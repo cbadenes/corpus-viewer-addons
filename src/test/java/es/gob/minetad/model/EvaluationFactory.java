@@ -1,13 +1,12 @@
-package es.gob.minetad.doctopic;
+package es.gob.minetad.model;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import es.gob.minetad.doctopic.DocTopicsIndex;
 import es.gob.minetad.metric.JensenShannon;
-import es.gob.minetad.model.Document;
-import es.gob.minetad.model.Evaluation;
-import es.gob.minetad.model.Score;
-import es.gob.minetad.model.Stats;
 import es.gob.minetad.solr.analyzer.TopicAnalyzer;
+import es.gob.minetad.solr.model.DocumentFactory;
+import es.gob.minetad.solr.model.TopicIndexFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
@@ -185,7 +184,7 @@ public class EvaluationFactory {
 
                 List<Double> d1Shape = docTopicsIndex.toVector(docTopicsIndex.toString(d1.getShape()));
                 // prepare query
-                QueryParser parser = new QueryParser(IndexFactory.FIELD_NAME, new TopicAnalyzer());
+                QueryParser parser = new QueryParser(TopicIndexFactory.FIELD_NAME, new TopicAnalyzer());
                 String queryString = docTopicsIndex.toString(d1.getShape());
 
                 Query query = parser.parse(queryString);
@@ -200,8 +199,8 @@ public class EvaluationFactory {
                         org.apache.lucene.document.Document docIndexed = reader.document(sd.doc);
 
                         Document d2 = new Document();
-                        d2.setId(String.format(docIndexed.get(IndexFactory.DOC_ID)));
-                        d2.setShape(docTopicsIndex.toVector(String.format(docIndexed.get(IndexFactory.FIELD_NAME))));
+                        d2.setId(String.format(docIndexed.get(TopicIndexFactory.DOC_ID)));
+                        d2.setShape(docTopicsIndex.toVector(String.format(docIndexed.get(TopicIndexFactory.FIELD_NAME))));
                         Score score = new Score(docTopicsIndex.similarity(d1Shape, d2.getShape()), d1, d2);
                         return score;
                     } catch (IOException e) {

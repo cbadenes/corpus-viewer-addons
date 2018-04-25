@@ -1,5 +1,6 @@
-package es.gob.minetad.doctopic;
+package es.gob.minetad.solr.model;
 
+import es.gob.minetad.doctopic.DocTopicsUtil;
 import es.gob.minetad.solr.analyzer.TopicAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
@@ -17,9 +18,9 @@ import java.time.temporal.ChronoUnit;
 /**
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
  */
-public class IndexFactory {
+public class TopicIndexFactory {
 
-    private static final Logger LOG = LoggerFactory.getLogger(IndexFactory.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TopicIndexFactory.class);
 
     public static final String DOC_ID           = "id";
     public static final String FIELD_NAME       = "doctopics_field";

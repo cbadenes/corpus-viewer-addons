@@ -1,4 +1,4 @@
-package es.gob.minetad.doctopic;
+package es.gob.minetad.solr.model;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -26,7 +26,7 @@ public class DocumentFactory {
     public static Document newDocId(String id, String topics) {
         Document luceneDoc = new Document();
         // id
-        luceneDoc.add(new TextField(IndexFactory.DOC_ID, id, Field.Store.YES));
+        luceneDoc.add(new TextField(TopicIndexFactory.DOC_ID, id, Field.Store.YES));
 
         // doc-topic
         FieldType fieldType = new FieldType(TextField.TYPE_STORED);//TYPE_NOT_STORED
@@ -35,7 +35,7 @@ public class DocumentFactory {
         fieldType.setStoreTermVectorOffsets(false);
         fieldType.setStoreTermVectors(true);
 
-        Field textField = new Field(IndexFactory.FIELD_NAME, topics, fieldType);
+        Field textField = new Field(TopicIndexFactory.FIELD_NAME, topics, fieldType);
         luceneDoc.add(textField);
 
 
