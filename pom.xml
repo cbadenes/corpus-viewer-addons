@@ -1,0 +1,200 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+ 
+  <groupId>es.gob.minetad</groupId>
+  <artifactId>corpus-viewer-addons</artifactId>
+  <version>0.1</version>
+  <packaging>jar</packaging>
+  <name>corpus-viewer-addons</name>
+  
+  <prerequisites>
+   <maven>3.0.0</maven>
+  </prerequisites>
+  
+  <properties>
+	  <!-- Project Details -->
+	  <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	  <project.java.version>1.8</project.java.version>
+	  <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+	  <!-- Maven Plugins -->
+	  <maven.appassembler.plugin.version>1.9</maven.appassembler.plugin.version>
+	  <maven.assembly.plugin.version>2.5.5</maven.assembly.plugin.version>
+	  <maven.compiler.plugin.version>3.3</maven.compiler.plugin.version>
+	  <maven.jar.plugin.version>2.6</maven.jar.plugin.version>
+	  <maven.site.plugin.version>0.10</maven.site.plugin.version>
+	  <maven.scala.version>2.15.2</maven.scala.version>
+	  <maven.surefire.plugin.version>2.11</maven.surefire.plugin.version>
+	  <maven.war.plugin.version>2.6</maven.war.plugin.version>
+	  <maven.resources.plugin.version>2.7</maven.resources.plugin.version>
+	  <surefire.junit.version>2.12</surefire.junit.version>
+
+	  <!-- Project Dependencies -->
+	  <commons-lang3.version>3.5</commons-lang3.version>
+	  <librairy.version>[1.0,)</librairy.version>
+	  <mallet.version>2.0.8</mallet.version>
+	  <solr.version>7.2.1</solr.version>
+	  <junit.version>4.12</junit.version>
+	  <logback.version>1.1.3</logback.version>
+	  <tsne.version>v2.5.0</tsne.version>
+	  <unirest.version>1.4.9</unirest.version>
+  </properties>
+  
+	  <dependencyManagement>
+		  <dependencies>
+
+			  <!-- Solr Libraries -->
+			  <dependency>
+				  <groupId>org.apache.solr</groupId>
+				  <artifactId>solr-core</artifactId>
+				  <version>${solr.version}</version>
+			  </dependency>
+			  <dependency>
+				  <groupId>org.apache.solr</groupId>
+				  <artifactId>solr-solrj</artifactId>
+				  <version>${solr.version}</version>
+			  </dependency>
+
+			  <!-- Http Libraries -->
+			  <dependency>
+				  <groupId>com.mashape.unirest</groupId>
+				  <artifactId>unirest-java</artifactId>
+				  <version>${unirest.version}</version>
+			  </dependency>
+
+			  <!-- ML Libraries -->
+			  <dependency>
+				  <groupId>cc.mallet</groupId>
+				  <artifactId>mallet</artifactId>
+				  <version>${mallet.version}</version>
+			  </dependency>
+			  <dependency>
+				  <groupId>com.github.lejon</groupId>
+				  <artifactId>T-SNE-JAVA</artifactId>
+				  <version>${tsne.version}</version>
+			  </dependency>
+
+			  <!-- Log Libraries -->
+			  <dependency>
+				  <groupId>ch.qos.logback</groupId>
+				  <artifactId>logback-classic</artifactId>
+				  <version>${logback.version}</version>
+			  </dependency>
+			  <dependency>
+				  <groupId>ch.qos.logback</groupId>
+				  <artifactId>logback-core</artifactId>
+				  <version>${logback.version}</version>
+			  </dependency>
+
+			  <dependency>
+				  <groupId>org.apache.commons</groupId>
+				  <artifactId>commons-lang3</artifactId>
+				  <version>${commons-lang3.version}</version>
+			  </dependency>
+
+			  <!-- Unit tests Libraries -->
+			  <dependency>
+				  <groupId>junit</groupId>
+				  <artifactId>junit</artifactId>
+				  <version>${junit.version}</version>
+			  </dependency>			  
+
+		  </dependencies>
+	  </dependencyManagement>
+
+	  <dependencies>
+
+		  <!-- Solr Libraries -->
+		  <dependency>
+			  <groupId>org.apache.solr</groupId>
+			  <artifactId>solr-core</artifactId>
+		  </dependency>
+		  <dependency>
+			  <groupId>org.apache.solr</groupId>
+			  <artifactId>solr-solrj</artifactId>
+		  </dependency>
+
+		  <!-- ML Libraries -->
+		  <dependency>
+			  <groupId>cc.mallet</groupId>
+			  <artifactId>mallet</artifactId>
+		  </dependency>
+		  <dependency>
+			  <groupId>com.github.lejon</groupId>
+			  <artifactId>T-SNE-JAVA</artifactId>
+		  </dependency>
+
+		  <!-- Http Libraries -->
+		  <dependency>
+			  <groupId>com.mashape.unirest</groupId>
+			  <artifactId>unirest-java</artifactId>
+		  </dependency>
+
+		  <!-- Unit tests -->
+		  <dependency>
+			  <groupId>junit</groupId>
+			  <artifactId>junit</artifactId>
+			  <scope>test</scope>
+		  </dependency>
+		 
+		  <!-- Logging -->
+		  <dependency>
+			  <groupId>ch.qos.logback</groupId>
+			  <artifactId>logback-classic</artifactId>
+		  </dependency>
+		  <dependency>
+			  <groupId>ch.qos.logback</groupId>
+			  <artifactId>logback-core</artifactId>
+		  </dependency>		  
+
+	  </dependencies>
+
+	  <build>
+		  <resources>
+			  <resource>
+		  		  <directory>src/main/bin</directory>
+			  </resource>
+			  <resource>
+				  <directory>src/main/resources</directory>
+			  </resource>
+		  </resources>
+		  <finalName>${project.artifactId}</finalName>
+		  <plugins>
+
+			  <!-- Maven Compiler Plugin -->
+			  <plugin>
+				  <groupId>org.apache.maven.plugins</groupId>
+				  <artifactId>maven-compiler-plugin</artifactId>
+				  <version>${maven.compiler.plugin.version}</version>
+				  <configuration>
+					  <encoding>${project.build.sourceEncoding}</encoding>
+					  <source>${project.java.version}</source>
+					  <target>${project.java.version}</target>
+					  <compilerVersion>${project.java.version}</compilerVersion>
+				  </configuration>
+			  </plugin>
+
+			  <!-- Maven Test Plugin -->
+			  <plugin>
+				  <groupId>org.apache.maven.plugins</groupId>
+				  <artifactId>maven-surefire-plugin</artifactId>
+				  <version>2.11</version>
+				  <configuration>
+					  <excludes>
+						  <exclude>%regex[.*Eval.*]</exclude>
+						  <exclude>%regex[.*IntTest.*]</exclude>
+					  </excludes>
+				  </configuration>
+			  </plugin>
+		  </plugins>
+	  </build>
+
+	<repositories>
+		<repository>
+			<id>jitpack.io</id>
+			<url>https://jitpack.io</url>
+		</repository>
+	</repositories>
+
+  </project>
