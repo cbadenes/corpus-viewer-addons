@@ -39,8 +39,5 @@ public abstract class CorpusManager {
         });
     }
 
-
-    abstract void create();
-
     abstract void train();
 }

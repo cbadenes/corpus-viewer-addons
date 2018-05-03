@@ -34,7 +34,7 @@ public class CordisManager extends CorpusManager{
 
     private static final Logger LOG = LoggerFactory.getLogger(CordisManager.class);
 
-    private static final String CORPUS_FILE_PATH = "src/main/resources/cordis-projects-fp1-h2020_nsf-1984-2018.jsonl.gz";
+    private static final String CORPUS_URL = "https://delicias.dia.fi.upm.es/nextcloud/index.php/s/hTu0RCHOVyh1ZAW/download";
 
     /**
      * Creates a jsonl.gz file from a MySQL dump
@@ -62,7 +62,7 @@ public class CordisManager extends CorpusManager{
             df.setTimeZone(tz);
 
             // Corpus File
-            File outputFile = new File(CORPUS_FILE_PATH);
+            File outputFile = new File("/tmp/corpus.jsonl.gz");
             if (outputFile.exists()) outputFile.delete();
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(outputFile, false))));
 
@@ -115,8 +115,7 @@ public class CordisManager extends CorpusManager{
 
         BufferedReader reader = null;
         try {
-            String url = "https://delicias.dia.fi.upm.es/nextcloud/index.php/s/hTu0RCHOVyh1ZAW/download";
-            reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new URL(url).openStream())));
+            reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new URL(CORPUS_URL).openStream())));
 
             String endpoint = "http://librairy.linkeddata.es/learner";
             String user     = System.getenv("LIBRAIRY_USER");
@@ -147,7 +146,7 @@ public class CordisManager extends CorpusManager{
                     Document document = new Document();
                     document.setId(project.getId());
                     document.setName(project.getTitle());
-                    document.setLabels(Arrays.asList(new String[]{project.getInstrument()}));
+                    document.setLabels(Strings.isNullOrEmpty(project.getInstrument())? Arrays.asList(new String[]{"UNKNOWN"}) : Arrays.asList(new String[]{project.getInstrument().replace(" ","_")}));
                     document.setText(project.getObjective());
 
                     Unirest.post(endpoint + "/documents").basicAuth(user, pwd).body(document).asString();
@@ -174,9 +173,8 @@ public class CordisManager extends CorpusManager{
             LOG.info("Learner ready to train a new model");
             ModelParameters modelParameters = new ModelParameters();
             Map<String, String> parameters = ImmutableMap.of(
-                    "algorithm","lda",
+                    "algorithm","llda",
                     "language","en",
-                    "topics","100",
                     "email","cbadenes@fi.upm.es"
             );
             modelParameters.setParameters(parameters);
@@ -202,6 +200,102 @@ public class CordisManager extends CorpusManager{
         // Create a new Topic Model
         cordis.train();
 
+    }
+
+    private class CordisElement {
+
+        private String id;
+
+        private String title;
+
+        private String objective;
+
+        private String instrument;
+
+        private String startDate;
+
+        private String endDate;
+
+        private Integer totalCost;
+
+        private String area;
+
+        private Integer topicWater;
+
+        public CordisElement() {
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public String getObjective() {
+            return objective;
+        }
+
+        public void setObjective(String objective) {
+            this.objective = objective;
+        }
+
+        public String getInstrument() {
+            return instrument;
+        }
+
+        public void setInstrument(String instrument) {
+            this.instrument = instrument;
+        }
+
+        public String getStartDate() {
+            return startDate;
+        }
+
+        public void setStartDate(String startDate) {
+            this.startDate = startDate;
+        }
+
+        public String getEndDate() {
+            return endDate;
+        }
+
+        public void setEndDate(String endDate) {
+            this.endDate = endDate;
+        }
+
+        public Integer getTotalCost() {
+            return totalCost;
+        }
+
+        public void setTotalCost(Integer totalCost) {
+            this.totalCost = totalCost;
+        }
+
+        public String getArea() {
+            return area;
+        }
+
+        public void setArea(String area) {
+            this.area = area;
+        }
+
+        public Integer getTopicWater() {
+            return topicWater;
+        }
+
+        public void setTopicWater(Integer topicWater) {
+            this.topicWater = topicWater;
+        }
     }
 
 }
