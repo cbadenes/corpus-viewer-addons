@@ -1,0 +1,2 @@
+docker run -d --name wiki-model -p 8080:7777 -e JAVA_OPTS=-Xmx4096m -e NLP_ENDPOINT=http://librairy.linkeddata.es/nlp-en librairy/wiki-en-model:200
+docker logs -f wiki-model

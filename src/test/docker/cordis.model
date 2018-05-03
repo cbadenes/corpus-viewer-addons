@@ -1,0 +1,2 @@
+docker run -d --name cordis-model -p 8081:7777 -e JAVA_OPTS=-Xmx4096m -e NLP_ENDPOINT=http://librairy.linkeddata.es/nlp-en librairy/cordis-en-model:100
+docker logs -f cordis-model

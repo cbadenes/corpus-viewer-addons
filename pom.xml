@@ -37,12 +37,20 @@
 	  <solr.version>7.2.1</solr.version>
 	  <junit.version>4.12</junit.version>
 	  <logback.version>1.1.3</logback.version>
+	  <mysql.version>8.0.11</mysql.version>
 	  <tsne.version>v2.5.0</tsne.version>
 	  <unirest.version>1.4.9</unirest.version>
   </properties>
   
 	  <dependencyManagement>
 		  <dependencies>
+
+			  <!-- librAIry -->
+			  <dependency>
+				  <groupId>org.librairy</groupId>
+				  <artifactId>learner-service-facade</artifactId>
+				  <version>${librairy.version}</version>
+			  </dependency>
 
 			  <!-- Solr Libraries -->
 			  <dependency>
@@ -61,6 +69,13 @@
 				  <groupId>com.mashape.unirest</groupId>
 				  <artifactId>unirest-java</artifactId>
 				  <version>${unirest.version}</version>
+			  </dependency>
+
+			  <!-- MySQL -->
+			  <dependency>
+				  <groupId>mysql</groupId>
+				  <artifactId>mysql-connector-java</artifactId>
+				  <version>${mysql.version}</version>
 			  </dependency>
 
 			  <!-- ML Libraries -->
@@ -105,6 +120,12 @@
 
 	  <dependencies>
 
+		  <!-- librAIry -->
+		  <dependency>
+			  <groupId>org.librairy</groupId>
+			  <artifactId>learner-service-facade</artifactId>
+		  </dependency>
+
 		  <!-- Solr Libraries -->
 		  <dependency>
 			  <groupId>org.apache.solr</groupId>
@@ -113,6 +134,12 @@
 		  <dependency>
 			  <groupId>org.apache.solr</groupId>
 			  <artifactId>solr-solrj</artifactId>
+		  </dependency>
+
+		  <!-- MySQL -->
+		  <dependency>
+			  <groupId>mysql</groupId>
+			  <artifactId>mysql-connector-java</artifactId>
 		  </dependency>
 
 		  <!-- ML Libraries -->
@@ -195,6 +222,17 @@
 			<id>jitpack.io</id>
 			<url>https://jitpack.io</url>
 		</repository>
+
+		<!-- librAIry Repository -->
+		<repository>
+			<id>learner-service</id>
+			<url>https://raw.github.com/librairy/learner-service-facade/mvn-repo/</url>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+			</snapshots>
+		</repository>
+
 	</repositories>
 
   </project>

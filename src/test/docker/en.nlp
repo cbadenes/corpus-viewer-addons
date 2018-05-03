@@ -1,0 +1,2 @@
+docker run -d --name nlp-en-service -p 8085:7777 librairy/nlp-en-service:latest
+docker logs -f nlp-en-service
