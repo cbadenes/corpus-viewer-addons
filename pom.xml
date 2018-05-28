@@ -34,7 +34,7 @@
 	  <commons-lang3.version>3.5</commons-lang3.version>
 	  <librairy.version>[1.0,)</librairy.version>
 	  <mallet.version>2.0.8</mallet.version>
-	  <solr.version>7.2.1</solr.version>
+	  <solr.version>7.3.0</solr.version>
 	  <junit.version>4.12</junit.version>
 	  <logback.version>1.1.3</logback.version>
 	  <mysql.version>8.0.11</mysql.version>
@@ -49,6 +49,11 @@
 			  <dependency>
 				  <groupId>org.librairy</groupId>
 				  <artifactId>learner-service-facade</artifactId>
+				  <version>${librairy.version}</version>
+			  </dependency>
+			  <dependency>
+				  <groupId>es.linkeddata.librairy</groupId>
+				  <artifactId>loader</artifactId>
 				  <version>${librairy.version}</version>
 			  </dependency>
 
@@ -124,6 +129,10 @@
 		  <dependency>
 			  <groupId>org.librairy</groupId>
 			  <artifactId>learner-service-facade</artifactId>
+		  </dependency>
+		  <dependency>
+			  <groupId>es.linkeddata.librairy</groupId>
+			  <artifactId>loader</artifactId>
 		  </dependency>
 
 		  <!-- Solr Libraries -->
@@ -211,6 +220,7 @@
 					  <excludes>
 						  <exclude>%regex[.*Eval.*]</exclude>
 						  <exclude>%regex[.*IntTest.*]</exclude>
+						  <exclude>%regex[.*tasks.*]</exclude>
 					  </excludes>
 				  </configuration>
 			  </plugin>
@@ -227,6 +237,14 @@
 		<repository>
 			<id>learner-service</id>
 			<url>https://raw.github.com/librairy/learner-service-facade/mvn-repo/</url>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>loader-service</id>
+			<url>https://raw.github.com/librairy/loader/mvn-repo/</url>
 			<snapshots>
 				<enabled>true</enabled>
 				<updatePolicy>always</updatePolicy>

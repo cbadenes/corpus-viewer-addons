@@ -9,3 +9,4 @@ services:
     environment:
       - JAVA_OPTS=-Xmx4096m
       - NLP_ENDPOINT=nlp-en-service
+      - REST_PATH=/topics

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import es.gob.minetad.doctopic.DocTopicsIndex;
 import es.gob.minetad.metric.JensenShannon;
-import es.gob.minetad.solr.analyzer.TopicAnalyzer;
+import es.gob.minetad.solr.analyzer.DocTopicAnalyzer;
 import es.gob.minetad.solr.model.DocumentFactory;
 import es.gob.minetad.solr.model.TopicIndexFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -117,7 +117,7 @@ public class EvaluationFactory {
         FSDirectory directory = FSDirectory.open(indexFile.toPath());
 
         LOG.info("initializing index config");
-        IndexWriterConfig writerConfig = new IndexWriterConfig(new TopicAnalyzer());
+        IndexWriterConfig writerConfig = new IndexWriterConfig(new DocTopicAnalyzer());
         writerConfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
         writerConfig.setRAMBufferSizeMB(500.0);
         IndexWriter writer = new IndexWriter(directory, writerConfig);
@@ -184,7 +184,7 @@ public class EvaluationFactory {
 
                 List<Double> d1Shape = docTopicsIndex.toVector(docTopicsIndex.toString(d1.getShape()));
                 // prepare query
-                QueryParser parser = new QueryParser(TopicIndexFactory.FIELD_NAME, new TopicAnalyzer());
+                QueryParser parser = new QueryParser(TopicIndexFactory.FIELD_NAME, new DocTopicAnalyzer());
                 String queryString = docTopicsIndex.toString(d1.getShape());
 
                 Query query = parser.parse(queryString);
