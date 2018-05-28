@@ -1,7 +1,7 @@
 package es.gob.minetad.solr.model;
 
 import es.gob.minetad.doctopic.DocTopicsUtil;
-import es.gob.minetad.solr.analyzer.TopicAnalyzer;
+import es.gob.minetad.solr.analyzer.DocTopicAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
@@ -38,7 +38,7 @@ public class TopicIndexFactory {
     }
 
     private static IndexWriter createIndexWriter(Directory directory) throws IOException {
-        IndexWriterConfig writerConfig = new IndexWriterConfig(new TopicAnalyzer());
+        IndexWriterConfig writerConfig = new IndexWriterConfig(new DocTopicAnalyzer());
         writerConfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
         writerConfig.setRAMBufferSizeMB(500.0);
         IndexWriter writer = new IndexWriter(directory, writerConfig);
