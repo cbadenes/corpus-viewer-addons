@@ -1,0 +1,11 @@
+version: '2'
+services:
+  nlp-en-service:
+    image: librairy/nlp-en-service:latest
+  wiki-model:
+    image: librairy/wiki-model:0.1_120
+    ports:
+     - "8080:7777"
+    environment:
+      - JAVA_OPTS=-Xmx4096m
+      - NLP_ENDPOINT=nlp-en-service

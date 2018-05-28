@@ -9,7 +9,7 @@ import org.apache.lucene.analysis.miscellaneous.DelimitedTermFrequencyTokenFilte
 /**
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
  */
-public class TopicAnalyzer extends Analyzer {
+public class DocTopicAnalyzer extends Analyzer {
     @Override
     protected TokenStreamComponents createComponents(String s) {
         Tokenizer tokenizer = new WhitespaceTokenizer();
