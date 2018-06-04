@@ -28,8 +28,8 @@ public class TopicCollection extends RestResource {
     public TopicCollection(String endpoint, String name) {
         this.endpoint = endpoint;
         this.name = name;
-//        this.client = new CloudSolrClient.Builder(Arrays.asList(new String[]{endpoint}))
-        this.client = new HttpSolrClient.Builder(endpoint)
+        this.client = new CloudSolrClient.Builder(Arrays.asList(new String[]{endpoint}))
+//        this.client = new HttpSolrClient.Builder(endpoint)
                 .withConnectionTimeout(10000)
                 .withSocketTimeout(60000)
                 .build();
@@ -44,8 +44,7 @@ public class TopicCollection extends RestResource {
         FieldManager fieldManager = new FieldManager(endpoint,name);
 
         // field type for words
-        //String typeDefinition = "{\"tokenizer\":{\"class\":\"solr.WhitespaceTokenizerFactory\"}, \"filters\":[{ \"class\":\"org.apache.lucene.analysis.miscellaneous.DelimitedTermFrequencyTokenFilter\", \"preserveOriginal\":\"0\"}] }";
-        String typeDefinition = "{\"tokenizer\":{\"class\":\"solr.WhitespaceTokenizerFactory\"}, \"filters\":[{ \"class\":\"solr.LowerCaseFilterFactory\"}] }";
+        String typeDefinition = "{\"tokenizer\":{\"class\":\"solr.WhitespaceTokenizerFactory\"}, \"filters\":[{ \"class\":\"solr.DelimitedTermFrequencyTokenFilterFactory\"}] }";
 
         String topicWordsType = "topicWordsField";
         fieldManager.addType(topicWordsType,"solr.TextField","100",typeDefinition);
@@ -66,14 +65,14 @@ public class TopicCollection extends RestResource {
     }
 
 
-    public boolean add(Topic topic){
+    public boolean add(Topic topic, Integer normalizer){
 
         try{
             final SolrInputDocument doc = new SolrInputDocument();
             doc.addField("id", topic.getId());
             doc.addField("name", topic.getName());
             doc.addField("description", topic.getDescription());
-            String topicWords = topic.getWords().stream().map(tw -> tw.getWord().getValue() + "|" + tw.getScore()).collect(Collectors.joining(" "));
+            String topicWords = topic.getWords().stream().map(tw -> tw.getWord().getValue() + "|" + Double.valueOf(normalizer*tw.getScore()).intValue()).collect(Collectors.joining(" "));
             doc.addField("words", topicWords);
 
             UpdateResponse updateResponse = client.add(name, doc);

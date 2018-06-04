@@ -1,7 +1,8 @@
-package es.gob.minetad.model;
+package es.gob.minetad.solr.model;
 
 import es.gob.minetad.librairy.ModelClient;
-import es.gob.minetad.solr.model.TopicCollection;
+import es.gob.minetad.metric.TopicUtils;
+import es.gob.minetad.model.Topic;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,7 +50,7 @@ public class TopicCollectionIntTest {
         List<Topic> topics = modelClient.getTopics();
 
         for (Topic topic : topics){
-            collection.add(topic);
+            collection.add(topic, TopicUtils.multiplier(topics.size()));
         }
 
     }

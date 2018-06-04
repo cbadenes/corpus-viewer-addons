@@ -21,6 +21,7 @@ public class Collection extends RestResource {
 
     public static boolean create(String endpoint, String name){
         try{
+            LOG.info("Creating collection '" + name + "' ..");
             String uri = endpoint + "/admin/collections";
             Map<String,Object> params = new HashMap<>();
 
