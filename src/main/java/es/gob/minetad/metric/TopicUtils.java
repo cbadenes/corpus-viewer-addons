@@ -18,7 +18,9 @@ public class TopicUtils {
 
         int length = String.valueOf(numTopics).length();
 
-        double value = Math.pow(10.0, Double.valueOf(length+1));
+        int ratio = 3;
+
+        double value = Math.pow(10.0, Double.valueOf(length+ratio));
 
         return Double.valueOf(value).intValue();
     }

@@ -72,7 +72,7 @@ public class TopicCollection extends RestResource {
             doc.addField("id", topic.getId());
             doc.addField("name", topic.getName());
             doc.addField("description", topic.getDescription());
-            String topicWords = topic.getWords().stream().map(tw -> tw.getWord().getValue() + "|" + Double.valueOf(normalizer*tw.getScore()).intValue()).collect(Collectors.joining(" "));
+            String topicWords = topic.getWords().stream().map(tw -> tw.getWord().getValue() + "|" + normalizedScore(tw.getScore(), normalizer)).collect(Collectors.joining(" "));
             doc.addField("words", topicWords);
 
             UpdateResponse updateResponse = client.add(name, doc);
@@ -84,5 +84,10 @@ public class TopicCollection extends RestResource {
             LOG.error("Error adding topic " + topic+ " to collection: " + name,e);
             return false;
         }
+    }
+
+    private Integer normalizedScore (Double score, Integer ratio){
+        Integer normScore = Double.valueOf(ratio*score).intValue();
+        return (normScore < 1)? 1 : normScore;
     }
 }
