@@ -1,6 +1,7 @@
 package es.gob.minetad.metric;
 
 import es.gob.minetad.model.Topic;
+import es.gob.minetad.model.TopicWord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,9 +28,9 @@ public class TopicUtils {
         return Double.valueOf(value).intValue();
     }
 
-    public static Double similarity(Topic t1, Topic t2){
-        List<Double> w1 = t1.getWords().stream().sorted((a, b) -> a.getWord().getValue().compareTo(b.getWord().getValue())).map(w -> w.getScore()).collect(Collectors.toList());
-        List<Double> w2 = t2.getWords().stream().sorted((a, b) -> a.getWord().getValue().compareTo(b.getWord().getValue())).map(w -> w.getScore()).collect(Collectors.toList());
+    public static Double similarity(List<TopicWord> tw1, List<TopicWord> tw2){
+        List<Double> w1 = tw1.stream().sorted((a, b) -> a.getWord().getValue().compareTo(b.getWord().getValue())).map(w -> w.getScore()).collect(Collectors.toList());
+        List<Double> w2 = tw2.stream().sorted((a, b) -> a.getWord().getValue().compareTo(b.getWord().getValue())).map(w -> w.getScore()).collect(Collectors.toList());
         return JensenShannon.similarity(w1,w2);
     }
 

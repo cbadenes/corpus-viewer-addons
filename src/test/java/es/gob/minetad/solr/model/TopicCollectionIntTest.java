@@ -68,7 +68,10 @@ public class TopicCollectionIntTest {
 
         for (String id1 : ids){
 
-            List<String> tail = ids.subList(ids.indexOf(id1), ids.size());
+            int index = ids.indexOf(id1);
+            if (index == topics.size() -1) break;
+
+            List<String> tail = ids.subList(index+1, ids.size());
 
             for(String id2: tail){
                 LOG.info("Comparison between topic '"+ id1+ "' and topic '"+ id2 +"'");
@@ -79,7 +82,11 @@ public class TopicCollectionIntTest {
 
                 if (t1.isPresent() && t2.isPresent()){
 
-                    Double score = TopicUtils.similarity(t1.get(), t2.get());
+                    List<String> w1 = t1.get().getWords().stream().map(tw -> tw.getWord().getValue()).collect(Collectors.toList());
+                    List<String> w2 = t2.get().getWords().stream().map(tw -> tw.getWord().getValue()).collect(Collectors.toList());
+                    List<String> wc = w1.stream().filter(w -> w2.contains(w)).collect(Collectors.toList());
+
+                    Double score = TopicUtils.similarity(t1.get().getWords().stream().filter(tw -> wc.contains(tw.getWord().getValue())).collect(Collectors.toList()), t2.get().getWords().stream().filter(tw -> wc.contains(tw.getWord().getValue())).collect(Collectors.toList()));
                     LOG.info("Score=" + score);
 
                 }
