@@ -2,6 +2,7 @@ package es.gob.minetad.metric;
 
 import es.gob.minetad.model.Topic;
 import es.gob.minetad.model.TopicWord;
+import es.gob.minetad.model.Word;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +33,20 @@ public class TopicUtils {
         List<Double> w1 = tw1.stream().sorted((a, b) -> a.getWord().getValue().compareTo(b.getWord().getValue())).map(w -> w.getScore()).collect(Collectors.toList());
         List<Double> w2 = tw2.stream().sorted((a, b) -> a.getWord().getValue().compareTo(b.getWord().getValue())).map(w -> w.getScore()).collect(Collectors.toList());
         return JensenShannon.similarity(w1,w2);
+    }
+
+    public static Double similarity(Topic t1, Topic t2){
+        List<String> w1 = t1.getWords().parallelStream().map(tw -> tw.getWord().getValue()).collect(Collectors.toList());
+        List<String> w2 = t2.getWords().parallelStream().map(tw -> tw.getWord().getValue()).collect(Collectors.toList());
+
+        List<TopicWord> tw1addons = w2.parallelStream().filter(w -> !w1.contains(w)).map(w -> new TopicWord(new Word(w), 0.0)).collect(Collectors.toList());
+        List<TopicWord> tw2addons = w1.parallelStream().filter(w -> !w2.contains(w)).map(w -> new TopicWord(new Word(w), 0.0)).collect(Collectors.toList());
+
+        t1.getWords().addAll(tw1addons);
+        t2.getWords().addAll(tw2addons);
+
+        return similarity(t1.getWords().stream().sorted((a,b)->a.getWord().getValue().compareTo(b.getWord().getValue())).collect(Collectors.toList()), t2.getWords().stream().sorted((a,b)->a.getWord().getValue().compareTo(b.getWord().getValue())).collect(Collectors.toList()));
+
     }
 
 }

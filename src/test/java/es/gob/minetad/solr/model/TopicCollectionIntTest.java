@@ -81,12 +81,7 @@ public class TopicCollectionIntTest {
                 Optional<Topic> t2 = collection.get(id2);
 
                 if (t1.isPresent() && t2.isPresent()){
-
-                    List<String> w1 = t1.get().getWords().stream().map(tw -> tw.getWord().getValue()).collect(Collectors.toList());
-                    List<String> w2 = t2.get().getWords().stream().map(tw -> tw.getWord().getValue()).collect(Collectors.toList());
-                    List<String> wc = w1.stream().filter(w -> w2.contains(w)).collect(Collectors.toList());
-
-                    Double score = TopicUtils.similarity(t1.get().getWords().stream().filter(tw -> wc.contains(tw.getWord().getValue())).collect(Collectors.toList()), t2.get().getWords().stream().filter(tw -> wc.contains(tw.getWord().getValue())).collect(Collectors.toList()));
+                    Double score = TopicUtils.similarity(t1.get(),t2.get());
                     LOG.info("Score=" + score);
 
                 }
