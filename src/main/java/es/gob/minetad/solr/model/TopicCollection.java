@@ -1,16 +1,24 @@
 package es.gob.minetad.solr.model;
 
+import es.gob.minetad.metric.TopicUtils;
 import es.gob.minetad.model.RestResource;
 import es.gob.minetad.model.Topic;
+import es.gob.minetad.model.TopicWord;
+import es.gob.minetad.model.Word;
+import org.apache.commons.lang.StringUtils;
 import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.UpdateResponse;
+import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -23,11 +31,15 @@ public class TopicCollection extends RestResource {
     private final String name;
     private final String endpoint;
     private final SolrClient client;
+    private final Integer freqRatio;
+    private final Integer numTopics;
 
 
-    public TopicCollection(String endpoint, String name) {
+    public TopicCollection(String endpoint, String name, Integer numTopics) {
         this.endpoint = endpoint;
         this.name = name;
+        this.numTopics = numTopics;
+        this.freqRatio = TopicUtils.multiplier(numTopics);
         this.client = new CloudSolrClient.Builder(Arrays.asList(new String[]{endpoint}))
 //        this.client = new HttpSolrClient.Builder(endpoint)
                 .withConnectionTimeout(10000)
@@ -35,6 +47,7 @@ public class TopicCollection extends RestResource {
                 .build();
 
     }
+
 
     public boolean create(){
         if (!Collection.create(endpoint,name)) return false;
@@ -65,14 +78,14 @@ public class TopicCollection extends RestResource {
     }
 
 
-    public boolean add(Topic topic, Integer normalizer){
+    public boolean add(Topic topic){
 
         try{
             final SolrInputDocument doc = new SolrInputDocument();
             doc.addField("id", topic.getId());
             doc.addField("name", topic.getName());
             doc.addField("description", topic.getDescription());
-            String topicWords = topic.getWords().stream().map(tw -> tw.getWord().getValue() + "|" + normalizedScore(tw.getScore(), normalizer)).collect(Collectors.joining(" "));
+            String topicWords = topic.getWords().stream().map(tw -> tw.getWord().getValue() + "|" + normalizedScore(tw.getScore())).collect(Collectors.joining(" "));
             doc.addField("words", topicWords);
 
             UpdateResponse updateResponse = client.add(name, doc);
@@ -86,8 +99,32 @@ public class TopicCollection extends RestResource {
         }
     }
 
-    private Integer normalizedScore (Double score, Integer ratio){
-        Integer normScore = Double.valueOf(ratio*score).intValue();
+    private Integer normalizedScore (Double score){
+        Integer normScore = Double.valueOf(freqRatio*score).intValue();
         return (normScore < 1)? 1 : normScore;
+    }
+
+    private Double denormalizedScore(Integer freq){
+        return Double.valueOf(freq)/Double.valueOf(freqRatio);
+    }
+
+    public Optional<Topic> get(String id){
+        try{
+            SolrDocument topicDoc = client.getById(name, id);
+            Topic topic = new Topic();
+            topic.setId(id);
+            topic.setName((String)topicDoc.getFieldValue("name"));
+            topic.setDescription((String)topicDoc.getFieldValue("description"));
+
+            String words = (String) topicDoc.getFieldValue("words");
+            List<TopicWord> topicWords = Arrays.stream(words.split(" ")).map(exp -> new TopicWord(new Word(StringUtils.substringBefore(exp, "|")), denormalizedScore(Integer.valueOf(StringUtils.substringAfter(exp, "|"))))).collect(Collectors.toList());
+            topic.setWords(topicWords);
+            return Optional.of(topic);
+
+        }catch (Exception e){
+            LOG.error("Error getting topic by id '" + id + "' in collection '" + name+"'");
+            return Optional.empty();
+        }
+
     }
 }
