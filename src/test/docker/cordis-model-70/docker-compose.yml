@@ -1,7 +1,7 @@
 version: '2'
 services:
   nlp-en-service:
-    image: librairy/nlp-en-service:latest
+    image: librairy/nlp-en-service:0.2
   cordis-model:
     image: librairy/cordis-model:0.1_70
     ports:

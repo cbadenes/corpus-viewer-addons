@@ -1,7 +1,7 @@
 version: '2'
 services:
   nlp-en-service:
-    image: librairy/nlp-en-service:latest
+    image: librairy/nlp-en-service:0.2
   wiki-model:
     image: librairy/wiki-model:0.1_120
     ports:
@@ -10,3 +10,5 @@ services:
       - JAVA_OPTS=-Xmx4096m
       - NLP_ENDPOINT=nlp-en-service
       - REST_PATH=/topics
+#    volumes:
+#      - ./data:/mnt

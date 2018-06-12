@@ -1,7 +1,7 @@
 version: '2'
 services:
   nlp-en-service:
-    image: librairy/nlp-en-service:latest
+    image: librairy/nlp-en-service:0.2
   wiki-model:
     image: librairy/patstat-model:0.1_100
     ports:
