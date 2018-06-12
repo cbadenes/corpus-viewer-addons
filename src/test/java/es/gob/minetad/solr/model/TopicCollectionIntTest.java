@@ -38,7 +38,6 @@ public class TopicCollectionIntTest {
         try{
             ModelClient modelClient = new ModelClient(model_endpoint);
             this.topics = modelClient.getTopics();
-            this.collection = new TopicCollection(solr_endpoint, COLLECTION_NAME, topics.size());
             LOG.info(topics.size() + " topics read");
         }catch (Exception e){
             LOG.error("Error reading topics from model", e);
@@ -48,12 +47,14 @@ public class TopicCollectionIntTest {
 
     @Test
     public void delete(){
+        this.collection = new TopicCollection(solr_endpoint, COLLECTION_NAME, topics.size());
         Assert.assertTrue(collection.destroy());
     }
 
 
     @Test
     public void create(){
+        this.collection = new TopicCollection(solr_endpoint, COLLECTION_NAME, topics.size());
         Assert.assertTrue(collection.create());
 
         for (Topic topic : topics){
@@ -62,8 +63,8 @@ public class TopicCollectionIntTest {
     }
 
     @Test
-    public void compare(){
-
+    public void compareCollections(){
+        this.collection = new TopicCollection(solr_endpoint, COLLECTION_NAME, topics.size());
         List<String> ids = topics.stream().map(t -> t.getId()).collect(Collectors.toList());
 
         for (String id1 : ids){
@@ -79,6 +80,41 @@ public class TopicCollectionIntTest {
                 Instant start = Instant.now();
                 Optional<Topic> t1 = collection.get(id1);
                 Optional<Topic> t2 = collection.get(id2);
+
+                if (t1.isPresent() && t2.isPresent()){
+                    Double score = TopicUtils.similarity(t1.get(),t2.get());
+                    LOG.info("Score=" + score);
+
+                }
+                Instant finish = Instant.now();
+                LOG.info("elapsed time: " + Duration.between(start, finish).toMillis() + "msecs");
+
+
+            }
+
+
+        }
+
+    }
+
+    @Test
+    public void compareTopics(){
+
+        List<String> ids = topics.stream().map(t -> t.getId()).collect(Collectors.toList());
+
+        for (String id1 : ids){
+
+            int index = ids.indexOf(id1);
+            if (index == topics.size() -1) break;
+
+            List<String> tail = ids.subList(index+1, ids.size());
+
+            for(String id2: tail){
+                LOG.info("Comparison between topic '"+ id1+ "' and topic '"+ id2 +"'");
+
+                Instant start = Instant.now();
+                Optional<Topic> t1 = Optional.of(topics.get(Integer.valueOf(id1)));
+                Optional<Topic> t2 = Optional.of(topics.get(Integer.valueOf(id2)));
 
                 if (t1.isPresent() && t2.isPresent()){
                     Double score = TopicUtils.similarity(t1.get(),t2.get());

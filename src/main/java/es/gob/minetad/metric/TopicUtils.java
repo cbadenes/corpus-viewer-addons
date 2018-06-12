@@ -42,8 +42,11 @@ public class TopicUtils {
         List<TopicWord> tw1addons = w2.parallelStream().filter(w -> !w1.contains(w)).map(w -> new TopicWord(new Word(w), 0.0)).collect(Collectors.toList());
         List<TopicWord> tw2addons = w1.parallelStream().filter(w -> !w2.contains(w)).map(w -> new TopicWord(new Word(w), 0.0)).collect(Collectors.toList());
 
+        LOG.debug("t1.size/addons: " + t1.getWords().size() +  "/" + tw1addons.size() + " , t2.size/addons: " + t2.getWords().size() + "/" + tw2addons.size());
+
         t1.getWords().addAll(tw1addons);
         t2.getWords().addAll(tw2addons);
+
 
         return similarity(t1.getWords().stream().sorted((a,b)->a.getWord().getValue().compareTo(b.getWord().getValue())).collect(Collectors.toList()), t2.getWords().stream().sorted((a,b)->a.getWord().getValue().compareTo(b.getWord().getValue())).collect(Collectors.toList()));
 
