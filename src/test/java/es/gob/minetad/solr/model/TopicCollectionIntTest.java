@@ -105,7 +105,7 @@ public class TopicCollectionIntTest {
 
     @Test
     public void compareOnlySimilarTopics(){
-        compareTopics(topics.subList(0,50), true);
+        compareTopics(topics, true);
     }
 
 
