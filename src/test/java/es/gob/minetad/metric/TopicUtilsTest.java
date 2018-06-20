@@ -1,9 +1,14 @@
 package es.gob.minetad.metric;
 
+import es.gob.minetad.model.Topic;
+import es.gob.minetad.model.TopicWord;
+import es.gob.minetad.model.Word;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Arrays;
 
 /**
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
@@ -60,6 +65,19 @@ public class TopicUtilsTest {
         Assert.assertEquals(Integer.valueOf(1000000), TopicUtils.multiplier(900));
 
         Assert.assertEquals(Integer.valueOf(1000000), TopicUtils.multiplier(999));
+
+    }
+
+    @Test
+    public void comparison(){
+
+        Topic t1 = new Topic();
+        t1.setWords(Arrays.asList(new TopicWord[]{ new TopicWord(new Word("A"),0.0), new TopicWord(new Word("B"),0.0), new TopicWord(new Word("C"),0.0)  }));
+
+        Topic t2 = new Topic();
+        t2.setWords(Arrays.asList(new TopicWord[]{ new TopicWord(new Word("D"),1.0), new TopicWord(new Word("B"),1.0), new TopicWord(new Word("C"),1.0), new TopicWord(new Word("E"),1.0)   }));
+
+        TopicUtils.similarity(t1, t2, false);
 
     }
 

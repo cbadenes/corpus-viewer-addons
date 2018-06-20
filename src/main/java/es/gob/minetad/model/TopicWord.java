@@ -46,16 +46,13 @@ public class TopicWord {
 
         TopicWord topicWord = (TopicWord) o;
 
-        if (word != null ? !word.equals(topicWord.word) : topicWord.word != null) return false;
-        return score != null ? score.equals(topicWord.score) : topicWord.score == null;
+        return word != null ? word.equals(topicWord.word) : topicWord.word == null;
 
     }
 
     @Override
     public int hashCode() {
-        int result = word != null ? word.hashCode() : 0;
-        result = 31 * result + (score != null ? score.hashCode() : 0);
-        return result;
+        return word != null ? word.hashCode() : 0;
     }
 
     @Override

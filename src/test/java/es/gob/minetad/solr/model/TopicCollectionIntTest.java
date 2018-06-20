@@ -2,7 +2,7 @@ package es.gob.minetad.solr.model;
 
 import es.gob.minetad.librairy.ModelClient;
 import es.gob.minetad.metric.TopicUtils;
-import es.gob.minetad.model.Topic;
+import es.gob.minetad.model.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -82,7 +83,7 @@ public class TopicCollectionIntTest {
                 Optional<Topic> t2 = collection.get(id2);
 
                 if (t1.isPresent() && t2.isPresent()){
-                    Double score = TopicUtils.similarity(t1.get(),t2.get());
+                    Double score = TopicUtils.similarity(t1.get(),t2.get(), false);
                     LOG.info("Score=" + score);
 
                 }
@@ -98,38 +99,39 @@ public class TopicCollectionIntTest {
     }
 
     @Test
-    public void compareTopics(){
+    public void compareAllTopics(){
+        compareTopics(topics, false);
+    }
 
-        List<String> ids = topics.stream().map(t -> t.getId()).collect(Collectors.toList());
-
-        for (String id1 : ids){
-
-            int index = ids.indexOf(id1);
-            if (index == topics.size() -1) break;
-
-            List<String> tail = ids.subList(index+1, ids.size());
-
-            for(String id2: tail){
-                LOG.info("Comparison between topic '"+ id1+ "' and topic '"+ id2 +"'");
-
-                Instant start = Instant.now();
-                Optional<Topic> t1 = Optional.of(topics.get(Integer.valueOf(id1)));
-                Optional<Topic> t2 = Optional.of(topics.get(Integer.valueOf(id2)));
-
-                if (t1.isPresent() && t2.isPresent()){
-                    Double score = TopicUtils.similarity(t1.get(),t2.get());
-                    LOG.info("Score=" + score);
-
-                }
-                Instant finish = Instant.now();
-                LOG.info("elapsed time: " + Duration.between(start, finish).toMillis() + "msecs");
+    @Test
+    public void compareOnlySimilarTopics(){
+        compareTopics(topics.subList(0,50), true);
+    }
 
 
-            }
+    private void compareTopics(List<Topic> topics, Boolean validate){
+
+        Map<String, Topic> topicsMap = topics.stream().collect(Collectors.toMap(t -> t.getId(), t -> t));
+
+        List<Combination<String>.Pair> pairs = new Combination<String>(topics.stream().map(t -> t.getId()).collect(Collectors.toList())).getPairs();
 
 
-        }
+        List<TopicWord> results = pairs.parallelStream().map(pair -> {
 
+            Instant start = Instant.now();
+            Double score = TopicUtils.similarity(topicsMap.get(pair.getT1()), topicsMap.get(pair.getT2()), false);
+            Instant end = Instant.now();
+
+            Word summary = new Word(pair.getT1() + " <-> " + pair.getT2() + " : " + score);
+
+            return new TopicWord(summary, Double.valueOf(Duration.between(start, end).toMillis()));
+        }).collect(Collectors.toList());
+
+        results.forEach(result -> LOG.info("Result: " + result.getWord().getValue()));
+        LOG.info("Pairs: " + results.size());
+
+        Stats timeStats = new Stats(results.stream().map(t -> t.getScore()).collect(Collectors.toList()));
+        LOG.info("Time Stats: " + timeStats);
     }
 
 }

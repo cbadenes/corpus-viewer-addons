@@ -11,6 +11,8 @@ import java.util.List;
  */
 public class Stats {
 
+    private final Double total;
+
     private Double min;
 
     private Double max;
@@ -36,6 +38,7 @@ public class Stats {
         mean = StatUtils.mean(valuesArray);
         median = StatUtils.geometricMean(valuesArray);
         variance = StatUtils.variance(valuesArray);
+        total = StatUtils.sum(valuesArray);
     }
 
     public Double getMin() {
@@ -76,6 +79,7 @@ public class Stats {
                 ", mean=" + mean +
                 ", median=" + median +
                 ", variance=" + variance +
+                ", total=" + total +
                 '}';
     }
 }

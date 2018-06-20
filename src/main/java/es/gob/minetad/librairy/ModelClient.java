@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
@@ -31,22 +32,28 @@ public class ModelClient extends RestResource {
 
     public List<Topic> getTopics(){
 
-        List<Topic> topics = new ArrayList<>();
+
 
         try {
             HttpResponse<JsonNode> response = Unirest.get(endpoint + "/dimensions").asJson();
 
             if (response.getStatus() == 200){
 
+                List<Topic> topicList = new ArrayList<>();
+
                 Iterator<Object> iterator = response.getBody().getObject().getJSONArray("dimensions").iterator();
+
                 while(iterator.hasNext()){
                     JSONObject jsonObject = (JSONObject) iterator.next();
                     Topic topic = new Topic();
                     topic.setId(String.valueOf(jsonObject.getInt("id")));
                     topic.setName(jsonObject.getString("name"));
                     topic.setDescription(jsonObject.getString("description"));
-                    topics.add(topic);
+                    topicList.add(topic);
+                }
 
+
+                List<Topic>topics = topicList.parallelStream().map( topic -> {
                     Integer offset      = 0;
                     Integer maxWords    = 500;
                     Boolean completed   = false;
@@ -57,7 +64,12 @@ public class ModelClient extends RestResource {
                         Map<String,Object> params = new HashMap<>();
                         params.put("maxWords",maxWords);
                         params.put("offset",offset);
-                        HttpResponse<JsonNode> resp = Unirest.get(endpoint + "/dimensions/"+topic.getId()).queryString(params).asJson();
+                        HttpResponse<JsonNode> resp = null;
+                        try {
+                            resp = Unirest.get(endpoint + "/dimensions/"+topic.getId()).queryString(params).asJson();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
 
                         if (resp.getStatus() != 200){
                             LOG.error("Error reading topic: " + topic.getId() + " -> " + resp.getStatus() + ": " + resp.getStatusText());
@@ -82,7 +94,9 @@ public class ModelClient extends RestResource {
 
                     }
                     topic.setWords(topicWords);
-                }
+                    return topic;
+                }).collect(Collectors.toList());
+
                 return topics;
             }
 
@@ -90,7 +104,7 @@ public class ModelClient extends RestResource {
             LOG.error("Error reading topics from " + endpoint, e);
         }
 
-        return topics;
+        return Collections.emptyList();
     }
 
 }
