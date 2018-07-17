@@ -1,7 +1,7 @@
 version: '2'
 services:
   cordis-model:
-    image: sesiad/cordis-model:0.2-70
+    image: sesiad/cordis-model:0.2-150
     ports:
      - "7777:7777"
     environment:
