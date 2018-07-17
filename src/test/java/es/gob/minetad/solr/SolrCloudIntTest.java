@@ -26,7 +26,7 @@ public class SolrCloudIntTest {
     public void connect(){
 
 
-        CloudSolrClient client = new CloudSolrClient.Builder(Arrays.asList(new String[]{"http://localhost:2181"}), Optional.empty())
+        CloudSolrClient client = new CloudSolrClient.Builder(Arrays.asList(new String[]{"localhost:2181"}), Optional.empty())
                 .withConnectionTimeout(10000)
                 .withSocketTimeout(60000)
                 .build();
@@ -34,9 +34,7 @@ public class SolrCloudIntTest {
         client.connect();
 
         ClusterState clusterState = client.getZkStateReader().getClusterState();
-        final DocCollection collection = clusterState.getCollection("topics");
-
-        LOG.info("Collection: " + collection);
+        LOG.info("Collection: " + clusterState);
 
 
 

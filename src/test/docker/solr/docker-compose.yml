@@ -1,14 +1,36 @@
-version: '2'
+version: "2"
 services:
-  solr:
-    image: solr
-    ports:
-     - "8983:8983"
-    volumes:
-      - data:/opt/solr/server/solr/mycores
-    entrypoint:
-      - docker-entrypoint.sh
-      - solr-precreate
-      - mycore
-volumes:
-  data:
+ solr1:
+  image: solr:7.3.1
+  ports:
+   - "8983:8983"
+  links:
+   - zookeeper
+  command: bash -c '/opt/solr/bin/solr start -f -z zookeeper:2181'
+ solr2:
+  image: solr:7.3.1
+  links:
+   - zookeeper
+   - solr1
+  command: bash -c '/opt/solr/bin/solr start -f -z zookeeper:2181'
+# solr3:
+#  image: solr:7.3.1
+#  links:
+#   - zookeeper
+#   - solr1
+#   - solr2
+#  command: bash -c '/opt/solr/bin/solr start -f -z zookeeper:2181'
+# solr4:
+#  image: solr:7.3.1
+#  links:
+#   - zookeeper
+#   - solr1
+#   - solr2
+#   - solr3
+#  command: bash -c '/opt/solr/bin/solr start -f -z zookeeper:2181'
+ zookeeper:
+  image: jplock/zookeeper:3.4.11
+  ports:
+   - "2181:2181"
+   - "2888:2888"
+   - "3888:3888"

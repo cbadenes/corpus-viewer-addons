@@ -1,12 +1,10 @@
 version: '2'
 services:
-  nlp-en-service:
-    image: librairy/nlp-en-service:0.2
-  wiki-model:
-    image: librairy/wiki-model:0.1_350
+  cordis-model:
+    image: sesiad/wiki-model:0.2-350
     ports:
-     - "8080:7777"
+     - "7777:7777"
     environment:
-      - JAVA_OPTS=-Xmx4096m
-      - NLP_ENDPOINT=nlp-en-service
-      - REST_PATH=/topics
+     - JAVA_OPTS=-Xmx4096m
+     - REST_PATH=/model
+     - NLP_ENDPOINT=nlp-en-service.bdlab.minetur.es:30111

@@ -25,7 +25,7 @@ public class TopicCollectionIntTest {
     private static final Logger LOG = LoggerFactory.getLogger(TopicCollectionIntTest.class);
 
 
-    private final String solr_endpoint      = "http://localhost:8081/solr";
+    private final String solr_endpoint      = "localhost:2181";
     private final String model_endpoint     = "http://localhost:8080/topics";
 
     private final String COLLECTION_NAME    = "topics";

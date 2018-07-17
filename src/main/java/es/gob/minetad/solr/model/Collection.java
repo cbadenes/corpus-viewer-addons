@@ -4,6 +4,8 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import es.gob.minetad.model.RestResource;
+import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.request.CollectionAdminRequest;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,24 +21,27 @@ public class Collection extends RestResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(Collection.class);
 
-    public static boolean create(String endpoint, String name){
+    public static boolean create(SolrClient client, String name){
         try{
             LOG.info("Creating collection '" + name + "' ..");
-            String uri = endpoint + "/admin/collections";
-            Map<String,Object> params = new HashMap<>();
+//            String uri = endpoint.startsWith("http")? endpoint + "/admin/collections" : "http://" + endpoint + "/admin/collections";
+//            Map<String,Object> params = new HashMap<>();
+//
+//            params.put("action","CREATE");
+//            params.put("name",name);
+//            params.put("numShards",1);
+//            params.put("replicationFactor",1);
+//            params.put("wt","json");
 
-            params.put("action","CREATE");
-            params.put("name",name);
-            params.put("numShards",1);
-            params.put("replicationFactor",1);
-            params.put("wt","json");
+            CollectionAdminRequest.createCollection(name, 1,1).process(client);
 
-            HttpResponse<JsonNode> response = Unirest.get(uri).queryString(params).asJson();
 
-            if (response.getStatus() != 200){
-                LOG.warn("Collection not created: " + response.getBody().getObject().getJSONObject("error").getString("msg"));
-                return false;
-            }
+//            HttpResponse<JsonNode> response = Unirest.get(uri).queryString(params).asJson();
+//
+//            if (response.getStatus() != 200){
+//                LOG.warn("Collection not created: " + response.getBody().getObject().getJSONObject("error").getString("msg"));
+//                return false;
+//            }
             LOG.info("Collection '"+ name + "' created");
             return true;
         }catch (Exception e){
@@ -46,7 +51,8 @@ public class Collection extends RestResource {
     }
 
     public static boolean remove(String endpoint, String name){
-        String uri = endpoint + "/admin/collections";
+
+        String uri = endpoint.startsWith("http")? endpoint + "/admin/collections" : "http://" + endpoint + "/admin/collections";
         try{
             Map<String,Object> params = new HashMap<>();
 

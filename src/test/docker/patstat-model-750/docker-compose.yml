@@ -1,7 +1,7 @@
 version: '2'
 services:
   cordis-model:
-    image: sesiad/patstat-model:0.2-250
+    image: sesiad/patstat-model:0.2-750
     ports:
      - "7777:7777"
     environment:

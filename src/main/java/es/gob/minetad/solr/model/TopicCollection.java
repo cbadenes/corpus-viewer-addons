@@ -8,14 +8,20 @@ import es.gob.minetad.model.Word;
 import org.apache.commons.lang.StringUtils;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrRequest;
+import org.apache.solr.client.solrj.SolrResponse;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
+import org.apache.solr.client.solrj.request.CollectionAdminRequest;
+import org.apache.solr.client.solrj.request.RequestWriter;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.params.SolrParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -30,7 +36,7 @@ public class TopicCollection extends RestResource {
     private static final Logger LOG = LoggerFactory.getLogger(TopicCollection.class);
     private final String name;
     private final String endpoint;
-    private final SolrClient client;
+    private final CloudSolrClient client;
     private final Integer freqRatio;
     private final Integer numTopics;
 
@@ -40,16 +46,25 @@ public class TopicCollection extends RestResource {
         this.name = name;
         this.numTopics = numTopics;
         this.freqRatio = TopicUtils.multiplier(numTopics);
-        this.client = new CloudSolrClient.Builder(Arrays.asList(new String[]{endpoint}))
-//        this.client = new HttpSolrClient.Builder(endpoint)
+//        this.client = new CloudSolrClient.Builder(Arrays.asList(new String[]{endpoint}))
+////        this.client = new HttpSolrClient.Builder(endpoint)
+//                .withConnectionTimeout(10000)
+//                .withSocketTimeout(60000)
+//                .build();
+
+
+        this.client = new CloudSolrClient.Builder(Arrays.asList(new String[]{endpoint}), Optional.empty())
                 .withConnectionTimeout(10000)
                 .withSocketTimeout(60000)
                 .build();
+
+        client.connect();
 
     }
 
 
     public boolean create(){
+
         if (!Collection.create(endpoint,name)) return false;
         LOG.info("Adding fields..");
 
