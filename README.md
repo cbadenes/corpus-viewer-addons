@@ -3,14 +3,8 @@
 `Corpus-Viewer-Addons` provides a set of distributed services to analyze texts from large document corpora in a fast and easy way.
 
 ## Features
-- [NLP Toolkit](https://github.com/librairy/nlpEN-service)
- - Part-of-Speech Tagger (and filter)
- - Lemmatizer
- - N-Grams Identifier
- - Wikipedia resource Finder
- - Annotate your text with the elements discovered
- - Can be run locally using multiple threads, or in parallel on multiple machines
-- Topic Models trained from internal corpora and packaged as Restful APIs
+- [NLP Toolkit](https://github.com/librairy/nlpEN-service) 
+- A set of Topic Models trained from internal corpora and packaged as Restful APIs
 
 
 ## Quick Start
