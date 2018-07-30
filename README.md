@@ -48,7 +48,7 @@ A Topic Model is described by the following services:
 
 ## Reference
 
-You can use the following to cite the service:
+You can use the following to cite this work:
 
 ```
 @inproceedings{Badenes-Olmedo:2017:DTM:3103010.3121040,
