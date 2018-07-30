@@ -14,7 +14,7 @@
 1. Clone this repo and move into `src/test/docker/` directory.
 
 	```
-	git clone git@github.com:cbadenes/corpus-viewer-addons.git
+	git clone https://github.com/cbadenes/corpus-viewer-addons.git
 	```
 
 
