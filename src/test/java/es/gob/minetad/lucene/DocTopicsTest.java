@@ -56,7 +56,7 @@ public class DocTopicsTest {
 
     public static final String DOCTOPICS_PATH = "https://delicias.dia.fi.upm.es/nextcloud/index.php/s/iQx4Zy2dPcY84Sd/download";
 
-    public static final Integer NUM_DOCS = 1000;
+    public static final Integer NUM_DOCS = 10000;
 
     private static FSDirectory directory;
     private static DirectoryReader indexReader;
@@ -222,9 +222,9 @@ public class DocTopicsTest {
         }).filter(s -> s.getValue() > 0.5).sorted((a, b) -> -a.getValue().compareTo(b.getValue())).limit(10).collect(Collectors.toList());
         Instant globalEndTime = Instant.now();
         String globalElapsedTime = ChronoUnit.HOURS.between(startTime, globalEndTime) + "hours "
-                + ChronoUnit.MINUTES.between(startTime, endTime) % 60 + "min "
-                + (ChronoUnit.SECONDS.between(startTime, endTime) % 60) + "secs "
-                + (ChronoUnit.MILLIS.between(startTime, endTime) % 60) + "msecs";
+                + ChronoUnit.MINUTES.between(startTime, globalEndTime) % 60 + "min "
+                + (ChronoUnit.SECONDS.between(startTime, globalEndTime) % 60) + "secs "
+                + (ChronoUnit.MILLIS.between(startTime, globalEndTime) % 60) + "msecs";
         LOG.info("Search Time: " + globalElapsedTime);
 
         topDocs.forEach(doc -> LOG.info("- " + doc.getSimilar().getId() + " \t ["+ doc.getValue()+"]"));
