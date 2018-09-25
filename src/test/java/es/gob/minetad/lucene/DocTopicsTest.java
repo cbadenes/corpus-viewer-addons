@@ -55,7 +55,7 @@ public class DocTopicsTest {
 
     public static final String DOCTOPICS_PATH = "https://delicias.dia.fi.upm.es/nextcloud/index.php/s/iQx4Zy2dPcY84Sd/download";
 
-    public static final Integer NUM_DOCS = 1000000;
+    public static final Integer NUM_DOCS = 1000;
 
     private static FSDirectory directory;
     private static DirectoryReader indexReader;
@@ -102,8 +102,8 @@ public class DocTopicsTest {
                         shape.add(Double.valueOf(result[i]));
                     }
                     numTopics             = shape.size();
-                    epsylon               = 1f / shape.size();
-                    multiplicationFactor  = Double.valueOf(1*Math.pow(10,String.valueOf(shape.size()).length()+1)).floatValue();
+                    epsylon               = 1f / numTopics;
+                    multiplicationFactor  = Double.valueOf(1*Math.pow(10,String.valueOf(numTopics).length()+1)).floatValue();
 
                     if (SAMPLE_VECTOR == null) SAMPLE_VECTOR = shape;
 
