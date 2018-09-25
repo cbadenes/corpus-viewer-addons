@@ -21,10 +21,7 @@ import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.queries.mlt.MoreLikeThis;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.*;
 import org.apache.lucene.search.similarities.BM25Similarity;
 import org.apache.lucene.search.similarities.BooleanSimilarity;
 import org.apache.lucene.store.FSDirectory;
@@ -165,6 +162,12 @@ public class DocTopicsTest {
         query("BM25", searcher);
     }
 
+    @Test
+    public void bruteForceQuery() throws IOException, ParseException {
+        IndexSearcher searcher  = new IndexSearcher(indexReader);
+        search("BruteForce", searcher, new MatchAllDocsQuery());
+    }
+
 
     @Test
     public void moreLikeThisQuery() throws ParseException, IOException {
@@ -201,31 +204,26 @@ public class DocTopicsTest {
         LOG.info(description + Strings.repeat("-",100-description.length()));
         Instant startTime = Instant.now();
         TopDocs results = searcher.search(query, counter.get());
-        Instant endTime = Instant.now();
-
-        String elapsedTime = ChronoUnit.HOURS.between(startTime, endTime) + "hours "
-                + ChronoUnit.MINUTES.between(startTime, endTime) % 60 + "min "
-                + (ChronoUnit.SECONDS.between(startTime, endTime) % 60) + "secs "
-                + (ChronoUnit.MILLIS.between(startTime, endTime) % 60) + "msecs";
-        LOG.info("Query Time: " + elapsedTime);
-        LOG.info("Total Hits: " + results.totalHits);
-
 
         List<Score> topDocs = Arrays.stream(results.scoreDocs).parallel().map(scoreDoc -> {
             try {
                 org.apache.lucene.document.Document docIndexed = indexReader.document(scoreDoc.doc);
-                return new Score(JensenShannon.similarity(SAMPLE_VECTOR, DocTopicsUtil.getVectorFromString(String.format(docIndexed.get(TopicIndexFactory.FIELD_NAME)), multiplicationFactor, numTopics, epsylon)), new Document("ref"), new Document(String.format(docIndexed.get(TopicIndexFactory.DOC_ID))));
-            } catch (IOException e) {
+                String vectorString = String.format(docIndexed.get(TopicIndexFactory.FIELD_NAME));
+                if (Strings.isNullOrEmpty(vectorString)) return new Score(0.0, new Document(), new Document());
+                return new Score(JensenShannon.similarity(SAMPLE_VECTOR, DocTopicsUtil.getVectorFromString(vectorString, multiplicationFactor, numTopics, epsylon)), new Document("ref"), new Document(String.format(docIndexed.get(TopicIndexFactory.DOC_ID))));
+            } catch (Exception e) {
                 e.printStackTrace();
                 return new Score(0.0, new Document(), new Document());
             }
         }).filter(s -> s.getValue() > 0.5).sorted((a, b) -> -a.getValue().compareTo(b.getValue())).limit(10).collect(Collectors.toList());
+
         Instant globalEndTime = Instant.now();
         String globalElapsedTime = ChronoUnit.HOURS.between(startTime, globalEndTime) + "hours "
                 + ChronoUnit.MINUTES.between(startTime, globalEndTime) % 60 + "min "
                 + (ChronoUnit.SECONDS.between(startTime, globalEndTime) % 60) + "secs "
                 + (ChronoUnit.MILLIS.between(startTime, globalEndTime) % 60) + "msecs";
-        LOG.info("Search Time: " + globalElapsedTime);
+        LOG.info("Total Time: " + globalElapsedTime);
+        LOG.info("Total Hits: " + results.totalHits);
 
         topDocs.forEach(doc -> LOG.info("- " + doc.getSimilar().getId() + " \t ["+ doc.getValue()+"]"));
     }
