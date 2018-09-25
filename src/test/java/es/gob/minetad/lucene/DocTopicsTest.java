@@ -3,6 +3,7 @@ package es.gob.minetad.lucene;
 import com.google.common.base.Strings;
 import es.gob.minetad.doctopic.DocTopicsUtil;
 import es.gob.minetad.metric.JensenShannon;
+import es.gob.minetad.model.Combination;
 import es.gob.minetad.model.Document;
 import es.gob.minetad.model.Score;
 import es.gob.minetad.model.Stats;
@@ -206,28 +207,27 @@ public class DocTopicsTest {
                 + ChronoUnit.MINUTES.between(startTime, endTime) % 60 + "min "
                 + (ChronoUnit.SECONDS.between(startTime, endTime) % 60) + "secs "
                 + (ChronoUnit.MILLIS.between(startTime, endTime) % 60) + "msecs";
-        LOG.info("Search Time: " + elapsedTime);
+        LOG.info("Query Time: " + elapsedTime);
         LOG.info("Total Hits: " + results.totalHits);
 
-        Double previousScore = Double.MAX_VALUE;
 
-        for(ScoreDoc scoreDoc : results.scoreDocs){
-            org.apache.lucene.document.Document docIndexed = indexReader.document(scoreDoc.doc);
-
-            Document d2 = new Document();
-            String docId = String.format(docIndexed.get(TopicIndexFactory.DOC_ID));
-            d2.setId(docId);
-            String indexedVector = String.format(docIndexed.get(TopicIndexFactory.FIELD_NAME));
-            List<Double> docShape = DocTopicsUtil.getVectorFromString(indexedVector, multiplicationFactor, numTopics, epsylon);
-            d2.setShape(docShape);
-            double jsd = JensenShannon.similarity(SAMPLE_VECTOR, docShape);
-            LOG.info("- DocId='"+docId + ", LuceneScore=" + scoreDoc.score + ", JSD="+jsd);
-            if (jsd > previousScore) {
-                LOG.warn("No sorted list");
-                break;
+        List<Score> topDocs = Arrays.stream(results.scoreDocs).parallel().map(scoreDoc -> {
+            try {
+                org.apache.lucene.document.Document docIndexed = indexReader.document(scoreDoc.doc);
+                return new Score(JensenShannon.similarity(SAMPLE_VECTOR, DocTopicsUtil.getVectorFromString(String.format(docIndexed.get(TopicIndexFactory.FIELD_NAME)), multiplicationFactor, numTopics, epsylon)), new Document("ref"), new Document(String.format(docIndexed.get(TopicIndexFactory.DOC_ID))));
+            } catch (IOException e) {
+                e.printStackTrace();
+                return new Score(0.0, new Document(), new Document());
             }
-            previousScore = jsd;
-        }
+        }).filter(s -> s.getValue() > 0.5).sorted((a, b) -> -a.getValue().compareTo(b.getValue())).limit(10).collect(Collectors.toList());
+        Instant globalEndTime = Instant.now();
+        String globalElapsedTime = ChronoUnit.HOURS.between(startTime, globalEndTime) + "hours "
+                + ChronoUnit.MINUTES.between(startTime, endTime) % 60 + "min "
+                + (ChronoUnit.SECONDS.between(startTime, endTime) % 60) + "secs "
+                + (ChronoUnit.MILLIS.between(startTime, endTime) % 60) + "msecs";
+        LOG.info("Search Time: " + globalElapsedTime);
+
+        topDocs.forEach(doc -> LOG.info("- " + doc.getSimilar().getId() + " \t ["+ doc.getValue()+"]"));
     }
 
 }
