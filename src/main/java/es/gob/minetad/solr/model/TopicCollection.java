@@ -65,7 +65,7 @@ public class TopicCollection extends RestResource {
 
     public boolean create(){
 
-        if (!Collection.create(endpoint,name)) return false;
+        if (!Collection.create(client,name)) return false;
         LOG.info("Adding fields..");
 
         // adding fields

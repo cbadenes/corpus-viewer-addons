@@ -23,7 +23,7 @@ public class TopicIndexFactory {
     private static final Logger LOG = LoggerFactory.getLogger(TopicIndexFactory.class);
 
     public static final String DOC_ID           = "id";
-    public static final String FIELD_NAME       = "doctopics_field";
+    public static final String FIELD_NAME       = "topics";
     public static final float PRECISION         = 1e4f;
 
     public static IndexReader newTopicIndex(Directory directory, String corpus) throws IOException {
