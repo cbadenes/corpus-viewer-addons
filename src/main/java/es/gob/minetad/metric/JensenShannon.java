@@ -17,7 +17,11 @@ public class JensenShannon {
 
 
     public static double similarity(List<Double> v1, List<Double> v2){
-        return similarity(Doubles.toArray(v1),Doubles.toArray(v2));
+        double score = similarity(Doubles.toArray(v1), Doubles.toArray(v2));
+        if (score < 0 ){
+            LOG.warn("Invalid JSD score between: [1] -> " + v1 + " and [2] -> " + v2);
+        }
+        return score;
     }
 
     public static double similarity(double[] v1, double[] v2){
