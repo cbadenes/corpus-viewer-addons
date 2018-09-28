@@ -4,7 +4,6 @@ import com.google.common.base.Strings;
 import es.gob.minetad.doctopic.CRDCIndex;
 import es.gob.minetad.doctopic.DocTopicsUtil;
 import es.gob.minetad.metric.JensenShannon;
-import es.gob.minetad.model.Combination;
 import es.gob.minetad.model.Document;
 import es.gob.minetad.model.Score;
 import es.gob.minetad.model.Stats;
@@ -14,9 +13,7 @@ import es.gob.minetad.solr.model.TopicIndexFactory;
 import es.gob.minetad.utils.ParallelExecutor;
 import es.gob.minetad.utils.ReaderUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.queries.mlt.MoreLikeThis;
@@ -44,15 +41,14 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.zip.GZIPInputStream;
 
 /**
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
  */
 
-public class DocTopicsTest {
+public class DocTopicsEval {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DocTopicsTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DocTopicsEval.class);
 
     public static final String DOCTOPICS_PATH = "https://delicias.dia.fi.upm.es/nextcloud/index.php/s/iQx4Zy2dPcY84Sd/download";
 

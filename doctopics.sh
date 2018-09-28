@@ -1,1 +1,1 @@
-mvn -DargLine="-Xmx4096m" -Dtest=DocTopicsTest test
+mvn -DargLine="-Xmx4096m" -Dtest=DocTopicsEval test
