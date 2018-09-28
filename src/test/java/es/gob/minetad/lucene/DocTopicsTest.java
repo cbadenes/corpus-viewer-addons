@@ -56,7 +56,7 @@ public class DocTopicsTest {
 
     public static final String DOCTOPICS_PATH = "https://delicias.dia.fi.upm.es/nextcloud/index.php/s/iQx4Zy2dPcY84Sd/download";
 
-    public static final Integer NUM_DOCS = 1000;
+    public static final Integer NUM_DOCS = -1;
 
     private static FSDirectory directory;
     private static DirectoryReader indexReader;
@@ -87,9 +87,9 @@ public class DocTopicsTest {
     @BeforeClass
     public static void setup() throws IOException {
         File indexFile = new File("output/doctopics");
-        directory = FSDirectory.open(indexFile.toPath());
 //        if (indexFile.exists()) indexFile.delete();
         if (!indexFile.exists()) createIndex(indexFile);
+        else directory = FSDirectory.open(indexFile.toPath());
         indexReader      = DirectoryReader.open(directory);
         LOG.info("num docs indexed: " + indexReader.numDocs());
         LOG.info("max docs indexed: " + indexReader.maxDoc());
@@ -105,6 +105,7 @@ public class DocTopicsTest {
         IndexWriterConfig writerConfig = new IndexWriterConfig(new DocTopicAnalyzer());
         writerConfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
         writerConfig.setRAMBufferSizeMB(500.0);
+        directory = FSDirectory.open(indexFile.toPath());
         IndexWriter writer = new IndexWriter(directory, writerConfig);
 
         LOG.info("indexing documents..");
