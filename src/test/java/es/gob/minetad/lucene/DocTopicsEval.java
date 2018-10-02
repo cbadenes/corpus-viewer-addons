@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -52,9 +53,10 @@ public class DocTopicsEval {
 
     private static final Logger LOG = LoggerFactory.getLogger(DocTopicsEval.class);
 
-    public static final String DOCTOPICS_PATH = "https://delicias.dia.fi.upm.es/nextcloud/index.php/s/iQx4Zy2dPcY84Sd/download";
-
+    public static final String DOCTOPICS_PATH   = "https://delicias.dia.fi.upm.es/nextcloud/index.php/s/iQx4Zy2dPcY84Sd/download";
+    public static final String INDEX_DIR        = "output/doctopics";
     public static final Integer NUM_DOCS = 1000;
+
 
     private static FSDirectory directory;
     private static DirectoryReader indexReader;
@@ -84,7 +86,7 @@ public class DocTopicsEval {
 
     @BeforeClass
     public static void setup() throws IOException {
-        File indexFile = new File("output/doctopics");
+        File indexFile = new File(INDEX_DIR);
 //        if (indexFile.exists()) indexFile.delete();
         if (!indexFile.exists()) createIndex(indexFile);
         else directory = FSDirectory.open(indexFile.toPath());
@@ -188,40 +190,65 @@ public class DocTopicsEval {
     @Test
     @Ignore
     public void all() throws IOException, ParseException {
-        IndexSearcher searcher  = new IndexSearcher(indexReader);
-        searcher.setSimilarity(new BooleanSimilarity());
+
         BufferedReader reader = ReaderUtils.from(DOCTOPICS_PATH);
         String line;
         AtomicInteger counter = new AtomicInteger();
-        List<Double> timeList = new ArrayList<>();
+        ConcurrentLinkedQueue<Double> timeList = new ConcurrentLinkedQueue<Double>();
+        ConcurrentLinkedQueue<Double> hitsList = new ConcurrentLinkedQueue<Double>();
+        Map<Long,IndexSearcher> searcherMap = new ConcurrentHashMap<>();
+//        ParallelExecutor executor = new ParallelExecutor();
+        int num = 0;
         while( (line = reader.readLine()) != null){
             final String row = line;
+            num ++;
+            if (num == 10) break;
+//            executor.submit(() -> {
+                Long thId = Thread.currentThread().getId();
 
-            String[] result = row.split(",");
-            String id = result[0];
-            List<Double> shape = new ArrayList<>();
-            for (int i=1; i<result.length; i++){
-                shape.add(Double.valueOf(result[i]));
-            }
+                try {
+                    IndexSearcher searcher;
+                    if (!searcherMap.containsKey(thId)){
+                        FSDirectory dir = FSDirectory.open(Paths.get(INDEX_DIR));
+                        searcher  = new IndexSearcher(DirectoryReader.open(dir));
+                        searcher.setSimilarity(new BooleanSimilarity());
+                        searcherMap.put(thId, searcher);
+                    }else{
+                        searcher = searcherMap.get(thId);
+                    }
 
-            LOG.info("Getting similarities from " +counter.incrementAndGet());
+                    if (searcher == null){
+                        LOG.warn("Error searcher is null");
+                        return;
+                    }
 
-            // Query
-            String queryString = vector2String(shape);
-            QueryParser parser = new QueryParser(TopicIndexFactory.FIELD_NAME, new DocTopicAnalyzer());
-            Query query = null;
-            try{
-                query = parser.parse(queryString);
-            }catch (Exception e){
-                LOG.error("Unexpected error",e);
-                queryString = vector2String(shape);
-            }
-            timeList.add(Double.valueOf(search("all",searcher,query)));
+                    String[] result = row.split(",");
+                    String id = result[0];
+                    List<Double> shape = new ArrayList<>();
+                    for (int i=1; i<result.length; i++){
+                        shape.add(Double.valueOf(result[i]));
+                    }
+
+                    // Query
+                    String queryString = vector2String(shape);
+                    if (Strings.isNullOrEmpty(queryString)) return;
+                    QueryParser parser = new QueryParser(TopicIndexFactory.FIELD_NAME, new DocTopicAnalyzer());
+                    Query query = parser.parse(queryString);
+                    Instant startTime = Instant.now();
+                    TopDocs results = searcher.search(query, indexReader.numDocs());
+                    Instant endTime = Instant.now();
+                    long elapsedTime = ChronoUnit.MILLIS.between(startTime, endTime);
+                    timeList.add(Double.valueOf(elapsedTime));
+                    hitsList.add(Double.valueOf(results.totalHits));
+                    LOG.info("" +counter.incrementAndGet() + "/" + indexReader.numDocs() + " time: " + elapsedTime + "msecs, hits: " + results.totalHits);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+//            });
         }
-
-        LOG.info("Test completed");
-        Stats timeStats = new Stats(timeList);
-        LOG.info("Time Stats: " + timeStats);
+//        executor.awaitTermination(1, TimeUnit.HOURS);
+        LOG.info("Time Stats (msecs): " + new Stats(new ArrayList<>(timeList)));
+        LOG.info("Hits Stats: " + new Stats(new ArrayList<>(hitsList)));
     }
 
 
