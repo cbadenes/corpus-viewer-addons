@@ -1,6 +1,7 @@
 package es.gob.minetad.lucene;
 
 import com.google.common.base.Strings;
+import com.google.common.primitives.Doubles;
 import es.gob.minetad.doctopic.CRDCIndex;
 import es.gob.minetad.doctopic.DocTopicsUtil;
 import es.gob.minetad.metric.JensenShannon;
@@ -25,6 +26,7 @@ import org.apache.lucene.search.similarities.BooleanSimilarity;
 import org.apache.lucene.store.FSDirectory;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +54,7 @@ public class DocTopicsEval {
 
     public static final String DOCTOPICS_PATH = "https://delicias.dia.fi.upm.es/nextcloud/index.php/s/iQx4Zy2dPcY84Sd/download";
 
-    public static final Integer NUM_DOCS = -1;
+    public static final Integer NUM_DOCS = 1000;
 
     private static FSDirectory directory;
     private static DirectoryReader indexReader;
@@ -183,6 +185,45 @@ public class DocTopicsEval {
         search("BruteForce", searcher, new MatchAllDocsQuery());
     }
 
+    @Test
+    @Ignore
+    public void all() throws IOException, ParseException {
+        IndexSearcher searcher  = new IndexSearcher(indexReader);
+        searcher.setSimilarity(new BooleanSimilarity());
+        BufferedReader reader = ReaderUtils.from(DOCTOPICS_PATH);
+        String line;
+        AtomicInteger counter = new AtomicInteger();
+        List<Double> timeList = new ArrayList<>();
+        while( (line = reader.readLine()) != null){
+            final String row = line;
+
+            String[] result = row.split(",");
+            String id = result[0];
+            List<Double> shape = new ArrayList<>();
+            for (int i=1; i<result.length; i++){
+                shape.add(Double.valueOf(result[i]));
+            }
+
+            LOG.info("Getting similarities from " +counter.incrementAndGet());
+
+            // Query
+            String queryString = vector2String(shape);
+            QueryParser parser = new QueryParser(TopicIndexFactory.FIELD_NAME, new DocTopicAnalyzer());
+            Query query = null;
+            try{
+                query = parser.parse(queryString);
+            }catch (Exception e){
+                LOG.error("Unexpected error",e);
+                queryString = vector2String(shape);
+            }
+            timeList.add(Double.valueOf(search("all",searcher,query)));
+        }
+
+        LOG.info("Test completed");
+        Stats timeStats = new Stats(timeList);
+        LOG.info("Time Stats: " + timeStats);
+    }
+
 
     @Test
     public void moreLikeThisQuery() throws ParseException, IOException {
@@ -214,43 +255,46 @@ public class DocTopicsEval {
 
     }
 
-    private void search(String id, IndexSearcher searcher, Query query) throws IOException {
+    private Long search(String id, IndexSearcher searcher, Query query) throws IOException {
         List<Double> v1 = SAMPLE_VECTOR;
-        Map<String, Double> m1 = string2map(vector2String(v1));
+//        Map<String, Double> m1 = string2map(vector2String(v1));
         String description = "Searching by '" + id + "' ";
         LOG.info(description + Strings.repeat("-",100-description.length()));
         Instant startTime = Instant.now();
         TopDocs results = searcher.search(query, indexReader.numDocs());
-
-        Instant pstartTime = Instant.now();
-        List<Score> topDocs = Arrays.stream(results.scoreDocs).parallel().map(scoreDoc -> {
-            try {
-                org.apache.lucene.document.Document docIndexed = indexReader.document(scoreDoc.doc);
-                String vectorString = String.format(docIndexed.get(TopicIndexFactory.FIELD_NAME));
-                if (Strings.isNullOrEmpty(vectorString)) return new Score(0.0, new Document(), new Document());
-
-//                Map<String, Double> m2 = string2map(vectorString);
-                List<Double> v2 = string2Vector(vectorString);
-                return new Score(JensenShannon.similarity(v1, v2), new Document("ref"), new Document(String.format(docIndexed.get(TopicIndexFactory.DOC_ID))));
-            } catch (Exception e) {
-                e.printStackTrace();
-                return new Score(0.0, new Document(), new Document());
-            }
-        }).filter(s -> s.getValue() > 0.7).sorted((a, b) -> -a.getValue().compareTo(b.getValue())).limit(10).collect(Collectors.toList());
-        topDocs.size();
-        Instant pEndTime = Instant.now();
-        LOG.info("Similarities Time: " + + ChronoUnit.MINUTES.between(pstartTime, pEndTime) % 60 + "min "
-                + (ChronoUnit.SECONDS.between(pstartTime, pEndTime) % 60) + "secs "
-                + (ChronoUnit.MILLIS.between(pstartTime, pEndTime) % 1000) + "msecs");
-        Instant globalEndTime = Instant.now();
-        String globalElapsedTime =
-                + ChronoUnit.MINUTES.between(startTime, globalEndTime) % 60 + "min "
-                + (ChronoUnit.SECONDS.between(startTime, globalEndTime) % 60) + "secs "
-                + (ChronoUnit.MILLIS.between(startTime, globalEndTime) % 1000) + "msecs";
-        LOG.info("Total Time: " + globalElapsedTime);
+        Instant queryEndTime = Instant.now();
         LOG.info("Total Hits: " + results.totalHits);
+        LOG.info("Query Time: " + + ChronoUnit.MINUTES.between(startTime, queryEndTime) % 60 + "min "
+                + (ChronoUnit.SECONDS.between(startTime, queryEndTime) % 60) + "secs "
+                + (ChronoUnit.MILLIS.between(startTime, queryEndTime) % 1000) + "msecs");
+        Instant pstartTime = Instant.now();
+//        List<Score> topDocs = Arrays.stream(results.scoreDocs).parallel().map(scoreDoc -> {
+//            try {
+//                org.apache.lucene.document.Document docIndexed = indexReader.document(scoreDoc.doc);
+//                String vectorString = String.format(docIndexed.get(TopicIndexFactory.FIELD_NAME));
+//                if (Strings.isNullOrEmpty(vectorString)) return new Score(0.0, new Document(), new Document());
+//
+//                List<Double> v2 = string2Vector(vectorString);
+//                return new Score(JensenShannon.similarity(v1, v2), new Document("ref"), new Document(String.format(docIndexed.get(TopicIndexFactory.DOC_ID))));
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//                return new Score(0.0, new Document(), new Document());
+//            }
+//        }).filter(s -> s.getValue() > 0.7).sorted((a, b) -> -a.getValue().compareTo(b.getValue())).limit(10).collect(Collectors.toList());
+//        topDocs.size();
+//        Instant pEndTime = Instant.now();
+//        LOG.info("Comparison Time: " + + ChronoUnit.MINUTES.between(pstartTime, pEndTime) % 60 + "min "
+//                + (ChronoUnit.SECONDS.between(pstartTime, pEndTime) % 60) + "secs "
+//                + (ChronoUnit.MILLIS.between(pstartTime, pEndTime) % 1000) + "msecs");
+//        topDocs.forEach(doc -> LOG.info("- " + doc.getSimilar().getId() + " \t ["+ doc.getValue()+"]"));
+        Instant endTime = Instant.now();
+        String globalElapsedTime =
+                + ChronoUnit.MINUTES.between(startTime, endTime) % 60 + "min "
+                + (ChronoUnit.SECONDS.between(startTime, endTime) % 60) + "secs "
+                + (ChronoUnit.MILLIS.between(startTime, endTime) % 1000) + "msecs";
+        LOG.info("Total Time: " + globalElapsedTime);
+        return ChronoUnit.MILLIS.between(startTime, endTime);
 
-        topDocs.forEach(doc -> LOG.info("- " + doc.getSimilar().getId() + " \t ["+ doc.getValue()+"]"));
     }
 
 }
