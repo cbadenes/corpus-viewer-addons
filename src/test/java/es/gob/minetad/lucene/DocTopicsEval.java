@@ -57,7 +57,7 @@ public class DocTopicsEval {
 
     public static final String DOCTOPICS_PATH   = "https://delicias.dia.fi.upm.es/nextcloud/index.php/s/4FJtpLxM9qa7QiA/download";
     public static final String INDEX_DIR        = "output/doctopics";
-    public static final Integer NUM_DOCS        = 100000;
+    public static final Integer NUM_DOCS        = -1;
 
 
     private static FSDirectory directory;
@@ -89,16 +89,11 @@ public class DocTopicsEval {
     @BeforeClass
     public static void setup() throws IOException {
         File indexFile = new File(INDEX_DIR);
-//        if (indexFile.exists()) indexFile.delete();
         if (!indexFile.exists()) createIndex(indexFile);
         else directory = FSDirectory.open(indexFile.toPath());
         indexReader      = DirectoryReader.open(directory);
         LOG.info("num docs indexed: " + indexReader.numDocs());
         LOG.info("max docs indexed: " + indexReader.maxDoc());
-
-
-//        List<Map.Entry<String, Double>> topSimilars = similarities.entrySet().parallelStream().sorted((a, b) -> -a.getValue().compareTo(b.getValue())).limit(10).collect(Collectors.toList());
-//        topSimilars.forEach(entry -> LOG.info("- " + entry.getKey() + " [" + entry.getValue() + "]"));
     }
 
     private static void createIndex(File indexFile) throws IOException {
@@ -265,9 +260,10 @@ public class DocTopicsEval {
         mlt.setMinDocFreq(1);
 
         // Topic DTF
-//        mlt.setAnalyzer(new DocTopicAnalyzer());
-        //Reader stringReader = new StringReader(vector2String(SAMPLE_VECTOR));
-//        Query mltQuery = mlt.like(TopicIndexFactory.FIELD_NAME, stringReader);
+        mlt.setAnalyzer(new DocTopicAnalyzer());
+        Reader stringReader = new StringReader(vector2String(SAMPLE_VECTOR));
+        Query mltQuery = mlt.like(TopicIndexFactory.FIELD_NAME, stringReader);
+        search("MoreLikeThis-dtf", searcher, mltQuery);
 
         // Topic Hash
         mlt.setAnalyzer(new StandardAnalyzer());
@@ -278,7 +274,7 @@ public class DocTopicsEval {
 
         Reader stringReaderNegative = new StringReader(topicHash.byExclusion());
         Query mltQueryNegative = mlt.like(TopicIndexFactory.DOC_NEGATIVE_HASH, stringReaderNegative);
-        search("MoreLikeThis-negative", searcher, mltQueryNegative);
+        search("MoreLikeThis-exclusion", searcher, mltQueryNegative);
 
 
     }
@@ -287,20 +283,22 @@ public class DocTopicsEval {
 
     private void query(String id, IndexSearcher searcher) throws ParseException, IOException {
         // Topic DTF
-        //String queryString = vector2String(SAMPLE_VECTOR);
-//        QueryParser parser = new QueryParser(TopicIndexFactory.FIELD_NAME, new DocTopicAnalyzer());
+        String queryString = vector2String(SAMPLE_VECTOR);
+        QueryParser parser = new QueryParser(TopicIndexFactory.FIELD_NAME, new DocTopicAnalyzer());
+        Query query = parser.parse(queryString);
+        search(id+"-dtf", searcher, query);
 
         // Topic Hash
         TopicHash topicHash = new TopicHash(SAMPLE_VECTOR);
         String queryStringPositive = topicHash.byInclusion();
         QueryParser parserPositive = new QueryParser(TopicIndexFactory.DOC_POSITIVE_HASH, new StandardAnalyzer());
         Query queryPositive = parserPositive.parse(queryStringPositive);
-        search(id+"-positive", searcher, queryPositive);
+        search(id+"-inclusion", searcher, queryPositive);
 
         String queryStringNegative = topicHash.byExclusion();
         QueryParser parserNegative = new QueryParser(TopicIndexFactory.DOC_NEGATIVE_HASH, new StandardAnalyzer());
         Query queryNegative = parserNegative.parse(queryStringNegative);
-        search(id+"-negative", searcher, queryNegative);
+        search(id+"-exclusion", searcher, queryNegative);
 
 
 
@@ -325,7 +323,7 @@ public class DocTopicsEval {
                 String vectorString = String.format(docIndexed.get(TopicIndexFactory.FIELD_NAME));
                 if (Strings.isNullOrEmpty(vectorString)) return new Score(0.0, new Document(), new Document());
 
-                String hash = id.contains("positive")?String.format(docIndexed.get(TopicIndexFactory.DOC_POSITIVE_HASH)):String.format(docIndexed.get(TopicIndexFactory.DOC_NEGATIVE_HASH));
+                String hash = id.contains("inclusion")?String.format(docIndexed.get(TopicIndexFactory.DOC_POSITIVE_HASH)): id.contains("exclusion")?String.format(docIndexed.get(TopicIndexFactory.DOC_NEGATIVE_HASH)).substring(0,50)+"..": vectorString;
 
                 List<Double> v2 = string2Vector(vectorString);
                 return new Score(JensenShannon.similarity(v1, v2), new Document(hash), new Document(String.format(docIndexed.get(TopicIndexFactory.DOC_ID))+"-"+scoreDoc.score));
