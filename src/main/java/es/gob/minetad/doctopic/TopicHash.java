@@ -30,7 +30,6 @@ public class TopicHash {
 
         DistanceMeasure distanceMeasure = new MonoDimensionalDistanceMeasure();
         double eps      = (1.0/topicDistribution.size())/2.0;
-//        double eps      = 0.001;
         int minPts      = 1;
         this.clusterer  = new DBSCANClusterer<TopicPoint>(eps,minPts,distanceMeasure);
 
@@ -44,12 +43,6 @@ public class TopicHash {
             String label    = cluster.getPoints().stream().map(p -> p.id).sorted((x,y) -> -x.compareTo(y)).collect(Collectors.joining("#"));
             groups.add(new TopicPoint(label,score));
         }
-
-        // remove the biggest group
-//        TopicPoint massiveGroup = groups.stream().sorted((x, y) -> -Integer.valueOf(StringUtils.countMatches(x.id, "#")).compareTo(Integer.valueOf(StringUtils.countMatches(y.id, "#")))).findFirst().get();
-
-//        this.byInclusion = groups.size() > 1? groups.stream().filter(p -> !p.id.equalsIgnoreCase(massiveGroup.id)).sorted((x, y) -> -x.score.compareTo(y.score)).map(p -> p.id).collect(Collectors.joining("_")) : groups.get(0).id;
-//        this.byExclusion = groups.size() > 1? groups.stream().filter(p -> !p.id.equalsIgnoreCase(massiveGroup.id)).sorted((x, y) -> -x.score.compareTo(y.score)).map(p -> p.id).collect(Collectors.joining("_")) : groups.get(0).id;
 
         this.byInclusion = groups.size()>1?groups.stream().sorted((x, y) -> -x.score.compareTo(y.score)).map(p -> p.id).findFirst().get() : "-";
         this.byExclusion = groups.stream().sorted((x, y) -> x.score.compareTo(y.score)).map(p -> p.id).findFirst().get();
