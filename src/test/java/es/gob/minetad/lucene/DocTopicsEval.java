@@ -1,19 +1,21 @@
 package es.gob.minetad.lucene;
 
 import com.google.common.base.Strings;
-import com.google.common.primitives.Doubles;
 import es.gob.minetad.doctopic.CRDCIndex;
 import es.gob.minetad.doctopic.DocTopicsUtil;
+import es.gob.minetad.doctopic.TopicHash;
 import es.gob.minetad.metric.JensenShannon;
 import es.gob.minetad.model.Document;
 import es.gob.minetad.model.Score;
 import es.gob.minetad.model.Stats;
 import es.gob.minetad.solr.analyzer.DocTopicAnalyzer;
+import es.gob.minetad.solr.analyzer.TopicHashAnalyzer;
 import es.gob.minetad.solr.model.DocumentFactory;
 import es.gob.minetad.solr.model.TopicIndexFactory;
 import es.gob.minetad.utils.ParallelExecutor;
 import es.gob.minetad.utils.ReaderUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
@@ -55,7 +57,7 @@ public class DocTopicsEval {
 
     public static final String DOCTOPICS_PATH   = "https://delicias.dia.fi.upm.es/nextcloud/index.php/s/4FJtpLxM9qa7QiA/download";
     public static final String INDEX_DIR        = "output/doctopics";
-    public static final Integer NUM_DOCS        = -1;
+    public static final Integer NUM_DOCS        = 100000;
 
 
     private static FSDirectory directory;
@@ -130,7 +132,8 @@ public class DocTopicsEval {
                     }
 
                     String stringTopics = vector2String(shape);
-                    org.apache.lucene.document.Document luceneDoc = DocumentFactory.newDocId(id, stringTopics);
+                    //org.apache.lucene.document.Document luceneDoc = DocumentFactory.newDocId(id, stringTopics);
+                    org.apache.lucene.document.Document luceneDoc = DocumentFactory.newDoc(id, new TopicHash(shape), stringTopics);
                     representationLengths.add(Double.valueOf(StringUtils.countMatches(stringTopics,"|")));
                     writer.addDocument(luceneDoc);
                     if (index % interval == 0){
@@ -184,7 +187,7 @@ public class DocTopicsEval {
     @Test
     public void bruteForceQuery() throws IOException, ParseException {
         IndexSearcher searcher  = new IndexSearcher(indexReader);
-        search("BruteForce", searcher, new MatchAllDocsQuery());
+        search("BruteForce-positive", searcher, new MatchAllDocsQuery());
     }
 
     @Test
@@ -260,25 +263,46 @@ public class DocTopicsEval {
         MoreLikeThis mlt = new MoreLikeThis(indexReader);
         mlt.setMinTermFreq(1);
         mlt.setMinDocFreq(1);
-        mlt.setAnalyzer(new DocTopicAnalyzer());
 
-        Reader stringReader = new StringReader(vector2String(SAMPLE_VECTOR));
+        // Topic DTF
+//        mlt.setAnalyzer(new DocTopicAnalyzer());
+        //Reader stringReader = new StringReader(vector2String(SAMPLE_VECTOR));
+//        Query mltQuery = mlt.like(TopicIndexFactory.FIELD_NAME, stringReader);
 
-        Query mltQuery = mlt.like(TopicIndexFactory.FIELD_NAME, stringReader);
+        // Topic Hash
+        mlt.setAnalyzer(new StandardAnalyzer());
+        TopicHash topicHash = new TopicHash(SAMPLE_VECTOR);
+        Reader stringReaderPositive = new StringReader(topicHash.byInclusion());
+        Query mltQueryPositive = mlt.like(TopicIndexFactory.DOC_POSITIVE_HASH, stringReaderPositive);
+        search("MoreLikeThis-positive", searcher, mltQueryPositive);
 
-        search("MoreLikeThis", searcher, mltQuery);
+        Reader stringReaderNegative = new StringReader(topicHash.byExclusion());
+        Query mltQueryNegative = mlt.like(TopicIndexFactory.DOC_NEGATIVE_HASH, stringReaderNegative);
+        search("MoreLikeThis-negative", searcher, mltQueryNegative);
+
 
     }
 
 
 
     private void query(String id, IndexSearcher searcher) throws ParseException, IOException {
-        String queryString = vector2String(SAMPLE_VECTOR);
+        // Topic DTF
+        //String queryString = vector2String(SAMPLE_VECTOR);
+//        QueryParser parser = new QueryParser(TopicIndexFactory.FIELD_NAME, new DocTopicAnalyzer());
 
-        QueryParser parser = new QueryParser(TopicIndexFactory.FIELD_NAME, new DocTopicAnalyzer());
-        Query query = parser.parse(queryString);
+        // Topic Hash
+        TopicHash topicHash = new TopicHash(SAMPLE_VECTOR);
+        String queryStringPositive = topicHash.byInclusion();
+        QueryParser parserPositive = new QueryParser(TopicIndexFactory.DOC_POSITIVE_HASH, new StandardAnalyzer());
+        Query queryPositive = parserPositive.parse(queryStringPositive);
+        search(id+"-positive", searcher, queryPositive);
 
-        search(id, searcher, query);
+        String queryStringNegative = topicHash.byExclusion();
+        QueryParser parserNegative = new QueryParser(TopicIndexFactory.DOC_NEGATIVE_HASH, new StandardAnalyzer());
+        Query queryNegative = parserNegative.parse(queryStringNegative);
+        search(id+"-negative", searcher, queryNegative);
+
+
 
     }
 
@@ -301,8 +325,10 @@ public class DocTopicsEval {
                 String vectorString = String.format(docIndexed.get(TopicIndexFactory.FIELD_NAME));
                 if (Strings.isNullOrEmpty(vectorString)) return new Score(0.0, new Document(), new Document());
 
+                String hash = id.contains("positive")?String.format(docIndexed.get(TopicIndexFactory.DOC_POSITIVE_HASH)):String.format(docIndexed.get(TopicIndexFactory.DOC_NEGATIVE_HASH));
+
                 List<Double> v2 = string2Vector(vectorString);
-                return new Score(JensenShannon.similarity(v1, v2), new Document("ref"), new Document(String.format(docIndexed.get(TopicIndexFactory.DOC_ID))));
+                return new Score(JensenShannon.similarity(v1, v2), new Document(hash), new Document(String.format(docIndexed.get(TopicIndexFactory.DOC_ID))+"-"+scoreDoc.score));
             } catch (Exception e) {
                 e.printStackTrace();
                 return new Score(0.0, new Document(), new Document());
@@ -313,13 +339,13 @@ public class DocTopicsEval {
         LOG.info("Comparison Time: " + + ChronoUnit.MINUTES.between(pstartTime, pEndTime) % 60 + "min "
                 + (ChronoUnit.SECONDS.between(pstartTime, pEndTime) % 60) + "secs "
                 + (ChronoUnit.MILLIS.between(pstartTime, pEndTime) % 1000) + "msecs");
-        topDocs.forEach(doc -> LOG.info("- " + doc.getSimilar().getId() + " \t ["+ doc.getValue()+"]"));
         Instant endTime = Instant.now();
         String globalElapsedTime =
                 + ChronoUnit.MINUTES.between(startTime, endTime) % 60 + "min "
                 + (ChronoUnit.SECONDS.between(startTime, endTime) % 60) + "secs "
                 + (ChronoUnit.MILLIS.between(startTime, endTime) % 1000) + "msecs";
         LOG.info("Total Time: " + globalElapsedTime);
+        topDocs.forEach(doc -> LOG.info("- " + doc.getSimilar().getId() + " \t ["+ doc.getValue()+"] /" + doc.getReference().getId()+"/"));
         return ChronoUnit.MILLIS.between(startTime, endTime);
 
     }

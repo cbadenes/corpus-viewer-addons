@@ -23,6 +23,8 @@ public class TopicIndexFactory {
     private static final Logger LOG = LoggerFactory.getLogger(TopicIndexFactory.class);
 
     public static final String DOC_ID           = "id";
+    public static final String DOC_POSITIVE_HASH = "phash";
+    public static final String DOC_NEGATIVE_HASH = "nhash";
     public static final String FIELD_NAME       = "topics";
     public static final float PRECISION         = 1e4f;
 
