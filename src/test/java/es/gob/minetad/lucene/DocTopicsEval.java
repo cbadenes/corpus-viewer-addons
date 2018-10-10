@@ -27,10 +27,7 @@ import org.apache.lucene.search.*;
 import org.apache.lucene.search.similarities.BM25Similarity;
 import org.apache.lucene.search.similarities.BooleanSimilarity;
 import org.apache.lucene.store.FSDirectory;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,8 +84,8 @@ public class DocTopicsEval {
         return vectorMap;
     }
 
-    @BeforeClass
-    public static void setup() throws IOException {
+    @Before
+    public void setup() throws IOException {
         File indexFile = new File(INDEX_DIR);
         if (!indexFile.exists()) createIndex(indexFile);
         else directory = FSDirectory.open(indexFile.toPath());
@@ -161,8 +158,8 @@ public class DocTopicsEval {
         LOG.info("num docs read: " + counter.get());
     }
 
-    @AfterClass
-    public static void shutdown() throws IOException {
+    @After
+    public void shutdown() throws IOException {
         indexReader.close();
     }
 
@@ -261,12 +258,6 @@ public class DocTopicsEval {
         mlt.setMinTermFreq(1);
         mlt.setMinDocFreq(1);
 
-        // Topic DTF
-        mlt.setAnalyzer(new DocTopicAnalyzer());
-        Reader stringReader = new StringReader(vector2String(SAMPLE_VECTOR));
-        Query mltQuery = mlt.like(TopicIndexFactory.FIELD_NAME, stringReader);
-        search("MoreLikeThis-dtf", searcher, mltQuery);
-
         // Topic Hash
         mlt.setAnalyzer(new StandardAnalyzer());
         TopicHash topicHash = new TopicHash(SAMPLE_VECTOR);
@@ -274,9 +265,16 @@ public class DocTopicsEval {
         Query mltQueryPositive = mlt.like(TopicIndexFactory.DOC_POSITIVE_HASH, stringReaderPositive);
         search("MoreLikeThis-positive", searcher, mltQueryPositive);
 
-        Reader stringReaderNegative = new StringReader(topicHash.byExclusion());
-        Query mltQueryNegative = mlt.like(TopicIndexFactory.DOC_NEGATIVE_HASH, stringReaderNegative);
-        search("MoreLikeThis-exclusion", searcher, mltQueryNegative);
+        // Topic DTF
+        mlt.setAnalyzer(new DocTopicAnalyzer());
+        Reader stringReader = new StringReader(vector2String(SAMPLE_VECTOR));
+        Query mltQuery = mlt.like(TopicIndexFactory.FIELD_NAME, stringReader);
+        search("MoreLikeThis-dtf", searcher, mltQuery);
+
+
+//        Reader stringReaderNegative = new StringReader(topicHash.byExclusion());
+//        Query mltQueryNegative = mlt.like(TopicIndexFactory.DOC_NEGATIVE_HASH, stringReaderNegative);
+//        search("MoreLikeThis-exclusion", searcher, mltQueryNegative);
 
 
     }
@@ -284,11 +282,6 @@ public class DocTopicsEval {
 
 
     private void query(String id, IndexSearcher searcher) throws ParseException, IOException {
-        // Topic DTF
-        String queryString = vector2String(SAMPLE_VECTOR);
-        QueryParser parser = new QueryParser(TopicIndexFactory.FIELD_NAME, new DocTopicAnalyzer());
-        Query query = parser.parse(queryString);
-        search(id+"-dtf", searcher, query);
 
         // Topic Hash
         TopicHash topicHash = new TopicHash(SAMPLE_VECTOR);
@@ -297,11 +290,16 @@ public class DocTopicsEval {
         Query queryPositive = parserPositive.parse(queryStringPositive);
         search(id+"-inclusion", searcher, queryPositive);
 
-        String queryStringNegative = topicHash.byExclusion();
-        QueryParser parserNegative = new QueryParser(TopicIndexFactory.DOC_NEGATIVE_HASH, new StandardAnalyzer());
-        Query queryNegative = parserNegative.parse(queryStringNegative);
-        search(id+"-exclusion", searcher, queryNegative);
+//        String queryStringNegative = topicHash.byExclusion();
+//        QueryParser parserNegative = new QueryParser(TopicIndexFactory.DOC_NEGATIVE_HASH, new StandardAnalyzer());
+//        Query queryNegative = parserNegative.parse(queryStringNegative);
+//        search(id+"-exclusion", searcher, queryNegative);
 
+// Topic DTF
+        String queryString = vector2String(SAMPLE_VECTOR);
+        QueryParser parser = new QueryParser(TopicIndexFactory.FIELD_NAME, new DocTopicAnalyzer());
+        Query query = parser.parse(queryString);
+        search(id+"-dtf", searcher, query);
 
 
     }
