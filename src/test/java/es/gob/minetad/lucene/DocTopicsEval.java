@@ -92,8 +92,6 @@ public class DocTopicsEval {
         indexReader      = DirectoryReader.open(directory);
         LOG.info("num docs indexed: " + indexReader.numDocs());
         LOG.info("max docs indexed: " + indexReader.maxDoc());
-        IndexSearcher searcher  = new IndexSearcher(indexReader);
-        searcher.search(new MatchAllDocsQuery(), indexReader.numDocs());
     }
 
     private static void createIndex(File indexFile) throws IOException {
