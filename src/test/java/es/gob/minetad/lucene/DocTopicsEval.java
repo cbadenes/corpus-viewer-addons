@@ -202,7 +202,7 @@ public class DocTopicsEval {
                 String vectorString = String.format(docIndexed.get(TopicIndexFactory.FIELD_NAME));
                 if (Strings.isNullOrEmpty(vectorString)) return new Score(0.0, new Document(), new Document());
 
-                String hash = id.contains("inclusion") ? String.format(docIndexed.get(TopicIndexFactory.DOC_POSITIVE_HASH)) : id.contains("exclusion") ? String.format(docIndexed.get(TopicIndexFactory.DOC_NEGATIVE_HASH)).substring(0, 50) + ".." : vectorString;
+                String hash = id.contains("byHash") ? String.format(docIndexed.get(TopicIndexFactory.DOC_POSITIVE_HASH)) : id.contains("exclusion") ? String.format(docIndexed.get(TopicIndexFactory.DOC_NEGATIVE_HASH)).substring(0, 50) + ".." : vectorString;
 
                 List<Double> v2 = string2Vector(vectorString);
                 return new Score(JensenShannon.similarity(v1, v2), new Document(hash), new Document(String.format(docIndexed.get(TopicIndexFactory.DOC_ID)) + "-" + scoreDoc.score));
