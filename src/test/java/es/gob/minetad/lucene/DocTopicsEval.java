@@ -92,6 +92,8 @@ public class DocTopicsEval {
         indexReader      = DirectoryReader.open(directory);
         LOG.info("num docs indexed: " + indexReader.numDocs());
         LOG.info("max docs indexed: " + indexReader.maxDoc());
+        IndexSearcher searcher  = new IndexSearcher(indexReader);
+        searcher.search(new MatchAllDocsQuery(), indexReader.numDocs());
     }
 
     private static void createIndex(File indexFile) throws IOException {
@@ -164,93 +166,58 @@ public class DocTopicsEval {
     }
 
     @Test
-    public void booleanQuery() throws IOException, ParseException {
+    public void booleanDTFQuery() throws IOException, ParseException {
         IndexSearcher searcher  = new IndexSearcher(indexReader);
         searcher.setSimilarity(new BooleanSimilarity());
-        query("Boolean", searcher);
-
+        queryByDTF("Boolean", searcher);
     }
 
     @Test
-    public void bm25Query() throws IOException, ParseException {
+    public void booleanHashQuery() throws IOException, ParseException {
+        IndexSearcher searcher  = new IndexSearcher(indexReader);
+        searcher.setSimilarity(new BooleanSimilarity());
+        queryByHash("Boolean", searcher);
+    }
+
+    @Test
+    public void bm25DTFQuery() throws IOException, ParseException {
         IndexSearcher searcher  = new IndexSearcher(indexReader);
         searcher.setSimilarity(new BM25Similarity());
-        query("BM25", searcher);
+        queryByDTF("BM25", searcher);
     }
 
     @Test
+    public void bm25HashQuery() throws IOException, ParseException {
+        IndexSearcher searcher  = new IndexSearcher(indexReader);
+        searcher.setSimilarity(new BM25Similarity());
+        queryByHash("BM25", searcher);
+    }
+
+    @Test
+    @Ignore
     public void bruteForceQuery() throws IOException, ParseException {
         IndexSearcher searcher  = new IndexSearcher(indexReader);
         search("BruteForce-positive", searcher, new MatchAllDocsQuery());
     }
 
     @Test
-    @Ignore
-    public void all() throws IOException, ParseException {
+    public void moreLikeThisbyDTFQuery() throws ParseException, IOException {
 
-        BufferedReader reader = ReaderUtils.from(DOCTOPICS_PATH);
-        String line;
-        AtomicInteger counter = new AtomicInteger();
-        ConcurrentLinkedQueue<Double> timeList = new ConcurrentLinkedQueue<Double>();
-        ConcurrentLinkedQueue<Double> hitsList = new ConcurrentLinkedQueue<Double>();
-        Map<Long,IndexSearcher> searcherMap = new ConcurrentHashMap<>();
-//        ParallelExecutor executor = new ParallelExecutor();
-        int num = 0;
-        while( (line = reader.readLine()) != null){
-            final String row = line;
-            num ++;
-            if (num == 100) break;
-//            executor.submit(() -> {
-                Long thId = Thread.currentThread().getId();
+        IndexSearcher searcher = new IndexSearcher(indexReader);
 
-                try {
-                    IndexSearcher searcher;
-                    if (!searcherMap.containsKey(thId)){
-                        FSDirectory dir = FSDirectory.open(Paths.get(INDEX_DIR));
-                        searcher  = new IndexSearcher(DirectoryReader.open(dir));
-                        searcher.setSimilarity(new BooleanSimilarity());
-                        searcherMap.put(thId, searcher);
-                    }else{
-                        searcher = searcherMap.get(thId);
-                    }
+        MoreLikeThis mlt = new MoreLikeThis(indexReader);
+        mlt.setMinTermFreq(1);
+        mlt.setMinDocFreq(1);
 
-                    if (searcher == null){
-                        LOG.warn("Error searcher is null");
-                        return;
-                    }
-
-                    String[] result = row.split(",");
-                    String id = result[0];
-                    List<Double> shape = new ArrayList<>();
-                    for (int i=1; i<result.length; i++){
-                        shape.add(Double.valueOf(result[i]));
-                    }
-
-                    // Query
-                    String queryString = vector2String(shape);
-                    if (Strings.isNullOrEmpty(queryString)) return;
-                    QueryParser parser = new QueryParser(TopicIndexFactory.FIELD_NAME, new DocTopicAnalyzer());
-                    Query query = parser.parse(queryString);
-                    Instant startTime = Instant.now();
-                    TopDocs results = searcher.search(query, indexReader.numDocs());
-                    Instant endTime = Instant.now();
-                    long elapsedTime = ChronoUnit.MILLIS.between(startTime, endTime);
-                    timeList.add(Double.valueOf(elapsedTime));
-                    hitsList.add(Double.valueOf(results.totalHits));
-                    LOG.info("" +counter.incrementAndGet() + "/" + indexReader.numDocs() + " time: " + elapsedTime + "msecs, hits: " + results.totalHits);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-//            });
-        }
-//        executor.awaitTermination(1, TimeUnit.HOURS);
-        LOG.info("Time Stats (msecs): " + new Stats(new ArrayList<>(timeList)));
-        LOG.info("Hits Stats: " + new Stats(new ArrayList<>(hitsList)));
+        // Topic DTF
+        mlt.setAnalyzer(new DocTopicAnalyzer());
+        Reader stringReader = new StringReader(vector2String(SAMPLE_VECTOR));
+        Query mltQuery = mlt.like(TopicIndexFactory.FIELD_NAME, stringReader);
+        search("MoreLikeThis-byDTF", searcher, mltQuery);
     }
 
-
     @Test
-    public void moreLikeThisQuery() throws ParseException, IOException {
+    public void moreLikeThisbyHashQuery() throws ParseException, IOException {
 
         IndexSearcher searcher = new IndexSearcher(indexReader);
 
@@ -263,46 +230,30 @@ public class DocTopicsEval {
         TopicHash topicHash = new TopicHash(SAMPLE_VECTOR);
         Reader stringReaderPositive = new StringReader(topicHash.byInclusion());
         Query mltQueryPositive = mlt.like(TopicIndexFactory.DOC_POSITIVE_HASH, stringReaderPositive);
-        search("MoreLikeThis-positive", searcher, mltQueryPositive);
-
-        // Topic DTF
-        mlt.setAnalyzer(new DocTopicAnalyzer());
-        Reader stringReader = new StringReader(vector2String(SAMPLE_VECTOR));
-        Query mltQuery = mlt.like(TopicIndexFactory.FIELD_NAME, stringReader);
-        search("MoreLikeThis-dtf", searcher, mltQuery);
-
-
-//        Reader stringReaderNegative = new StringReader(topicHash.byExclusion());
-//        Query mltQueryNegative = mlt.like(TopicIndexFactory.DOC_NEGATIVE_HASH, stringReaderNegative);
-//        search("MoreLikeThis-exclusion", searcher, mltQueryNegative);
-
-
+        search("MoreLikeThis-byHash", searcher, mltQueryPositive);
     }
 
 
 
-    private void query(String id, IndexSearcher searcher) throws ParseException, IOException {
+    private void queryByDTF(String id, IndexSearcher searcher) throws ParseException, IOException {
 
-        // Topic Hash
+        String queryString = vector2String(SAMPLE_VECTOR);
+        QueryParser parser = new QueryParser(TopicIndexFactory.FIELD_NAME, new DocTopicAnalyzer());
+        Query query = parser.parse(queryString);
+        search(id+"-byDTF", searcher, query);
+
+
+    }
+
+    private void queryByHash(String id, IndexSearcher searcher) throws ParseException, IOException {
+
         TopicHash topicHash = new TopicHash(SAMPLE_VECTOR);
         String queryStringPositive = topicHash.byInclusion();
         QueryParser parserPositive = new QueryParser(TopicIndexFactory.DOC_POSITIVE_HASH, new StandardAnalyzer());
         Query queryPositive = parserPositive.parse(queryStringPositive);
-        search(id+"-inclusion", searcher, queryPositive);
-
-//        String queryStringNegative = topicHash.byExclusion();
-//        QueryParser parserNegative = new QueryParser(TopicIndexFactory.DOC_NEGATIVE_HASH, new StandardAnalyzer());
-//        Query queryNegative = parserNegative.parse(queryStringNegative);
-//        search(id+"-exclusion", searcher, queryNegative);
-
-// Topic DTF
-        String queryString = vector2String(SAMPLE_VECTOR);
-        QueryParser parser = new QueryParser(TopicIndexFactory.FIELD_NAME, new DocTopicAnalyzer());
-        Query query = parser.parse(queryString);
-        search(id+"-dtf", searcher, query);
-
-
+        search(id+"-byHash", searcher, queryPositive);
     }
+
 
     private Long search(String id, IndexSearcher searcher, Query query) throws IOException {
         List<Double> v1 = SAMPLE_VECTOR;
