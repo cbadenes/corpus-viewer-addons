@@ -14,6 +14,7 @@ import es.gob.minetad.solr.model.DocumentFactory;
 import es.gob.minetad.solr.model.TopicIndexFactory;
 import es.gob.minetad.utils.ParallelExecutor;
 import es.gob.minetad.utils.ReaderUtils;
+import es.gob.minetad.utils.TimeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.DirectoryReader;
@@ -135,6 +136,7 @@ public class DocTopicsEval {
                         LOG.info(index + " docs indexed");
                         writer.commit();
                     }
+
                 }catch (Exception e){
                     LOG.error("Unexpected error", e);
                 }
@@ -309,42 +311,43 @@ public class DocTopicsEval {
 //        Map<String, Double> m1 = string2map(vector2String(v1));
         String description = "Searching by '" + id + "' ";
         LOG.info(description + Strings.repeat("-",100-description.length()));
-        Instant startTime = Instant.now();
+        Instant s1 = Instant.now();
         TopDocs results = searcher.search(query, indexReader.numDocs());
-        Instant queryEndTime = Instant.now();
+        Instant e1 = Instant.now();
         LOG.info("Total Hits: " + results.totalHits);
-        LOG.info("Query Time: " + + ChronoUnit.MINUTES.between(startTime, queryEndTime) % 60 + "min "
-                + (ChronoUnit.SECONDS.between(startTime, queryEndTime) % 60) + "secs "
-                + (ChronoUnit.MILLIS.between(startTime, queryEndTime) % 1000) + "msecs");
-        Instant pstartTime = Instant.now();
-        List<Score> topDocs = Arrays.stream(results.scoreDocs).parallel().map(scoreDoc -> {
+        TimeUtils.print(s1, e1, "Query");
+
+        Instant s2 = Instant.now();
+        List<Score> scoredDocs = Arrays.stream(results.scoreDocs).parallel().map(scoreDoc -> {
             try {
                 org.apache.lucene.document.Document docIndexed = indexReader.document(scoreDoc.doc);
                 String vectorString = String.format(docIndexed.get(TopicIndexFactory.FIELD_NAME));
                 if (Strings.isNullOrEmpty(vectorString)) return new Score(0.0, new Document(), new Document());
 
-                String hash = id.contains("inclusion")?String.format(docIndexed.get(TopicIndexFactory.DOC_POSITIVE_HASH)): id.contains("exclusion")?String.format(docIndexed.get(TopicIndexFactory.DOC_NEGATIVE_HASH)).substring(0,50)+"..": vectorString;
+                String hash = id.contains("inclusion") ? String.format(docIndexed.get(TopicIndexFactory.DOC_POSITIVE_HASH)) : id.contains("exclusion") ? String.format(docIndexed.get(TopicIndexFactory.DOC_NEGATIVE_HASH)).substring(0, 50) + ".." : vectorString;
 
                 List<Double> v2 = string2Vector(vectorString);
-                return new Score(JensenShannon.similarity(v1, v2), new Document(hash), new Document(String.format(docIndexed.get(TopicIndexFactory.DOC_ID))+"-"+scoreDoc.score));
+                return new Score(JensenShannon.similarity(v1, v2), new Document(hash), new Document(String.format(docIndexed.get(TopicIndexFactory.DOC_ID)) + "-" + scoreDoc.score));
             } catch (Exception e) {
                 e.printStackTrace();
                 return new Score(0.0, new Document(), new Document());
             }
-        }).filter(s -> s.getValue() > 0.7).sorted((a, b) -> -a.getValue().compareTo(b.getValue())).limit(10).collect(Collectors.toList());
-        topDocs.size();
-        Instant pEndTime = Instant.now();
-        LOG.info("Comparison Time: " + + ChronoUnit.MINUTES.between(pstartTime, pEndTime) % 60 + "min "
-                + (ChronoUnit.SECONDS.between(pstartTime, pEndTime) % 60) + "secs "
-                + (ChronoUnit.MILLIS.between(pstartTime, pEndTime) % 1000) + "msecs");
-        Instant endTime = Instant.now();
-        String globalElapsedTime =
-                + ChronoUnit.MINUTES.between(startTime, endTime) % 60 + "min "
-                + (ChronoUnit.SECONDS.between(startTime, endTime) % 60) + "secs "
-                + (ChronoUnit.MILLIS.between(startTime, endTime) % 1000) + "msecs";
-        LOG.info("Total Time: " + globalElapsedTime);
+        }).filter(s -> s.getValue() > 0.7).collect(Collectors.toList());
+
+        Instant e2 = Instant.now();
+        TimeUtils.print(s2,e2,"JSD");
+
+
+        Instant s3 = Instant.now();
+        List<Score> topDocs = scoredDocs.parallelStream().sorted((a, b) -> -a.getValue().compareTo(b.getValue())).limit(10).collect(Collectors.toList());
+        Instant e3 = Instant.now();
+        TimeUtils.print(s3,e3,"Sort");
+
+
+        TimeUtils.print(s1,e3,"Total");
+
         topDocs.forEach(doc -> LOG.info("- " + doc.getSimilar().getId() + " \t ["+ doc.getValue()+"] /" + doc.getReference().getId()+"/"));
-        return ChronoUnit.MILLIS.between(startTime, endTime);
+        return ChronoUnit.MILLIS.between(s1, e3);
 
     }
 
