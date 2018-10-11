@@ -5,3 +5,4 @@ mvn -DargLine="-Xmx4096m" -Dtest=BooleanByHashEval test
 mvn -DargLine="-Xmx4096m" -Dtest=MLTByDTFEval test
 mvn -DargLine="-Xmx4096m" -Dtest=MLTByHashEval test
 mvn -DargLine="-Xmx65536m" -Dtest=BruteForceEval test
+mvn -DargLine="-Xmx65536m" -Dtest=GoldStandardEval test
