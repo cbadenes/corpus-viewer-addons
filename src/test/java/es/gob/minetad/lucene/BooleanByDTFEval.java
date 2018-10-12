@@ -21,10 +21,17 @@ public class BooleanByDTFEval extends DocTopicsEval {
 
 
     @Test
-    public void booleanDTFQuery() throws IOException, ParseException {
+    public void booleanDTF1Query() throws IOException, ParseException {
         IndexSearcher searcher  = new IndexSearcher(indexReader);
         searcher.setSimilarity(new BooleanSimilarity());
-        queryByDTF("Boolean", searcher);
+        queryByDTF("Boolean1", searcher);
+    }
+
+    @Test
+    public void booleanDTF2Query() throws IOException, ParseException {
+        IndexSearcher searcher  = new IndexSearcher(indexReader);
+        searcher.setSimilarity(new BooleanSimilarity());
+        queryByDTF("Boolean2", searcher);
     }
 
 }

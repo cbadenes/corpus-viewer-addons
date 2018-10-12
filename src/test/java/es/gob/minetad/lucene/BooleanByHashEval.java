@@ -20,10 +20,17 @@ public class BooleanByHashEval extends DocTopicsEval {
 
 
     @Test
-    public void booleanHashQuery() throws IOException, ParseException {
+    public void booleanHash1Query() throws IOException, ParseException {
         IndexSearcher searcher  = new IndexSearcher(indexReader);
         searcher.setSimilarity(new BooleanSimilarity());
-        queryByHash("Boolean", searcher);
+        queryByHash("Boolean1", searcher);
+    }
+
+    @Test
+    public void booleanHash2Query() throws IOException, ParseException {
+        IndexSearcher searcher  = new IndexSearcher(indexReader);
+        searcher.setSimilarity(new BooleanSimilarity());
+        queryByHash("Boolean2", searcher);
     }
 
 }

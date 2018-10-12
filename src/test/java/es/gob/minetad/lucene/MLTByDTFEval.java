@@ -26,7 +26,7 @@ public class MLTByDTFEval extends DocTopicsEval {
 
 
     @Test
-    public void moreLikeThisbyDTFQuery() throws ParseException, IOException {
+    public void moreLikeThisbyDTF1Query() throws ParseException, IOException {
 
         IndexSearcher searcher = new IndexSearcher(indexReader);
 
@@ -38,6 +38,22 @@ public class MLTByDTFEval extends DocTopicsEval {
         mlt.setAnalyzer(new DocTopicAnalyzer());
         Reader stringReader = new StringReader(vector2String(SAMPLE_VECTOR));
         Query mltQuery = mlt.like(TopicIndexFactory.FIELD_NAME, stringReader);
-        search("MoreLikeThis-byDTF", searcher, mltQuery);
+        search("MoreLikeThis1-byDTF", searcher, mltQuery);
+    }
+
+    @Test
+    public void moreLikeThisbyDTF2Query() throws ParseException, IOException {
+
+        IndexSearcher searcher = new IndexSearcher(indexReader);
+
+        MoreLikeThis mlt = new MoreLikeThis(indexReader);
+        mlt.setMinTermFreq(1);
+        mlt.setMinDocFreq(1);
+
+        // Topic DTF
+        mlt.setAnalyzer(new DocTopicAnalyzer());
+        Reader stringReader = new StringReader(vector2String(SAMPLE_VECTOR));
+        Query mltQuery = mlt.like(TopicIndexFactory.FIELD_NAME, stringReader);
+        search("MoreLikeThis2-byDTF", searcher, mltQuery);
     }
 }

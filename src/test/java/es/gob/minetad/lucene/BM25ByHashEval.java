@@ -20,10 +20,17 @@ public class BM25ByHashEval extends DocTopicsEval {
 
 
     @Test
-    public void bm25HashQuery() throws IOException, ParseException {
+    public void bm25Hash1Query() throws IOException, ParseException {
         IndexSearcher searcher  = new IndexSearcher(indexReader);
         searcher.setSimilarity(new BM25Similarity());
-        queryByHash("BM25", searcher);
+        queryByHash("BM251", searcher);
+    }
+
+    @Test
+    public void bm25Hash2Query() throws IOException, ParseException {
+        IndexSearcher searcher  = new IndexSearcher(indexReader);
+        searcher.setSimilarity(new BM25Similarity());
+        queryByHash("BM252", searcher);
     }
 
 }

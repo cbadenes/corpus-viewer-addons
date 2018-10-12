@@ -27,7 +27,7 @@ public class MLTByHashEval extends DocTopicsEval {
 
 
     @Test
-    public void moreLikeThisbyHashQuery() throws ParseException, IOException {
+    public void moreLikeThisbyHash1Query() throws ParseException, IOException {
 
         IndexSearcher searcher = new IndexSearcher(indexReader);
 
@@ -40,7 +40,24 @@ public class MLTByHashEval extends DocTopicsEval {
         TopicHash topicHash = new TopicHash(SAMPLE_VECTOR);
         Reader stringReaderPositive = new StringReader(topicHash.byInclusion());
         Query mltQueryPositive = mlt.like(TopicIndexFactory.DOC_POSITIVE_HASH, stringReaderPositive);
-        search("MoreLikeThis-byHash", searcher, mltQueryPositive);
+        search("MoreLikeThis-byHash1", searcher, mltQueryPositive);
+    }
+
+    @Test
+    public void moreLikeThisbyHash2Query() throws ParseException, IOException {
+
+        IndexSearcher searcher = new IndexSearcher(indexReader);
+
+        MoreLikeThis mlt = new MoreLikeThis(indexReader);
+        mlt.setMinTermFreq(1);
+        mlt.setMinDocFreq(1);
+
+        // Topic Hash
+        mlt.setAnalyzer(new StandardAnalyzer());
+        TopicHash topicHash = new TopicHash(SAMPLE_VECTOR);
+        Reader stringReaderPositive = new StringReader(topicHash.byInclusion());
+        Query mltQueryPositive = mlt.like(TopicIndexFactory.DOC_POSITIVE_HASH, stringReaderPositive);
+        search("MoreLikeThis-byHash2", searcher, mltQueryPositive);
     }
 
 }

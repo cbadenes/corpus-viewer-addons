@@ -19,10 +19,17 @@ public class BM25ByDTFEval extends DocTopicsEval {
 
 
     @Test
-    public void bm25DTFQuery() throws IOException, ParseException {
+    public void bm25DTF1Query() throws IOException, ParseException {
         IndexSearcher searcher  = new IndexSearcher(indexReader);
         searcher.setSimilarity(new BM25Similarity());
-        queryByDTF("BM25", searcher);
+        queryByDTF("BM251", searcher);
+    }
+
+    @Test
+    public void bm25DTF2Query() throws IOException, ParseException {
+        IndexSearcher searcher  = new IndexSearcher(indexReader);
+        searcher.setSimilarity(new BM25Similarity());
+        queryByDTF("BM252", searcher);
     }
 
 }
