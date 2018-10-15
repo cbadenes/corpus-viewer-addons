@@ -50,11 +50,11 @@ public class GoldStandardEval extends DocTopicsEval {
     }
 
 
-    public void goldStandardQuery(String id) throws IOException, ParseException {
+    public void goldStandardQuery(String label) throws IOException, ParseException {
 
         List<Double> v1 = SAMPLE_VECTOR;
 //        Map<String, Double> m1 = string2map(vector2String(v1));
-        String description = "Searching by " + id;
+        String description = "Searching by " + label;
 
         Map<String,Double> scoreDocs = new ConcurrentHashMap<>();
 
