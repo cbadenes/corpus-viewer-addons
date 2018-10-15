@@ -39,11 +39,21 @@ public class BruteForceEval extends DocTopicsEval {
 
 
     @Test
-    public void bruteForceQuery() throws IOException, ParseException {
+    public void test1() throws IOException, ParseException {
+        bruteForceQuery("Brute-Force1");
+    }
+
+    @Test
+    public void test2() throws IOException, ParseException {
+        bruteForceQuery("Brute-Force1");
+    }
+
+
+    public void bruteForceQuery(String id) throws IOException, ParseException {
         IndexSearcher searcher  = new IndexSearcher(indexReader);
         List<Double> v1 = SAMPLE_VECTOR;
 //        Map<String, Double> m1 = string2map(vector2String(v1));
-        String description = "Searching by Brute-Force' ";
+        String description = "Searching by ' " + id;
         LOG.info(description + Strings.repeat("-",100-description.length()));
         Instant s1 = Instant.now();
         TopDocs results = searcher.search(new MatchAllDocsQuery(), indexReader.numDocs());

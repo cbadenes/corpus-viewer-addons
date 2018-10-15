@@ -39,13 +39,22 @@ public class GoldStandardEval extends DocTopicsEval {
 
     private static final Logger LOG = LoggerFactory.getLogger(GoldStandardEval.class);
 
+    @Test
+    public void test1() throws IOException, ParseException {
+        goldStandardQuery("gold-standard1");
+    }
 
     @Test
-    public void bruteForceQuery() throws IOException, ParseException {
+    public void test2() throws IOException, ParseException {
+        goldStandardQuery("gold-standard2");
+    }
+
+
+    public void goldStandardQuery(String id) throws IOException, ParseException {
 
         List<Double> v1 = SAMPLE_VECTOR;
 //        Map<String, Double> m1 = string2map(vector2String(v1));
-        String description = "Searching by Gold-Standard' ";
+        String description = "Searching by " + id;
 
         Map<String,Double> scoreDocs = new ConcurrentHashMap<>();
 
