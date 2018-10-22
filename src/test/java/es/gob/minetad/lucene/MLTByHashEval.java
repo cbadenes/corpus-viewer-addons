@@ -1,14 +1,12 @@
 package es.gob.minetad.lucene;
 
-import es.gob.minetad.doctopic.TopicHash;
-import es.gob.minetad.solr.analyzer.DocTopicAnalyzer;
+import es.gob.minetad.doctopic.TopicSummary;
 import es.gob.minetad.solr.model.TopicIndexFactory;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.queries.mlt.MoreLikeThis;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,8 +35,8 @@ public class MLTByHashEval extends DocTopicsEval {
 
         // Topic Hash
         mlt.setAnalyzer(new StandardAnalyzer());
-        TopicHash topicHash = new TopicHash(SAMPLE_VECTOR);
-        Reader stringReaderPositive = new StringReader(topicHash.byInclusion());
+        TopicSummary topicSummary = new TopicSummary(SAMPLE_VECTOR);
+        Reader stringReaderPositive = new StringReader(topicSummary.byInclusion());
         Query mltQueryPositive = mlt.like(TopicIndexFactory.DOC_POSITIVE_HASH, stringReaderPositive);
         search("MoreLikeThis-byHash1", searcher, mltQueryPositive);
     }
@@ -54,8 +52,8 @@ public class MLTByHashEval extends DocTopicsEval {
 
         // Topic Hash
         mlt.setAnalyzer(new StandardAnalyzer());
-        TopicHash topicHash = new TopicHash(SAMPLE_VECTOR);
-        Reader stringReaderPositive = new StringReader(topicHash.byInclusion());
+        TopicSummary topicSummary = new TopicSummary(SAMPLE_VECTOR);
+        Reader stringReaderPositive = new StringReader(topicSummary.byInclusion());
         Query mltQueryPositive = mlt.like(TopicIndexFactory.DOC_POSITIVE_HASH, stringReaderPositive);
         search("MoreLikeThis-byHash2", searcher, mltQueryPositive);
     }

@@ -3,13 +3,12 @@ package es.gob.minetad.lucene;
 import com.google.common.base.Strings;
 import es.gob.minetad.doctopic.CRDCIndex;
 import es.gob.minetad.doctopic.DocTopicsUtil;
-import es.gob.minetad.doctopic.TopicHash;
+import es.gob.minetad.doctopic.TopicSummary;
 import es.gob.minetad.metric.JensenShannon;
 import es.gob.minetad.model.Document;
 import es.gob.minetad.model.Score;
 import es.gob.minetad.model.Stats;
 import es.gob.minetad.solr.analyzer.DocTopicAnalyzer;
-import es.gob.minetad.solr.analyzer.TopicHashAnalyzer;
 import es.gob.minetad.solr.model.DocumentFactory;
 import es.gob.minetad.solr.model.TopicIndexFactory;
 import es.gob.minetad.utils.ParallelExecutor;
@@ -20,19 +19,15 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.queries.mlt.MoreLikeThis;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
-import org.apache.lucene.search.similarities.BM25Similarity;
-import org.apache.lucene.search.similarities.BooleanSimilarity;
 import org.apache.lucene.store.FSDirectory;
 import org.junit.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -127,7 +122,7 @@ public class DocTopicsEval {
 
                     String stringTopics = vector2String(shape);
                     //org.apache.lucene.document.Document luceneDoc = DocumentFactory.newDocId(id, stringTopics);
-                    org.apache.lucene.document.Document luceneDoc = DocumentFactory.newDoc(id, new TopicHash(shape), stringTopics);
+                    org.apache.lucene.document.Document luceneDoc = DocumentFactory.newDoc(id, new TopicSummary(shape), stringTopics);
                     representationLengths.add(Double.valueOf(StringUtils.countMatches(stringTopics,"|")));
                     writer.addDocument(luceneDoc);
                     if (index % interval == 0){
@@ -176,8 +171,8 @@ public class DocTopicsEval {
 
     protected void queryByHash(String id, IndexSearcher searcher) throws ParseException, IOException {
 
-        TopicHash topicHash = new TopicHash(SAMPLE_VECTOR);
-        String queryStringPositive = topicHash.byInclusion();
+        TopicSummary topicSummary = new TopicSummary(SAMPLE_VECTOR);
+        String queryStringPositive = topicSummary.byInclusion();
         QueryParser parserPositive = new QueryParser(TopicIndexFactory.DOC_POSITIVE_HASH, new StandardAnalyzer());
         Query queryPositive = parserPositive.parse(queryStringPositive);
         search(id+"-byHash", searcher, queryPositive);

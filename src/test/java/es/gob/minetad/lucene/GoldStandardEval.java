@@ -1,21 +1,12 @@
 package es.gob.minetad.lucene;
 
-import com.google.common.base.Strings;
-import es.gob.minetad.doctopic.TopicHash;
 import es.gob.minetad.metric.JensenShannon;
 import es.gob.minetad.model.Document;
 import es.gob.minetad.model.Score;
-import es.gob.minetad.solr.model.DocumentFactory;
-import es.gob.minetad.solr.model.TopicIndexFactory;
 import es.gob.minetad.utils.ParallelExecutor;
 import es.gob.minetad.utils.ReaderUtils;
 import es.gob.minetad.utils.TimeUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.MatchAllDocsQuery;
-import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.TopDocs;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

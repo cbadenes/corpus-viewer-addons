@@ -1,0 +1,1 @@
+docker exec -it cv_solr solr create_core -c $1

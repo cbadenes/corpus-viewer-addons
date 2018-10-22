@@ -9,6 +9,10 @@
 
     <logger name="es.gob.minetad" level="DEBUG"/>
 
+    <logger name="load" level="DEBUG"/>
+
+    <logger name="query" level="DEBUG"/>
+
     <root level="ERROR">
         <appender-ref ref="STDOUT" />
     </root>

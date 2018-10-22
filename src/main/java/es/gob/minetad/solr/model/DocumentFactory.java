@@ -1,6 +1,6 @@
 package es.gob.minetad.solr.model;
 
-import es.gob.minetad.doctopic.TopicHash;
+import es.gob.minetad.doctopic.TopicSummary;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.IndexOptions;
 
@@ -41,7 +41,7 @@ public class DocumentFactory {
     }
 
 
-    public static Document newDoc(String id, TopicHash hash, String topics) {
+    public static Document newDoc(String id, TopicSummary hash, String topics) {
         Document luceneDoc = new Document();
         // id
         luceneDoc.add(new TextField(TopicIndexFactory.DOC_ID, id, Field.Store.YES));

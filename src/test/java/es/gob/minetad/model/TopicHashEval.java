@@ -1,10 +1,9 @@
 package es.gob.minetad.model;
 
-import es.gob.minetad.doctopic.TopicHash;
+import es.gob.minetad.doctopic.TopicSummary;
 import es.gob.minetad.utils.ParallelExecutor;
 import es.gob.minetad.utils.ReaderUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.util.Time;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,8 +43,8 @@ public class TopicHashEval {
                 for (int i=1; i<result.length; i++){
                     shape.add(Double.valueOf(result[i]));
                 }
-                TopicHash topicHash = new TopicHash(shape);
-                sizes.add(Double.valueOf(StringUtils.countMatches(topicHash.byInclusion(),"_")+1));
+                TopicSummary topicSummary = new TopicSummary(shape);
+                sizes.add(Double.valueOf(StringUtils.countMatches(topicSummary.byInclusion(),"_")+1));
             });
             if ((maxSize > 0) && (maxSize < counter.get())) break;
         }

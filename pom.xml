@@ -221,6 +221,8 @@
 						  <exclude>%regex[.*Eval.*]</exclude>
 						  <exclude>%regex[.*IntTest.*]</exclude>
 						  <exclude>%regex[.*tasks.*]</exclude>
+						  <exclude>%regex[load.*]</exclude>
+						  <exclude>%regex[query.*]</exclude>
 					  </excludes>
 				  </configuration>
 			  </plugin>
