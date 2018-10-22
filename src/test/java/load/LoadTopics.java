@@ -32,7 +32,7 @@ import java.util.Properties;
 
 /**
  *
- * Create 'topic-doc' collection from a Topic Model:
+ * Create a 'topic-doc' collection from a Topic Model:
  *
  * 1. move into: src/test/docker/models
  * 2. run container: e.g. ./cordis.70.sh
@@ -51,7 +51,7 @@ public class LoadTopics {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoadTopics.class);
 
-    private static final String SOLR_COLLECTION= "patstat";
+    private static final String SOLR_COLLECTION= "cordis";
 
     private static final String MODEL_API = "http://localhost:8000/model";
 
@@ -60,7 +60,7 @@ public class LoadTopics {
     @Test
     public void execute() throws UnirestException, IOException, SolrServerException {
 
-        LOG.info("Load Topics example");
+        LOG.info("Loading topics from '" + MODEL_API + "' ..");
 
         JsonNode response = RestClient.get(MODEL_API + "/settings",200);
 
