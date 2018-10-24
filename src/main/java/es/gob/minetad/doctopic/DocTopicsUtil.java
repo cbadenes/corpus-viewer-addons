@@ -197,7 +197,7 @@ public class DocTopicsUtil {
         for(int i=0; i<topic_vector.size();i++){
             int freq = (int) (topic_vector.get(i) * multiplication_factor);
             if(freq > (epsylon*multiplication_factor)){
-                result += i + "|" + freq + " ";
+                result += "t"+i + "|" + freq + " ";
             }
         }
         return result;
@@ -210,7 +210,7 @@ public class DocTopicsUtil {
         Double[] vector = new Double[size];
         Arrays.fill(vector,0.0);
         for(int i=0; i<topics.length;i++){
-            int id      = Integer.valueOf(StringUtils.substringBefore(topics[i],"|"));
+            int id      = Integer.valueOf(StringUtils.substringAfter(StringUtils.substringBefore(topics[i],"|"),"t"));
             int freq    = Integer.valueOf(StringUtils.substringAfter(topics[i],"|"));
             Double score = Double.valueOf(freq) / Double.valueOf(multiplication_factor);
             vector[id] = score;
@@ -225,7 +225,7 @@ public class DocTopicsUtil {
         Double[] vector = new Double[size];
         Arrays.fill(vector,(double)epsylon);
         for(int i=0; i<topics.length;i++){
-            int id      = Integer.valueOf(StringUtils.substringBefore(topics[i],"|"));
+            int id      = Integer.valueOf(StringUtils.substringAfter(StringUtils.substringBefore(topics[i],"|"),"t"));
             int freq    = Integer.valueOf(StringUtils.substringAfter(topics[i],"|"));
             Double score = Double.valueOf(freq) / Double.valueOf(multiplication_factor);
             vector[id] = score;

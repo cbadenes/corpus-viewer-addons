@@ -1,0 +1,12 @@
+version: '2'
+services:
+  solr:
+    image: solr:7.5
+    container_name: solr
+    ports:
+     - "8983:8983"
+    volumes:
+      - ./data:/opt/solr/server/solr/mycores
+    entrypoint:
+      - docker-entrypoint.sh
+      - create_core -c cordis-70

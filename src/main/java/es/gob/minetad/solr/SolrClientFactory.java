@@ -21,13 +21,13 @@ public class SolrClientFactory {
     public static SolrClient create(String url, String mode){
         switch (mode.toLowerCase()){
             case "cloud":
-                LOG.info("Created a new connection to Solr Cloud");
+                LOG.info("Created a new connection to Solr Cloud server");
                 return new CloudSolrClient.Builder(Arrays.asList(url), Optional.empty())
                         .withConnectionTimeout(10000)
                         .withSocketTimeout(6000000)
                         .build();
             default:
-                LOG.info("Created a new connection to Solr Standalon");
+                LOG.info("Created a new connection to Solr Standalone server");
                 String serverUrl = url.startsWith("http") ? url : "http://" + url;
                 return new HttpSolrClient.Builder(serverUrl+"/solr").build();
         }

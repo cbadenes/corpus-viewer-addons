@@ -38,4 +38,13 @@ public class Score {
     public void setSimilar(Document similar) {
         this.similar = similar;
     }
+
+    @Override
+    public String toString() {
+        return "Score{" +
+                "value=" + value +
+                ", reference=" + reference +
+                ", similar=" + similar +
+                '}';
+    }
 }

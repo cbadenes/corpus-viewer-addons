@@ -36,7 +36,7 @@ public class MLTByHashEval extends DocTopicsEval {
         // Topic Hash
         mlt.setAnalyzer(new StandardAnalyzer());
         TopicSummary topicSummary = new TopicSummary(SAMPLE_VECTOR);
-        Reader stringReaderPositive = new StringReader(topicSummary.byInclusion());
+        Reader stringReaderPositive = new StringReader(topicSummary.getHashTopicsQ1());
         Query mltQueryPositive = mlt.like(TopicIndexFactory.DOC_POSITIVE_HASH, stringReaderPositive);
         search("MoreLikeThis-byHash1", searcher, mltQueryPositive);
     }
@@ -53,7 +53,7 @@ public class MLTByHashEval extends DocTopicsEval {
         // Topic Hash
         mlt.setAnalyzer(new StandardAnalyzer());
         TopicSummary topicSummary = new TopicSummary(SAMPLE_VECTOR);
-        Reader stringReaderPositive = new StringReader(topicSummary.byInclusion());
+        Reader stringReaderPositive = new StringReader(topicSummary.getHashTopicsQ1());
         Query mltQueryPositive = mlt.like(TopicIndexFactory.DOC_POSITIVE_HASH, stringReaderPositive);
         search("MoreLikeThis-byHash2", searcher, mltQueryPositive);
     }

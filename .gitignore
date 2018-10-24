@@ -6,9 +6,7 @@ output/
 target/
 # Log file
 *.log
-src/test/docker/solrcloud-zookeeper/solrcloud/data
-src/test/docker/solrcloud-zookeper/solrcloud/data
-
+src/test/docker/solr/collections/data
 # BlueJ files
 *.ctxt
 

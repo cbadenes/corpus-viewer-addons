@@ -51,4 +51,12 @@ public class Document implements Serializable{
     public void setShape(List<Double> shape) {
         this.shape = shape;
     }
+
+    @Override
+    public String toString() {
+        return "Document{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                '}';
+    }
 }
