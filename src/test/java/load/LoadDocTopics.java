@@ -9,7 +9,7 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.jvm.hotspot.utilities.Assert;
+import org.junit.Assert;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -38,7 +38,7 @@ public class LoadDocTopics {
 
         TestSettings settings = new TestSettings();
 
-        Assert.that(settings.isSolrUp(), "Solr server seems down: " + settings.getSolrUrl());
+        Assert.assertTrue("Solr server seems down: " + settings.getSolrUrl(), settings.isSolrUp());
 
         Instant testStart = Instant.now();
         List<Corpus> corpora = settings.getCorpora();

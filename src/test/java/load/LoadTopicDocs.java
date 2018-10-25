@@ -15,7 +15,7 @@ import org.json.JSONObject;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.jvm.hotspot.utilities.Assert;
+import org.junit.Assert;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -47,7 +47,7 @@ public class LoadTopicDocs {
 
         TestSettings settings = new TestSettings();
 
-        Assert.that(settings.isSolrUp(), "Solr server seems down: " + settings.getSolrUrl());
+        Assert.assertTrue("Solr server seems down: " + settings.getSolrUrl(), settings.isSolrUp());
 
         Instant testStart = Instant.now();
         List<Corpus> corpora = settings.getCorpora();
@@ -60,7 +60,7 @@ public class LoadTopicDocs {
 
                 Instant modelStart = Instant.now();
 
-                Assert.that(settings.isServerUp(model.getApi()), "Model Rest-API seems down: " + model.getApi());
+                Assert.assertTrue("Model Rest-API seems down: " + model.getApi(), settings.isServerUp(model.getApi()));
 
                 LOG.info("Loading topics from '" + corpus.getName() + "' model '" + model.getNumtopics()+"' ..");
 
