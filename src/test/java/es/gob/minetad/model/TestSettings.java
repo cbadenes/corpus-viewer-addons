@@ -40,8 +40,12 @@ public class TestSettings {
     }
 
     public boolean isSolrUp(){
+        return isServerUp(getSolrUrl());
+    }
+
+    public boolean isServerUp(String url){
         try {
-            Unirest.get(getSolrUrl()).asString();
+            Unirest.get(url).asString();
             return true;
         } catch (UnirestException e) {
             return false;
@@ -53,14 +57,24 @@ public class TestSettings {
         for(Enumeration e=properties.propertyNames(); e.hasMoreElements();){
             String propName = (String) e.nextElement();
             if (propName.startsWith("corpus.")){
-                String name         = StringUtils.substringBefore(StringUtils.substringAfter(propName, "corpus."),".");
+                String[] values = propName.split("\\.");
+                String name         = values[1];
                 Corpus corpus       = corpora.containsKey(name)? corpora.get(name) : new Corpus(name);
-                String property         = StringUtils.substringAfter(propName, "corpus."+name+".");
-                switch (property.toLowerCase()){
-                    case "doctopics": corpus.setDoctopicsPath(properties.getProperty(propName));
-                        break;
-                    case "model": corpus.setModelPath(properties.getProperty(propName));
-                        break;
+                try{
+                    Integer numTopics = Integer.valueOf(values[2]);
+                    Corpus.Model model = corpus.getModels().containsKey(numTopics)? corpus.getModels().get(numTopics) : new Corpus.Model();
+                    model.setNumtopics(numTopics);
+                    switch (values[3].toLowerCase()){
+                        case "doctopics": model.setDoctopics(properties.getProperty(propName));
+                            break;
+                        case "model": model.setApi(properties.getProperty(propName));
+                            break;
+                    }
+                    corpus.add(model);
+                } catch(NumberFormatException ex){
+                    // documents.path
+                    String value = properties.getProperty(propName);
+                    corpus.setPath(value);
                 }
                 corpora.put(name, corpus);
             }

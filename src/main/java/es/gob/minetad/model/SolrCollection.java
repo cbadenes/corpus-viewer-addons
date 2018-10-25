@@ -27,6 +27,7 @@ public class SolrCollection {
     protected final SolrClient solrClient;
     protected final String collectionName;
     protected AtomicInteger counter = new AtomicInteger();
+    protected int interval = 500;
 
     public SolrCollection(String name) throws IOException, SolrServerException {
 
@@ -50,7 +51,7 @@ public class SolrCollection {
 
         solrClient.add(collectionName, document);
 
-        if (counter.incrementAndGet() % 500 == 0) commit();
+        if (counter.incrementAndGet() % interval == 0) commit();
 
     }
 
@@ -60,7 +61,7 @@ public class SolrCollection {
 
 
     public void commit() throws IOException, SolrServerException {
-        LOG.info("Added " + counter.get() + " documents to Solr");
+        LOG.info("Added " + counter.get() + " documents to Solr '" + collectionName + "' ");
         this.solrClient.commit(collectionName);
     }
 

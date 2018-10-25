@@ -32,39 +32,39 @@ services:
     - "65001:65111"
    environment:
     - REST_PATH=/model
-  wiki-120:
-   container_name: wiki-120
-   image: sesiad/wiki-model:0.5-120
-   restart: always
-   ports:
-    - "8002:7777"
-    - "65002:65111"
-   environment:
-    - REST_PATH=/model
-  wiki-350:
-   container_name: wiki-350
-   image: sesiad/wiki-model:0.5-350
-   restart: always
-   ports:
-    - "8003:7777"
-    - "65003:65111"
-   environment:
-    - REST_PATH=/model
-  patstat-250:
-   container_name: patstat-250
-   image: sesiad/patstat-model:0.4-250
-   restart: always
-   ports:
-    - "8004:7777"
-    - "65004:65111"
-   environment:
-    - REST_PATH=/model
-  patstat-750:
-   container_name: patstat-750
-   image: sesiad/patstat-model:0.5-750
-   restart: always
-   ports:
-    - "8005:7777"
-    - "65005:65111"
-   environment:
-    - REST_PATH=/model
+#  wiki-120:
+#   container_name: wiki-120
+#   image: sesiad/wiki-model:0.5-120
+#   restart: always
+#   ports:
+#    - "8002:7777"
+#    - "65002:65111"
+#   environment:
+#    - REST_PATH=/model
+#  wiki-350:
+#   container_name: wiki-350
+#   image: sesiad/wiki-model:0.5-350
+#   restart: always
+#   ports:
+#    - "8003:7777"
+#    - "65003:65111"
+#   environment:
+#    - REST_PATH=/model
+#  patstat-250:
+#   container_name: patstat-250
+#   image: sesiad/patstat-model:0.4-250
+#   restart: always
+#   ports:
+#    - "8004:7777"
+#    - "65004:65111"
+#   environment:
+#    - REST_PATH=/model
+#  patstat-750:
+#   container_name: patstat-750
+#   image: sesiad/patstat-model:0.5-750
+#   restart: always
+#   ports:
+#    - "8005:7777"
+#    - "65005:65111"
+#   environment:
+#    - REST_PATH=/model

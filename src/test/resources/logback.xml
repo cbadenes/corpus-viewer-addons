@@ -13,6 +13,10 @@
 
     <logger name="query" level="DEBUG"/>
 
+    <logger name="evals" level="DEBUG"/>
+
+    <logger name="admin" level="DEBUG"/>
+
     <root level="ERROR">
         <appender-ref ref="STDOUT" />
     </root>

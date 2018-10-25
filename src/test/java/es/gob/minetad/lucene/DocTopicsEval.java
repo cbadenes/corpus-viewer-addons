@@ -172,7 +172,7 @@ public class DocTopicsEval {
     protected void queryByHash(String id, IndexSearcher searcher) throws ParseException, IOException {
 
         TopicSummary topicSummary = new TopicSummary(SAMPLE_VECTOR);
-        String queryStringPositive = topicSummary.getHashTopicsQ1();
+        String queryStringPositive = topicSummary.getHashTopics(1);
         QueryParser parserPositive = new QueryParser(TopicIndexFactory.DOC_POSITIVE_HASH, new StandardAnalyzer());
         Query queryPositive = parserPositive.parse(queryStringPositive);
         search(id+"-byHash", searcher, queryPositive);

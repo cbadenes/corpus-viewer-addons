@@ -59,7 +59,7 @@ public class DocTopicsCollection extends SolrCollection {
         document.addField("id",id);
 
         String docTopic = docTopicIndexer.toString(topicDistribution);
-        document.addField("doctopic",docTopic);
+        document.addField("topics",docTopic);
 
         double docEntropy = -topicDistribution.stream().map(theta -> theta * Math.log(theta)).reduce((a, b) -> a + b).get();
         docEntropy = docEntropy / Math.log(numTopics);
@@ -67,14 +67,16 @@ public class DocTopicsCollection extends SolrCollection {
         incrementEntropy(docEntropy);
 
         TopicSummary tsq1 = new TopicSummary(topicDistribution);
-        document.addField("hashcodeQ1",tsq1.getHashCodeQ1());
-        document.addField("hashtopicsQ1",""+tsq1.getHashTopicsQ1());
-        document.addField("hashcodeQ2",tsq1.getHashCodeQ2());
-        document.addField("hashtopicsQ2",""+tsq1.getHashTopicsQ2());
+        for(int i=0; i<6; i++){
+            Integer hashCode = tsq1.getHashCode(i);
+            if (hashCode == 0) continue;
+            document.addField("hashcode"+i,hashCode);
+            document.addField("hashexpr"+i,""+tsq1.getHashTopics(i));
+        }
 
 
         //TODO debug
-        document.addField("topics",topicDistribution);
+//        document.addField("topics",topicDistribution);
 
         add(document);
 

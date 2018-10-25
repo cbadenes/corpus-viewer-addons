@@ -29,13 +29,13 @@
 
 ### Run a Topic Model
 1. Move into `src/test/docker/models` directory.
-1. Run the model by executing the script that describes it: e.g. `./cordis-70.sh`
+1. Run the models by executing `create.sh`
 
-- The above command runs a web service and uses the settings specified within script (e.g. `cordis-70.sh`).
-- The HTTP Restful-API should be available at: `http://localhost:8000/model`
+- The above command runs a web service for each model and uses the settings specified within `docker-compose.yml`.
+- The HTTP Restful-APIs should be available at: `http://localhost:800[x]/model`
 
 ### Configuration
-To change configuration, just edit the [docker-compose.yml](src/test/docker/nlp/en/docker-compose.yml) or the [docker-run](src/test/docker/models/cordis-70.sh) file.
+To change configuration, just edit the [docker-compose.yml](src/test/docker/nlp/en/docker-compose.yml) from NLP-EN or the [docker-compose](src/test/docker/models/docker-compose.yml) from Models.
 
 ## Services
 A Topic Model is described by the following services:

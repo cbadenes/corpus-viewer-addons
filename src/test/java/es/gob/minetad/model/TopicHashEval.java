@@ -44,7 +44,7 @@ public class TopicHashEval {
                     shape.add(Double.valueOf(result[i]));
                 }
                 TopicSummary topicSummary = new TopicSummary(shape);
-                sizes.add(Double.valueOf(StringUtils.countMatches(topicSummary.getHashTopicsQ1(),"_")+1));
+                sizes.add(Double.valueOf(StringUtils.countMatches(topicSummary.getHashTopics(1),"_")+1));
             });
             if ((maxSize > 0) && (maxSize < counter.get())) break;
         }

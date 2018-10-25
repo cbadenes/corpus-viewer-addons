@@ -22,6 +22,7 @@ public class TopicDocsCollection extends SolrCollection {
 
     public TopicDocsCollection(String name, Integer numTopics, Integer vocabSize) throws IOException, SolrServerException {
         super(name+"-topicdocs-"+numTopics);
+        super.interval              = 10;
         this.counter                = new AtomicInteger();
         this.multiplicationFactor   = Double.valueOf(1*Math.pow(10,String.valueOf(vocabSize).length()+1)).floatValue();
         this.indexer                = new DTFIndex(multiplicationFactor);

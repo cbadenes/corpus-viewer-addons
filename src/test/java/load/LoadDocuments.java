@@ -8,6 +8,7 @@ import es.gob.minetad.model.Corpus;
 import es.gob.minetad.model.DocumentCollection;
 import es.gob.minetad.model.TestSettings;
 import es.gob.minetad.utils.ReaderUtils;
+import es.gob.minetad.utils.TimeUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -23,15 +24,10 @@ import java.util.Map;
 
 /**
  *
- * Create a 'doc-topic' collection from a Corpus:
+ * Create a 'documents' collection for each Corpus:
  *
- * 1.a) external solr:
- *    - update settings in src/test/resources/config.properties
- * 1.b) local solr:
- *    - move into: src/test/docker/solr
- *    - run container: ./solr_7_5.sh
- *    - run container: ./create-collection.sh cordis-documents
- * 4. run LoadDocuments.execute test
+ *    1. move into: src/test/docker/solr
+ *    2. create (or start) a container: ./run.sh (./start.sh)
  *
  *
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
@@ -61,8 +57,9 @@ public class LoadDocuments {
         CorporaCollection corporaCollection = new CorporaCollection();
 
         for(Corpus corpus: corpora){
+            Instant corpusStart = Instant.now();
             LOG.info("Loading documents from corpus '" + corpus + "' ..");
-            String corpusPath       = corpus.getDocumentsPath();
+            String corpusPath       = corpus.getPath();
 
             // Creating Solr Collection
             DocumentCollection collection = new DocumentCollection(corpus.getName());
@@ -73,22 +70,20 @@ public class LoadDocuments {
             while((row = reader.readLine()) != null){
 
                 JsonNode json = jsonMapper.readTree(row);
+                //TODO add metainformation
+                String id = json.get(settings.get("corpus."+corpus.getName()+".id")).asText();
+                String name = json.get(settings.get("corpus."+corpus.getName()+".name")).asText();
+                String text = json.get(settings.get("corpus."+corpus.getName()+".text")).asText();
+                collection.add(id,name,text);
 
-                String area = json.get("area").asText();
-                if (area.equalsIgnoreCase("en")){
-                    String id = json.get("id").asText();
-                    String name = json.get("title").asText();
-                    String text = json.get("objective").asText();
-                    collection.add(id,name,text);
-                }
             }
 
             collection.commit();
 
-            LOG.info("All documents indexed in '"+collection.getCollectionName()+"' successfully!");
+            TimeUtils.print(corpusStart, Instant.now(), "Corpus '" + corpus.getName() +"' saved in solr in: ");
         }
 
-
+        TimeUtils.print(testStart, Instant.now(), "Corpora saved in solr in: ");
 
     }
 }

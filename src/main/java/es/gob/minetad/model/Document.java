@@ -20,6 +20,11 @@ public class Document implements Serializable{
         this.id = id;
     }
 
+    public Document(String id, List<Double> shape) {
+        this.id = id;
+        this.shape = shape;
+    }
+
     public String getId() {
         return id;
     }

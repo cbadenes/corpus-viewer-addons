@@ -13,6 +13,8 @@ public class Stats {
 
     private final Double total;
 
+    private Double popVariance;
+
     private Double min;
 
     private Double max;
@@ -38,6 +40,7 @@ public class Stats {
         mean = StatUtils.mean(valuesArray);
         median = StatUtils.geometricMean(valuesArray);
         variance = StatUtils.variance(valuesArray);
+        popVariance = StatUtils.populationVariance(valuesArray);
         total = StatUtils.sum(valuesArray);
     }
 
@@ -69,17 +72,26 @@ public class Stats {
         return variance;
     }
 
+    public Double getPopVariance() {
+        return popVariance;
+    }
+
+    public Double getTotal() {
+        return total;
+    }
+
     @Override
     public String toString() {
         return "Stats{" +
-                "min=" + min +
+                "total=" + total +
+                ", popVariance=" + popVariance +
+                ", min=" + min +
                 ", max=" + max +
                 ", dev=" + dev +
                 ", mode=" + mode +
                 ", mean=" + mean +
                 ", median=" + median +
                 ", variance=" + variance +
-                ", total=" + total +
                 '}';
     }
 }

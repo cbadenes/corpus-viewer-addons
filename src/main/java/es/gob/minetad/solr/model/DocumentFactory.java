@@ -47,9 +47,9 @@ public class DocumentFactory {
         luceneDoc.add(new TextField(TopicIndexFactory.DOC_ID, id, Field.Store.YES));
 
         // hash by inclusion
-        luceneDoc.add(new TextField(TopicIndexFactory.DOC_POSITIVE_HASH, hash.getHashTopicsQ1().replace("#"," "), Field.Store.YES));
+        luceneDoc.add(new TextField(TopicIndexFactory.DOC_POSITIVE_HASH, hash.getHashTopics(1).replace("#"," "), Field.Store.YES));
         // hash by exclusion
-        luceneDoc.add(new TextField(TopicIndexFactory.DOC_NEGATIVE_HASH, hash.getHashExclQ1().replace("#"," "), Field.Store.YES));
+        luceneDoc.add(new TextField(TopicIndexFactory.DOC_NEGATIVE_HASH, hash.getHashTopics(5).replace("#"," "), Field.Store.YES));
 
         // doc-topic
         FieldType fieldType = new FieldType(TextField.TYPE_STORED);//TYPE_NOT_STORED
