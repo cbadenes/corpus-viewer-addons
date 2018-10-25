@@ -89,7 +89,7 @@ public class AllPairwiseSimilaritiesEval {
 
         if (!simFile.exists()) calculateSimilarities(corpus.split("-")[0], Integer.valueOf(corpus.split("-")[2]), 0.7);
 
-        LOG.info("Loading similarities from: " + simFile.getAbsolutePath());
+        LOG.info("Loading similarities from: " + simFile.getAbsolutePath() + " for: " + reference);
         BufferedReader reader = ReaderUtils.from(simFile.getAbsolutePath());
         String row;
         List<Score> similarities = new ArrayList<>();
