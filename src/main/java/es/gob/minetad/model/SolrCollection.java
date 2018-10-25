@@ -9,7 +9,6 @@ import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.util.NamedList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.jvm.hotspot.utilities.Assert;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -43,7 +42,8 @@ public class SolrCollection {
         CoreAdminResponse response = CoreAdminRequest.getStatus(name, solrClient);
         NamedList<NamedList<Object>> collections = response.getCoreStatus();
 
-        Assert.that(collections.get(name).size() > 0, "Collection '"+ name + "' not exist in Solr. It must be created prior to this execution!");
+
+        if (collections.get(name).size() < 0) throw new RuntimeException("Collection '"+ name + "' not exist in Solr. It must be created prior to this execution!");
 
     }
 
