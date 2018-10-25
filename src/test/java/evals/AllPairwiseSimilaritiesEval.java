@@ -48,8 +48,6 @@ public class AllPairwiseSimilaritiesEval {
     public void execute() throws IOException, SolrServerException {
 
         String corpus = "cordis-doctopics-70";
-        List<Score> similarities = loadSimilarities(corpus);
-
         List<Integer> alarmTypes = Arrays.asList(0,1,2,3,4,5);
 
         for (Integer alarmType : alarmTypes){
@@ -65,6 +63,8 @@ public class AllPairwiseSimilaritiesEval {
 
                 for (SolrDocument doc: docs){
                     String refId = (String) doc.getFieldValue("id");
+
+                    List<Score> similarities = loadSimilarities(corpus, refId);
 
                     // candidates based on Density-based Approach
                     List<String> candidateList = docs.stream().map(d -> (String) d.getFieldValue("id")).filter(d -> !d.equalsIgnoreCase(refId)).collect(Collectors.toList());
@@ -83,30 +83,29 @@ public class AllPairwiseSimilaritiesEval {
 
     }
 
-    public List<Score> loadSimilarities(String corpus) throws IOException {
+    public List<Score> loadSimilarities(String corpus, String reference) throws IOException {
 
         File simFile = Paths.get("output", "similarities", corpus.replace("doctopics", "similarities") + ".csv.gz").toFile();
 
-        if (simFile.exists()){
-            LOG.info("Loading similarities from: " + simFile.getAbsolutePath());
-            BufferedReader reader = ReaderUtils.from(simFile.getAbsolutePath());
-            String row;
-            List<Score> similarities = new ArrayList<>();
-            while((row = reader.readLine()) != null){
-                String[] values = row.split(";;");
+        if (!simFile.exists()) calculateSimilarities(corpus.split("-")[0], Integer.valueOf(corpus.split("-")[2]), 0.7);
+
+        LOG.info("Loading similarities from: " + simFile.getAbsolutePath());
+        BufferedReader reader = ReaderUtils.from(simFile.getAbsolutePath());
+        String row;
+        List<Score> similarities = new ArrayList<>();
+        while((row = reader.readLine()) != null){
+            String[] values = row.split(";;");
+            if (values[1].equalsIgnoreCase(reference) || values[2].equalsIgnoreCase(reference)){
                 Score score = new Score(Double.valueOf(values[0]), new Document(values[1]), new Document(values[2]));
                 similarities.add(score);
             }
-            return similarities;
         }
-
-        String[] corpusValue = corpus.split("-");
-        return calculateSimilarities(corpusValue[0], Integer.valueOf(corpusValue[2]), 0.7);
+        return similarities;
 
     }
 
 
-    public List<Score> calculateSimilarities(String corpus, Integer model, Double threshold) throws IOException {
+    public void calculateSimilarities(String corpus, Integer model, Double threshold) throws IOException {
         LOG.info("calculating similarities in corpus '" + corpus+"' based on model '" + model+ "' ");
         List<Corpus> corpora = settings.getCorpora().stream().filter(c -> c.getName().equalsIgnoreCase(corpus)).collect(Collectors.toList());
         if (corpora.isEmpty()) throw new RuntimeException("Corpus '" + corpus + "' not found");
@@ -116,7 +115,6 @@ public class AllPairwiseSimilaritiesEval {
 
 
         List<Document> documents = new ArrayList<>();
-        List<Score> similarities = new ArrayList();
         File simFile = Paths.get("output", "similarities", corpus + "-similarities-" + model + ".csv.gz").toFile();
         BufferedWriter writer = WriterUtils.to(simFile.getAbsolutePath());
         AtomicInteger   counter = new AtomicInteger();
@@ -130,7 +128,6 @@ public class AllPairwiseSimilaritiesEval {
             List<Score> calculatedSimilarities = documents.parallelStream().map(d2 -> new Score(JensenShannon.similarity(d1.getShape(), d2.getShape()), d1, d2)).filter(s -> s.getValue() > threshold).collect(Collectors.toList());
             calculatedSimilarities.forEach(sim -> {
                 try {
-                    similarities.add(sim);
                     writer.write(sim.getValue()+";;"+sim.getReference().getId()+";;"+sim.getSimilar().getId()+"\n");
                 } catch (IOException e) {
                     LOG.warn("Unexpected error",e);
@@ -144,7 +141,6 @@ public class AllPairwiseSimilaritiesEval {
         }
         reader.close();
         writer.close();
-        LOG.info(similarities.size() + " similarities saved at: " + simFile.getAbsolutePath());
-        return similarities;
+        LOG.info(" similarities saved at: " + simFile.getAbsolutePath());
     }
 }
