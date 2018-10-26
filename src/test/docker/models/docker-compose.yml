@@ -52,7 +52,7 @@ services:
 #    - REST_PATH=/model
 #  patstat-250:
 #   container_name: patstat-250
-#   image: sesiad/patstat-model:0.4-250
+#   image: sesiad/patstat-model:0.5-250
 #   restart: always
 #   ports:
 #    - "8004:7777"

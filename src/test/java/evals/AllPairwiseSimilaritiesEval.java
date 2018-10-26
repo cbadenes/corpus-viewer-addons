@@ -3,6 +3,7 @@ package evals;
 import es.gob.minetad.metric.JensenShannon;
 import es.gob.minetad.model.*;
 import es.gob.minetad.solr.SolrClientFactory;
+import es.gob.minetad.utils.ParallelExecutor;
 import es.gob.minetad.utils.ReaderUtils;
 import es.gob.minetad.utils.WriterUtils;
 import org.apache.solr.client.solrj.SolrClient;
@@ -20,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -48,9 +50,14 @@ public class AllPairwiseSimilaritiesEval {
     public void execute() throws IOException, SolrServerException {
 
         String corpus = "cordis-doctopics-70";
-        List<Integer> alarmTypes = Arrays.asList(0,1,2,3,4,5);
+        List<Integer> alarmTypes = Arrays.asList(0,1,2);
+
+        File simFile = Paths.get("output", "similarities", corpus.replace("doctopics", "similarities") + ".csv.gz").toFile();
+        if (!simFile.exists()) calculateSimilarities(corpus.split("-")[0], Integer.valueOf(corpus.split("-")[2]), 0.92);
 
         for (Integer alarmType : alarmTypes){
+
+            ParallelExecutor executor = new ParallelExecutor();
 
             // Density-based Approach
             Alarm alarm = AlarmService.getAlarmsBy(alarmType, corpus, client);
@@ -59,23 +66,33 @@ public class AllPairwiseSimilaritiesEval {
 
             for(Map.Entry<String,Long> group : alarm.getGroups().entrySet()){
 
-                List<SolrDocument> docs = AlarmService.getDocumentsBy(alarmType, corpus, group.getKey(), client);
+                executor.submit(() -> {
+                    try{
+                        List<SolrDocument> docs = AlarmService.getDocumentsBy(alarmType, corpus, group.getKey(), client);
 
-                for (SolrDocument doc: docs){
-                    String refId = (String) doc.getFieldValue("id");
+                        for (SolrDocument doc: docs){
+                            String refId = (String) doc.getFieldValue("id");
 
-                    List<Score> similarities = loadSimilarities(corpus, refId);
+                            List<Score> similarities = loadSimilarities(simFile, refId);
 
-                    // candidates based on Density-based Approach
-                    List<String> candidateList = docs.stream().map(d -> (String) d.getFieldValue("id")).filter(d -> !d.equalsIgnoreCase(refId)).collect(Collectors.toList());
+                            // candidates based on Density-based Approach
+                            List<String> candidateList = docs.stream().map(d -> (String) d.getFieldValue("id")).filter(d -> !d.equalsIgnoreCase(refId)).collect(Collectors.toList());
 
-                    // gold-standard based on brute-force similarity list (same size than before)
-                    List<String> referenceList = similarities.parallelStream().filter(s -> s.getReference().getId().equalsIgnoreCase(refId) || s.getSimilar().getId().equalsIgnoreCase(refId)).sorted((a, b) -> -a.getValue().compareTo(b.getValue())).limit(candidateList.size()).map(score -> (score.getReference().getId().equalsIgnoreCase(refId)) ? score.getSimilar().getId() : score.getReference().getId()).collect(Collectors.toList());
+                            // gold-standard based on brute-force similarity list (same size than before)
+                            List<String> referenceList = similarities.stream().filter(s -> s.getReference().getId().equalsIgnoreCase(refId) || s.getSimilar().getId().equalsIgnoreCase(refId)).sorted((a, b) -> -a.getValue().compareTo(b.getValue())).limit(candidateList.size()).map(score -> (score.getReference().getId().equalsIgnoreCase(refId)) ? score.getSimilar().getId() : score.getReference().getId()).collect(Collectors.toList());
 
-                    evaluation.addResult(referenceList, candidateList);
-                }
+                            if (referenceList.size() != candidateList.size()) LOG.warn("Candidate and Reference lists with different size");
 
+                            evaluation.addResult(referenceList, candidateList);
+                        }
+                    }catch (Exception e){
+                        LOG.error("Unexpected error",e);
+                    }
+
+                });
             }
+
+            executor.awaitTermination(1, TimeUnit.HOURS);
 
             LOG.info("Results for alarm type '" + alarmType +"': " + evaluation);
 
@@ -83,11 +100,7 @@ public class AllPairwiseSimilaritiesEval {
 
     }
 
-    public List<Score> loadSimilarities(String corpus, String reference) throws IOException {
-
-        File simFile = Paths.get("output", "similarities", corpus.replace("doctopics", "similarities") + ".csv.gz").toFile();
-
-        if (!simFile.exists()) calculateSimilarities(corpus.split("-")[0], Integer.valueOf(corpus.split("-")[2]), 0.7);
+    public List<Score> loadSimilarities(File simFile, String reference) throws IOException {
 
         LOG.info("Loading similarities from: " + simFile.getAbsolutePath() + " for: " + reference);
         BufferedReader reader = ReaderUtils.from(simFile.getAbsolutePath());
