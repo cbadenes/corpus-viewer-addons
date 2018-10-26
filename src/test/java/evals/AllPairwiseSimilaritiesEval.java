@@ -50,7 +50,7 @@ public class AllPairwiseSimilaritiesEval {
     public void execute() throws IOException, SolrServerException {
 
         String corpus = "cordis-doctopics-70";
-        List<Integer> alarmTypes = Arrays.asList(0,1,2);
+        List<Integer> alarmTypes = Arrays.asList(0,1,2,3,4,5);
 
         File simFile = Paths.get("output", "similarities", corpus.replace("doctopics", "similarities") + ".csv.gz").toFile();
         if (!simFile.exists()) calculateSimilarities(corpus.split("-")[0], Integer.valueOf(corpus.split("-")[2]), 0.92);
