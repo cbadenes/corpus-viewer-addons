@@ -20,8 +20,8 @@ public class TopicDocsCollection extends SolrCollection {
     private final float multiplicationFactor;
     private final DTFIndex indexer;
 
-    public TopicDocsCollection(String name, Integer numTopics, Integer vocabSize) throws IOException, SolrServerException {
-        super(name+"-topicdocs-"+numTopics);
+    public TopicDocsCollection(String name, Integer vocabSize) throws IOException, SolrServerException {
+        super(name);
         super.interval              = 10;
         this.counter                = new AtomicInteger();
         this.multiplicationFactor   = Double.valueOf(1*Math.pow(10,String.valueOf(vocabSize).length()+1)).floatValue();

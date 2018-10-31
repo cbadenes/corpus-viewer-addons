@@ -1,4 +1,6 @@
 output/
+corpora/
+
 # Compiled class file
 *.class
 .idea

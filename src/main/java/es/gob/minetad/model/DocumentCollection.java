@@ -20,7 +20,7 @@ public class DocumentCollection extends SolrCollection {
     private static final Logger LOG = LoggerFactory.getLogger(DocumentCollection.class);
 
     public DocumentCollection(String name) throws IOException, SolrServerException {
-        super(name+"-docs");
+        super(name);
     }
 
 

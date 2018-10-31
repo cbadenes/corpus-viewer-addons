@@ -17,14 +17,14 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  *
- * Create a 'doc-topic' collection for each Model in a Corpus:
+ *  Create a 'doc-topic' collection for each Model in a Corpus.
  *
+ *  It Requires a Solr server running:
  *    1. move into: src/test/docker/solr
- *    2. create (or start) a container: ./run.sh (./start.sh)
+ *    2. create (or start) a container: ./create.sh (./start.sh)
  *
  *
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
@@ -41,58 +41,51 @@ public class LoadDocTopics {
         Assert.assertTrue("Solr server seems down: " + settings.getSolrUrl(), settings.isSolrUp());
 
         Instant testStart = Instant.now();
-        List<Corpus> corpora = settings.getCorpora();
+
         CorporaCollection corporaCollection = new CorporaCollection();
 
-        for(Corpus corpus: corpora){
-            List<Corpus.Model> models = corpus.getModels().entrySet().stream().map(e -> e.getValue()).collect(Collectors.toList());
+        Instant colStart = Instant.now();
 
-            for(Corpus.Model model: models){
+        String path = settings.get("corpus.doctopics");
+        String name = settings.get("corpus.name");
+        Integer numTopics = Integer.valueOf(settings.get("corpus.dim"));
 
-                Instant colStart = Instant.now();
-                String corpusName           = corpus.getName();
-                String doctopicsPath        = model.getDoctopics();
-                Integer numTopics           = model.getNumtopics();
+        LOG.info("Loading doctopics from corpus: '" + path +" ..");
 
-                LOG.info("Loading doctopics from corpus: '" + corpusName + "' and model: '" + numTopics + "' ..");
+        // Creating Solr Collection
+        DocTopicsCollection collection = new DocTopicsCollection("doctopics", numTopics);
 
-                // Creating Solr Collection
-                DocTopicsCollection collection = new DocTopicsCollection(corpusName, numTopics);
+        ParallelExecutor executor = new ParallelExecutor();
+        BufferedReader reader = ReaderUtils.from(path);
+        String row;
+        while((row = reader.readLine()) != null){
+            final String line = row;
+            executor.submit(() -> {
+                try{
+                    String[] values = line.split(",");
+                    String id = values[0];
+                    List<Double> vector = new ArrayList<>();
+                    for(int i=1;i<values.length;i++){
+                        vector.add(Double.valueOf(values[i]));
+                    }
 
-                ParallelExecutor executor = new ParallelExecutor();
-                BufferedReader reader = ReaderUtils.from(doctopicsPath);
-                String row;
-                while((row = reader.readLine()) != null){
-                    final String line = row;
-                    executor.submit(() -> {
-                        try{
-                            String[] values = line.split(",");
-                            String id = values[0];
-                            List<Double> vector = new ArrayList<>();
-                            for(int i=1;i<values.length;i++){
-                                vector.add(Double.valueOf(values[i]));
-                            }
+                    collection.add(id,vector);
 
-                            collection.add(id,vector);
-
-                        }catch (Exception e){
-                            LOG.error("Unexpected error",e);
-                        }
-                    });
+                }catch (Exception e){
+                    LOG.error("Unexpected error",e);
                 }
-                executor.awaitTermination(1, TimeUnit.HOURS);
-
-                collection.commit();
-
-                double corpusEntropy = collection.getEntropy() / collection.getSize();
-                model.setEntropy(corpusEntropy);
-                corporaCollection.add(corpusName, model);
-
-                TimeUtils.print(colStart, Instant.now(), "Model '" + model.getNumtopics() +"' from corpus '" + corpusName+"' created in: ");
-
-
-            }
+            });
         }
+        executor.awaitTermination(1, TimeUnit.HOURS);
+
+        collection.commit();
+
+        Corpus corpus = new Corpus(name+"-"+numTopics);
+        double corpusEntropy = collection.getEntropy() / collection.getSize();
+        corpus.setEntropy(corpusEntropy);
+        corporaCollection.add(corpus);
+
+        TimeUtils.print(colStart, Instant.now(), "Corpus '" + corpus +"' created in: ");
 
         corporaCollection.commit();
         TimeUtils.print(testStart, Instant.now(), "All collections created in: ");

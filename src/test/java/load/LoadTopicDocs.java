@@ -29,11 +29,13 @@ import java.util.stream.Collectors;
  *
  * Create a 'topic-doc' collection for each model in a Corpus:
  *
- * 1. move into: src/test/docker/models
- * 2. create (or start) the containers: ./create.sh (./start.sh)
- * 3. move into: src/test/docker/solr
- * 4. create (or start) the container: ./create.sh (./start.sh)
+ * It Requires a Topic Model API running:
+ *    1. move into: src/test/docker/models
+ *    2. run the service: ./docker-compose up -d
  *
+ *  It Requires a Solr server running:
+ *    1. move into: src/test/docker/solr
+ *    2. create (or start) a container: ./create.sh (./start.sh)
  *
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
  */
@@ -49,83 +51,69 @@ public class LoadTopicDocs {
 
         Assert.assertTrue("Solr server seems down: " + settings.getSolrUrl(), settings.isSolrUp());
 
-        Instant testStart = Instant.now();
-        List<Corpus> corpora = settings.getCorpora();
+        Instant modelStart = Instant.now();
 
-        for(Corpus corpus: corpora) {
-            Instant corpusStart = Instant.now();
-            List<Corpus.Model> models = corpus.getModels().entrySet().stream().map(e -> e.getValue()).collect(Collectors.toList());
+        String name = settings.get("corpus.name");
+        Integer numTopics = Integer.valueOf(settings.get("corpus.dim"));
+        String api = settings.get("corpus.api");
 
-            for (Corpus.Model model : models) {
+        Assert.assertTrue("Model Rest-API seems down: " + api, settings.isServerUp(api));
 
-                Instant modelStart = Instant.now();
+        LOG.info("Loading topics from '" + name + "' model '" + numTopics+"' ..");
 
-                Assert.assertTrue("Model Rest-API seems down: " + model.getApi(), settings.isServerUp(model.getApi()));
+        JsonNode response = RestClient.get(api + "/settings",200);
 
-                LOG.info("Loading topics from '" + corpus.getName() + "' model '" + model.getNumtopics()+"' ..");
+        // Get vocabulary size
+        Integer vocabularySize  = Integer.valueOf(response.getObject().getJSONObject("stats").getString("vocabulary"));
 
-                JsonNode response = RestClient.get(model.getApi() + "/settings",200);
+        // Creating Solr Collection
+        TopicDocsCollection collection = new TopicDocsCollection("topicdocs", vocabularySize);
 
-                // Get vocabulary size
-                Integer vocabularySize  = Integer.valueOf(response.getObject().getJSONObject("stats").getString("vocabulary"));
-                Integer numTopics       = Integer.valueOf(response.getObject().getJSONObject("params").getString("topics"));
+        // Loading topics
+        response = RestClient.get(api + "/topics",200);
+        Iterator dimIterator = response.getArray().iterator();
+        while(dimIterator.hasNext()){
 
-                // Creating Solr Collection
-                TopicDocsCollection collection = new TopicDocsCollection(corpus.getName(), numTopics, vocabularySize);
+            JSONObject dimension = (JSONObject) dimIterator.next();
 
-                // Loading topics
-                response = RestClient.get(model.getApi() + "/dimensions",200);
-                Iterator dimIterator = response.getObject().getJSONArray("dimensions").iterator();
-                while(dimIterator.hasNext()){
+            String id           = String.valueOf(dimension.getInt("id"));
+            String topicName    = dimension.getString("name");
+            String description  = dimension.getString("description");
 
+            JsonNode topicResponse = RestClient.get(api + "/topics/" + id, 200);
+            Double entropy      = topicResponse.getObject().getDouble("entropy");;
 
-                    JSONObject dimension = (JSONObject) dimIterator.next();
+            Integer offset = 0;
 
-                    String id           = String.valueOf(dimension.getInt("id"));
-                    String topicName    = dimension.getString("name");
-                    String description  = dimension.getString("description");
-                    Double entropy      = dimension.getDouble("entropy");
+            Integer maxWords = 100;
 
-                    Integer offset = 0;
+            Boolean finished = false;
 
-                    Integer maxWords = 100;
+            Map<String,Double> words = new HashMap<>();
 
-                    Boolean finished = false;
+            while(!finished){
 
-                    Map<String,Double> words = new HashMap<>();
+                response = RestClient.get(api+"/topics/"+ id+"/words", ImmutableMap.of("maxWords",maxWords,"offset",offset), 200);
 
-                    while(!finished){
+                JSONArray elements = response.getArray();
 
-                        response = RestClient.get(model.getApi()+"/dimensions/"+ id, ImmutableMap.of("maxWords",maxWords,"offset",offset), 200);
+                for (int j=0;j<elements.length();j++){
 
-                        JSONArray elements = response.getObject().getJSONArray("elements");
-
-                        for (int j=0;j<elements.length();j++){
-
-                            String word     = elements.getJSONObject(j).getString("value");
-                            Double score    = elements.getJSONObject(j).getDouble("score");
-                            words.put(word,score);
-                        }
-
-                        offset += maxWords;
-
-                        finished = elements.length() != maxWords;
-                    }
-                    collection.add(id, topicName, description, entropy, words);
-
+                    String word     = elements.getJSONObject(j).getString("value");
+                    Double score    = elements.getJSONObject(j).getDouble("score");
+                    words.put(word,score);
                 }
 
-                collection.commit();
+                offset += maxWords;
 
-                LOG.info("All topics added as documents in Solr successfully!");
-                TimeUtils.print(modelStart, Instant.now(), "Topics from model '" + model.getNumtopics()+"' of corpus: '" + corpus.getName()+ "' saved in Solr");
-
+                finished = elements.length() != maxWords;
             }
+            collection.add(id, topicName, description, entropy, words);
 
-            TimeUtils.print(corpusStart, Instant.now(), "All models of corpus: '" + corpus.getName()+ "' saved in Solr");
         }
 
-        TimeUtils.print(testStart, Instant.now(), "Corpora saved in Solr");
+        collection.commit();
 
+        TimeUtils.print(modelStart, Instant.now(), "Topics from corpus: '" + name+ "' saved in Solr");
     }
 }

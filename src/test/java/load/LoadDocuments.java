@@ -3,31 +3,28 @@ package load;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mashape.unirest.http.exceptions.UnirestException;
-import es.gob.minetad.model.CorporaCollection;
-import es.gob.minetad.model.Corpus;
-import es.gob.minetad.model.DocumentCollection;
+import es.gob.minetad.model.SolrCollection;
 import es.gob.minetad.model.TestSettings;
 import es.gob.minetad.utils.ReaderUtils;
 import es.gob.minetad.utils.TimeUtils;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.common.SolrInputDocument;
+import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.junit.Assert;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  *
- * Create a 'documents' collection for each Corpus:
+ * Create a 'documents' collection for each Corpus
  *
+ *  It Requires a Solr server running:
  *    1. move into: src/test/docker/solr
- *    2. create (or start) a container: ./run.sh (./start.sh)
+ *    2. create (or start) a container: ./create.sh (./start.sh)
  *
  *
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
@@ -36,15 +33,6 @@ public class LoadDocuments {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoadDocuments.class);
 
-    static Map<String,String> corpora = new HashMap<>();
-
-    static {
-        corpora.put("cordis", "https://delicias.dia.fi.upm.es/nextcloud/index.php/s/woBzdYWfJtJ6sfY/download");
-    }
-
-    private static final String CORPUS = "cordis";
-
-
     @Test
     public void execute() throws UnirestException, IOException, SolrServerException {
 
@@ -52,38 +40,40 @@ public class LoadDocuments {
 
         Assert.assertTrue("Solr server seems down: " + settings.getSolrUrl(), settings.isSolrUp());
 
-        Instant testStart = Instant.now();
-        List<Corpus> corpora = settings.getCorpora();
-        CorporaCollection corporaCollection = new CorporaCollection();
+        String path = settings.get("corpus.documents");
+        String name = settings.get("corpus.name");
 
-        for(Corpus corpus: corpora){
-            Instant corpusStart = Instant.now();
-            LOG.info("Loading documents from corpus '" + corpus + "' ..");
-            String corpusPath       = corpus.getPath();
+        Instant corpusStart = Instant.now();
+        LOG.info("Loading documents from corpus '" + path + "' ..");
 
-            // Creating Solr Collection
-            DocumentCollection collection = new DocumentCollection(corpus.getName());
+        // Creating Solr Collection
+        SolrCollection collection = new SolrCollection("documents");
 
-            BufferedReader reader = ReaderUtils.from(corpusPath);
-            String row;
-            ObjectMapper jsonMapper = new ObjectMapper();
-            while((row = reader.readLine()) != null){
+        BufferedReader reader = ReaderUtils.from(path);
+        String row;
+        ObjectMapper jsonMapper = new ObjectMapper();
+        while((row = reader.readLine()) != null){
 
-                JsonNode json = jsonMapper.readTree(row);
-                //TODO add metainformation
-                String id = json.get(settings.get("corpus."+corpus.getName()+".id")).asText();
-                String name = json.get(settings.get("corpus."+corpus.getName()+".name")).asText();
-                String text = json.get(settings.get("corpus."+corpus.getName()+".text")).asText();
-                collection.add(id,name,text);
+            JsonNode json = jsonMapper.readTree(row);
 
-            }
+            SolrInputDocument document = new SolrInputDocument();
+            document.addField("id",json.get("id").asText());
+            document.addField("name",json.get("title").asText());
+            document.addField("text",json.get("objective").asText());
+            document.addField("instrument",json.get("instrument").asText());
+            document.addField("startDate",json.get("startDate").asText());
+            document.addField("endDate",json.get("endDate").asText());
+            document.addField("totalCost",json.get("totalCost").asText());
+            document.addField("area",json.get("area").asText());
+            document.addField("topicWater",json.get("topicWater").asText());
 
-            collection.commit();
+            collection.add(document);
 
-            TimeUtils.print(corpusStart, Instant.now(), "Corpus '" + corpus.getName() +"' saved in solr in: ");
         }
 
-        TimeUtils.print(testStart, Instant.now(), "Corpora saved in solr in: ");
+        collection.commit();
+
+        TimeUtils.print(corpusStart, Instant.now(), "Corpus '" + name +"' saved in solr in: ");
 
     }
 }

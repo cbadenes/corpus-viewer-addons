@@ -20,13 +20,12 @@ public class CorporaCollection extends SolrCollection {
     }
 
 
-    public void add(String corpusName, Corpus.Model model) throws IOException, SolrServerException {
+    public void add(Corpus corpus) throws IOException, SolrServerException {
 
         SolrInputDocument document = new SolrInputDocument();
-        document.addField("id",corpusName+"-"+model.getNumtopics());
-        document.addField("name",corpusName);
-        document.addField("numTopics",model.getNumtopics());
-        document.addField("entropy",model.getEntropy());
+        document.addField("id",corpus.getName().hashCode());
+        document.addField("name",corpus.getName());
+        document.addField("entropy",corpus.getEntropy());
 
         add(document);
 

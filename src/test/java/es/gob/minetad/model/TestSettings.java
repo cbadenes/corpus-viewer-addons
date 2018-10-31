@@ -52,35 +52,4 @@ public class TestSettings {
         }
     }
 
-    public List<Corpus> getCorpora(){
-        Map<String,Corpus> corpora = new HashMap<>();
-        for(Enumeration e=properties.propertyNames(); e.hasMoreElements();){
-            String propName = (String) e.nextElement();
-            if (propName.startsWith("corpus.")){
-                String[] values = propName.split("\\.");
-                String name         = values[1];
-                Corpus corpus       = corpora.containsKey(name)? corpora.get(name) : new Corpus(name);
-                try{
-                    Integer numTopics = Integer.valueOf(values[2]);
-                    Corpus.Model model = corpus.getModels().containsKey(numTopics)? corpus.getModels().get(numTopics) : new Corpus.Model();
-                    model.setNumtopics(numTopics);
-                    switch (values[3].toLowerCase()){
-                        case "doctopics": model.setDoctopics(properties.getProperty(propName));
-                            break;
-                        case "model": model.setApi(properties.getProperty(propName));
-                            break;
-                    }
-                    corpus.add(model);
-                } catch(NumberFormatException ex){
-                    // documents.path
-                    String value = properties.getProperty(propName);
-                    corpus.setPath(value);
-                }
-                corpora.put(name, corpus);
-            }
-        }
-
-        return corpora.entrySet().stream().map(e -> e.getValue()).collect(Collectors.toList());
-    }
-
 }

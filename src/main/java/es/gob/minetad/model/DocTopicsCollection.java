@@ -42,11 +42,11 @@ public class DocTopicsCollection extends SolrCollection {
     private final CleanZeroEpsylonIndex docTopicIndexer;
     private double entropy;
 
-    public DocTopicsCollection(String name, Integer numTopics) throws IOException, SolrServerException {
-        super(name+"-doctopics-"+numTopics);
+    public DocTopicsCollection(String name, Integer dim) throws IOException, SolrServerException {
+        super(name);
         this.counter                = new AtomicInteger();
         this.entropy                = 0.0;
-        this.numTopics              = numTopics;
+        this.numTopics              = dim;
         this.epsylon                = 1f / numTopics;
         this.multiplicationFactor   = Double.valueOf(1*Math.pow(10,String.valueOf(numTopics).length()+1)).floatValue();
         this.docTopicIndexer        = new CleanZeroEpsylonIndex(numTopics, multiplicationFactor, epsylon);
