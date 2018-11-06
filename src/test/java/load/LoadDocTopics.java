@@ -17,6 +17,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  *
@@ -24,7 +25,8 @@ import java.util.concurrent.TimeUnit;
  *
  *  It Requires a Solr server running:
  *    1. move into: src/test/docker/solr
- *    2. create (or start) a container: ./create.sh (./start.sh)
+ *    2. create (or start) a container: ./run.sh (./start.sh)
+ *    3. create collections: ./create-collections.sh
  *
  *
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
@@ -32,6 +34,9 @@ import java.util.concurrent.TimeUnit;
 public class LoadDocTopics {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoadDocTopics.class);
+
+    private static final Integer MAX    = -1;
+    private static final Integer OFFSET = -1;
 
     @Test
     public void execute() throws UnirestException, IOException, SolrServerException {
@@ -57,9 +62,12 @@ public class LoadDocTopics {
 
         ParallelExecutor executor = new ParallelExecutor();
         BufferedReader reader = ReaderUtils.from(path);
+        AtomicInteger counter = new AtomicInteger();
+        AtomicInteger offCounter = new AtomicInteger();
         String row;
         while((row = reader.readLine()) != null){
             final String line = row;
+            if ((OFFSET>0) && (offCounter.incrementAndGet()<OFFSET)) continue;
             executor.submit(() -> {
                 try{
                     String[] values = line.split(",");
@@ -75,6 +83,7 @@ public class LoadDocTopics {
                     LOG.error("Unexpected error",e);
                 }
             });
+            if ((MAX > 0) && (counter.incrementAndGet() >= MAX))break;
         }
         executor.awaitTermination(1, TimeUnit.HOURS);
 
