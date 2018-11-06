@@ -64,12 +64,12 @@ public class TopicSummary {
     }
 
     public String getHashTopics(int top) {
-        if (groups.size()<=top) return "";
+        if (groups.size()<=top) return groups.subList(0,1).stream().map(tp -> tp.id).collect(Collectors.joining("|"));
         return groups.subList(0,groups.size()-top).stream().map(tp -> tp.id).collect(Collectors.joining("|"));
     }
 
     public Integer getHashCode(int top){
-        if (groups.size()<=top) return 0;
+        if (groups.size()<=top) return hf.hashString(groups.subList(0,1).stream().map(tp -> tp.id).collect(Collectors.joining("|")),Charset.defaultCharset()).asInt();
         return hf.hashString(groups.subList(0,groups.size()-top).stream().map(tp -> tp.id).collect(Collectors.joining("|")),Charset.defaultCharset()).asInt();
     }
 

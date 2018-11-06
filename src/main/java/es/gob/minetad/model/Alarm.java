@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
@@ -29,7 +30,9 @@ public class Alarm {
     }
 
     public Long getTotal(){
-        return this.groups.entrySet().stream().map(e -> e.getValue()).reduce((a,b) -> a+b).get();
+        Optional<Long> val = this.groups.entrySet().stream().map(e -> e.getValue()).reduce((a, b) -> a + b);
+        if (!val.isPresent()) return 0l;
+        return val.get();
     }
 
     public Map<String,Long> getGroups(){
@@ -41,7 +44,7 @@ public class Alarm {
         return "Alarm{" +
                 "type=" + type +
                 ", groups=" + groups.size() +
-                ", elements=" + getTotal() +
+                ", documents=" + getTotal() +
                 '}';
     }
 }

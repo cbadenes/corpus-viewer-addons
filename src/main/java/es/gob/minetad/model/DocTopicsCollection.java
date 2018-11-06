@@ -1,8 +1,10 @@
 package es.gob.minetad.model;
 
 import es.gob.minetad.doctopic.CleanZeroEpsylonIndex;
+import es.gob.minetad.doctopic.DocTopicsIndex;
 import es.gob.minetad.doctopic.TopicSummary;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +63,7 @@ public class DocTopicsCollection extends SolrCollection {
         String docTopic = docTopicIndexer.toString(topicDistribution);
         document.addField("topics",docTopic);
 
+
         double docEntropy = -topicDistribution.stream().map(theta -> theta * Math.log(theta)).reduce((a, b) -> a + b).get();
         docEntropy = docEntropy / Math.log(numTopics);
         document.addField("entropy",docEntropy);
@@ -98,4 +101,7 @@ public class DocTopicsCollection extends SolrCollection {
         return entropy;
     }
 
+    public DocTopicsIndex getDocTopicIndexer() {
+        return docTopicIndexer;
+    }
 }
