@@ -1,4 +1,4 @@
-package es.gob.minetad.solr;
+package query;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -16,7 +16,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class pruebaCordis150Combinado4_Test {
+public class CorpusViewerTest_24 {
 
 	//Atributes
 	
