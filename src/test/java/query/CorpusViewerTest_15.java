@@ -36,9 +36,9 @@ import java.util.stream.Collectors;
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
  */
 
-public class AlarmService {
+public class CorpusViewerTest_15 {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AlarmService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CorpusViewerTest_15.class);
     private TestSettings settings;
     private SolrClient client;
 
