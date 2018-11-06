@@ -47,6 +47,7 @@ public class CorpusViewerTest_15 {
         settings    = new TestSettings();
         client      = SolrClientFactory.create(settings.get("solr.url"), settings.get("solr.mode"));
     }
+    
 
 
     /**
