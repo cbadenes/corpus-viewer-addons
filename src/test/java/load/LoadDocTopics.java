@@ -35,8 +35,8 @@ public class LoadDocTopics {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoadDocTopics.class);
 
-    private static final Integer MAX    = -1;
-    private static final Integer OFFSET = -1;
+    private static final Integer MAX    = 1000;
+    private static final Integer OFFSET = 0;
 
     @Test
     public void execute() throws UnirestException, IOException, SolrServerException {
