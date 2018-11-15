@@ -16,7 +16,7 @@ services:
 #    - REST_PATH=/en
   cordis-70:
    container_name: cordis-70
-   image: sesiad/cordis-model:0.6-70
+   image: sesiad/cordis-model:1.0-70
    restart: always
    ports:
     - "8000:7777"
@@ -25,7 +25,7 @@ services:
     - REST_PATH=/model
 #  cordis-150:
 #   container_name: cordis-150
-#   image: sesiad/cordis-model:0.6-150
+#   image: sesiad/cordis-model:1.0-150
 #   restart: always
 #   ports:
 #    - "8001:7777"
@@ -34,7 +34,7 @@ services:
 #    - REST_PATH=/model
 #  wiki-120:
 #   container_name: wiki-120
-#   image: sesiad/wiki-model:0.6-120
+#   image: sesiad/wiki-model:1.0-120
 #   restart: always
 #   ports:
 #    - "8002:7777"
@@ -43,7 +43,7 @@ services:
 #    - REST_PATH=/model
 #  wiki-350:
 #   container_name: wiki-350
-#   image: sesiad/wiki-model:0.6-350
+#   image: sesiad/wiki-model:1.0-350
 #   restart: always
 #   ports:
 #    - "8003:7777"
@@ -52,7 +52,7 @@ services:
 #    - REST_PATH=/model
 #  patstat-250:
 #   container_name: patstat-250
-#   image: sesiad/patstat-model:0.6-250
+#   image: sesiad/patstat-model:1.0-250
 #   restart: always
 #   ports:
 #    - "8004:7777"
@@ -61,7 +61,7 @@ services:
 #    - REST_PATH=/model
 #  patstat-750:
 #   container_name: patstat-750
-#   image: sesiad/patstat-model:0.6-750
+#   image: sesiad/patstat-model:1.0-750
 #   restart: always
 #   ports:
 #    - "8005:7777"
