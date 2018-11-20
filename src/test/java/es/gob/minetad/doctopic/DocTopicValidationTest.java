@@ -6,7 +6,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import es.gob.minetad.metric.JensenShannon;
 import es.gob.minetad.utils.ReaderUtils;
+import es.gob.minetad.utils.WriterUtils;
 import org.apache.commons.text.similarity.JaccardSimilarity;
 import org.apache.hadoop.util.hash.Hash;
 import org.json.JSONArray;
@@ -16,12 +18,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
+ *
+ * This class groups the tests that allow to compare the topic distributions generated during the training stage of the model
+ * with those obtained by inference for the same corpus.
+ *
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
  */
 
@@ -35,7 +43,8 @@ public class DocTopicValidationTest {
     public void comparison() throws IOException {
 
         String documents    = "https://delicias.dia.fi.upm.es/nextcloud/index.php/s/woBzdYWfJtJ6sfY/download";
-        String doctopics    = "https://delicias.dia.fi.upm.es/nextcloud/index.php/s/82z5WRNbYftqr2L/download";
+
+        String doctopics    = "https://delicias.dia.fi.upm.es/nextcloud/index.php/s/nfmoNWMB3NN7FwE/download";
 
         JaccardSimilarity similarity = new JaccardSimilarity();
         int size            = 10;
@@ -66,7 +75,7 @@ public class DocTopicValidationTest {
             if (docTopics.containsKey(id)){
 
                 String text     = docTexts.get(id);
-                LOG.info("text -> " + text);
+                LOG.info("text -> " + text.replace("\n",""));
 
                 List<Double> v1 = docTopics.get(id);
                 List<Index> t1 = top(v1);
@@ -81,17 +90,33 @@ public class DocTopicValidationTest {
                 LOG.info("- v3: " + top(v3));
 
 
-                LOG.info("v1<->v2 = " + similarity.apply(t1.stream().map(i -> String.valueOf(i.getScore())).collect(Collectors.joining(" ")),t2.stream().map(i -> String.valueOf(i.getScore())).collect(Collectors.joining(" "))));
-                LOG.info("v2<->v3 = " + similarity.apply(t2.stream().map(i -> String.valueOf(i.getScore())).collect(Collectors.joining(" ")),t3.stream().map(i -> String.valueOf(i.getScore())).collect(Collectors.joining(" "))));
-                LOG.info("v1<->v3 = " + similarity.apply(t1.stream().map(i -> String.valueOf(i.getScore())).collect(Collectors.joining(" ")),t3.stream().map(i -> String.valueOf(i.getScore())).collect(Collectors.joining(" "))));
-
-
+                LOG.info("v1<->v2 = " + similarity.apply(t1.stream().map(i -> String.valueOf(i.getScore())).collect(Collectors.joining(" ")),t2.stream().map(i -> String.valueOf(i.getScore())).collect(Collectors.joining(" "))) +" -> " + JensenShannon.similarity(v1,v2));
+                LOG.info("v2<->v3 = " + similarity.apply(t2.stream().map(i -> String.valueOf(i.getScore())).collect(Collectors.joining(" ")),t3.stream().map(i -> String.valueOf(i.getScore())).collect(Collectors.joining(" "))) +" -> " + JensenShannon.similarity(v2,v3));
+                LOG.info("v1<->v3 = " + similarity.apply(t1.stream().map(i -> String.valueOf(i.getScore())).collect(Collectors.joining(" ")),t3.stream().map(i -> String.valueOf(i.getScore())).collect(Collectors.joining(" "))) +" -> " + JensenShannon.similarity(v1,v3));
 
 
             }
 
 
         }
+
+    }
+
+    @Test
+    public void generate() throws IOException {
+
+        String documents    = "https://delicias.dia.fi.upm.es/nextcloud/index.php/s/woBzdYWfJtJ6sfY/download";
+
+        BufferedWriter writer = WriterUtils.to(Paths.get("cordis.csv.gz").toFile().getAbsolutePath());
+        BufferedReader docReader = ReaderUtils.from(documents);
+        String row;
+        while((row = docReader.readLine()) != null){
+            JsonNode json = jsonMapper.readTree(row);
+            writer.write(json.get("id").asText() + " " + json.get("id").asText() + " " +json.get("objective").asText().replace("\n","").replaceAll("\\P{Print}", "") + "\n");
+        }
+        docReader.close();
+        writer.close();
+
 
     }
 
