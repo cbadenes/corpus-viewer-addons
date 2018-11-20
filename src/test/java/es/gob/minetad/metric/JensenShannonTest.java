@@ -60,8 +60,21 @@ public class JensenShannonTest {
 
         test(docA,docB,docC);
 
-
     }
+
+    @Test
+    public void test4(){
+        // doctopics
+        List<Double> docA = Arrays.asList(0.9964499484004059, 9.494324045407538E-4, 7.843137254901879E-4, 9.494324045407534E-4, 8.66873065015471E-4);
+        LOG.info("sum1 -> " + docA.stream().reduce((a,b) -> a+b).get());
+
+        // inference
+        List<Double> docB = Arrays.asList(0.9968627450980392, 7.843137254901962E-4, 7.843137254901962E-4, 7.843137254901962E-4, 7.843137254901962E-4);
+        LOG.info("sum2 -> " + docB.stream().reduce((a,b) -> a+b).get());
+
+        LOG.info("Sim=" + JensenShannon.similarity(docA,docB));
+    }
+
 
     private void test(List<Double> docA,List<Double> docB,List<Double> docC){
         LOG.info("sim(A,B)=" + JensenShannon.similarity(docA,docB));
