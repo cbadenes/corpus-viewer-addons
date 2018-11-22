@@ -42,7 +42,7 @@ public class LoadDocTopics {
     public void execute() throws UnirestException, IOException, SolrServerException {
 
         TestSettings settings = new TestSettings();
-
+        //cambio para prueba
         Assert.assertTrue("Solr server seems down: " + settings.getSolrUrl(), settings.isSolrUp());
 
         Instant testStart = Instant.now();
