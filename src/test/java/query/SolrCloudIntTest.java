@@ -65,7 +65,7 @@ public class SolrCloudIntTest {
     	query.set("qq", ""+consultaT);
     	//query.set("fq", "id:3"); filtro extra sobre los metadatos.
     	query.set("q","{!frangeext}query($qq)");
-    	query.set("pruebas", true); //parametro que se quitará
+    	query.set("pruebas", true); //parametro para usar un vector customizado cordis-70
     	query.set("multiplicationFactor", multiplicationFactor+"");
     	query.addField("jsWeight:[js],score,id,listaBM");
     	query.setSort("id", ORDER.asc);
