@@ -196,19 +196,67 @@ public class DocTopicsUtil {
         String result = "";
         for(int i=0; i<topic_vector.size();i++){
             int freq = (int) (topic_vector.get(i) * multiplication_factor);
+            //cambio pruebas David
             if(freq > (epsylon*multiplication_factor)){
-                result += "t"+i + "|" + freq + " ";
+          //  if(freq > 0){  
+            result += "t"+i + "|" + freq + " ";
             }
         }
         return result;
     }
+
+    public static List<Double> cleanZerosDocTopicVector(List<Double> docTopicValues) {
+		// List<Double> docTopicVector = new ArrayList<>(numTopics);
+
+		int numTopics = docTopicValues.size();
+		Double[] docTopicVector = new Double[numTopics];
+		// find zero
+		double min = 1d;
+		for (int i = 0; i < numTopics; i++) {
+			if (docTopicValues.get(i) < min) {
+				min = docTopicValues.get(i);
+			}
+		}
+
+		if (min > 0.01d || min == 0d) {
+			return docTopicValues;
+		}
+
+		// clean zero and get rest
+		int num_zeros = 0;
+		for (int i = 0; i < numTopics; i++) {
+			if (docTopicValues.get(i) > min) {
+				docTopicVector[i] = docTopicValues.get(i);
+			} else {
+				docTopicVector[i] = 0d;
+				num_zeros++;
+			}
+		}
+
+		// complete rest
+		float rest = 1;
+		for (int i = 0; i < numTopics; i++) {
+			rest -= docTopicVector[i];
+		}
+		rest = rest / (float) (numTopics - num_zeros);
+		for (int i = 0; i < numTopics; i++) {
+			if (docTopicValues.get(i) > min) {
+				docTopicVector[i] = docTopicVector[i] + rest;
+			}
+		}
+
+		return Arrays.asList(docTopicVector);
+	}
+    
 
     public static List<Double> getVectorFromString(String topic_vector, float multiplication_factor, int size) {
 
         String[] topics = topic_vector.split(" ");
 
         Double[] vector = new Double[size];
-        Arrays.fill(vector,0.0);
+       //cambio segun David
+        // Arrays.fill(vector,0.0);
+        Arrays.fill(vector,1/size); 
         for(int i=0; i<topics.length;i++){
             int id      = Integer.valueOf(StringUtils.substringAfter(StringUtils.substringBefore(topics[i],"|"),"t"));
             int freq    = Integer.valueOf(StringUtils.substringAfter(topics[i],"|"));

@@ -24,8 +24,8 @@ public class CorporaCollection extends SolrCollection {
 
         SolrInputDocument document = new SolrInputDocument();
         document.addField("id",corpus.getName().hashCode());
-        document.addField("name",corpus.getName());
-        document.addField("entropy",corpus.getEntropy());
+        document.addField("name_s",corpus.getName());
+        document.addField("entropy_f",corpus.getEntropy());
 
         add(document);
 

@@ -3,6 +3,7 @@ package es.gob.minetad.model;
 import es.gob.minetad.solr.SolrClientFactory;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import org.apache.solr.client.solrj.request.CoreAdminRequest;
 import org.apache.solr.client.solrj.response.CoreAdminResponse;
 import org.apache.solr.common.SolrInputDocument;
@@ -23,10 +24,10 @@ public class SolrCollection {
 
     private static final Logger LOG = LoggerFactory.getLogger(SolrCollection.class);
 
-    protected final SolrClient solrClient;
+    protected  SolrClient solrClient;
     protected final String collectionName;
     protected AtomicInteger counter = new AtomicInteger();
-    protected int interval = 100;
+    protected int interval = 10;
 
     public SolrCollection(String name) throws IOException, SolrServerException {
 
@@ -37,19 +38,26 @@ public class SolrCollection {
 
         String url  = properties.getProperty("solr.url");
         String mode = properties.getProperty("solr.mode");
-        this.solrClient = SolrClientFactory.create( url, mode );
-
-        CoreAdminResponse response = CoreAdminRequest.getStatus(name, solrClient);
+       	this.solrClient = SolrClientFactory.create( url, mode );
+       
+       /* CoreAdminResponse response = CoreAdminRequest.getStatus(name, solrClient);
         NamedList<NamedList<Object>> collections = response.getCoreStatus();
 
 
         if (collections.get(name).size() < 0) throw new RuntimeException("Collection '"+ name + "' not exist in Solr. It must be created prior to this execution!");
-
+*/
     }
 
     public void add(SolrInputDocument document ) throws IOException, SolrServerException {
 
-        solrClient.add(collectionName, document);
+        
+        if (solrClient instanceof  CloudSolrClient) {
+        	solrClient=(CloudSolrClient)solrClient;
+        	((CloudSolrClient) solrClient).setDefaultCollection(collectionName);
+        	solrClient.add(document);
+        }else {
+        	solrClient.add(collectionName, document);
+        }
 
         if (counter.incrementAndGet() % interval == 0) commit();
 
@@ -68,4 +76,13 @@ public class SolrCollection {
     public String getCollectionName() {
         return collectionName;
     }
+
+	public SolrClient getSolrClient() {
+		return solrClient;
+	}
+
+
+    
+    
+    
 }

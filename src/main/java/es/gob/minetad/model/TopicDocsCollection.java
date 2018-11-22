@@ -32,12 +32,12 @@ public class TopicDocsCollection extends SolrCollection {
     public void add(String id, String name, String description, Double entropy,  Map<String,Double> words) throws IOException, SolrServerException {
         SolrInputDocument document = new SolrInputDocument();
         document.addField("id",id);
-        document.addField("name",name);
-        document.addField("description",description);
-        document.addField("entropy",entropy);
+        document.addField("name_s",name);
+        document.addField("description_txt",description);
+        document.addField("entropy_f",entropy);
 
         String dtf = indexer.toString(words);
-        document.addField("words",dtf);
+        document.addField("words_tfdl",dtf);
 
         add(document);
     }
