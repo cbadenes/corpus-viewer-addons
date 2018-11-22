@@ -8,6 +8,7 @@ import es.gob.minetad.model.TestSettings;
 import es.gob.minetad.utils.ReaderUtils;
 import es.gob.minetad.utils.TimeUtils;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import org.apache.solr.common.SolrInputDocument;
 import org.junit.Assert;
 import org.junit.Test;
@@ -15,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
 
@@ -38,7 +40,7 @@ public class LoadDocuments {
 
         TestSettings settings = new TestSettings();
 
-        Assert.assertTrue("Solr server seems down: " + settings.getSolrUrl(), settings.isSolrUp());
+      //  Assert.assertTrue("Solr server seems down: " + settings.getSolrUrl(), settings.isSolrUp());
 
         String path = settings.get("corpus.documents");
         String name = settings.get("corpus.name");
@@ -47,29 +49,36 @@ public class LoadDocuments {
         LOG.info("Loading documents from corpus '" + path + "' ..");
 
         // Creating Solr Collection
-        SolrCollection collection = new SolrCollection("documents");
-
+        
+       
+        SolrCollection collection = new SolrCollection("cordis-documents");
+       
+       
         BufferedReader reader = ReaderUtils.from(path);
         String row;
         ObjectMapper jsonMapper = new ObjectMapper();
         while((row = reader.readLine()) != null){
 
             JsonNode json = jsonMapper.readTree(row);
+            
+      //    for(JsonNode json:jsonn) {
 
             SolrInputDocument document = new SolrInputDocument();
+            if (!json.get("objective").asText().trim().isEmpty()) {
             document.addField("id",json.get("id").asText());
-            document.addField("name",json.get("title").asText());
-            document.addField("text",json.get("objective").asText());
-            document.addField("instrument",json.get("instrument").asText());
-            document.addField("startDate",json.get("startDate").asText());
-            document.addField("endDate",json.get("endDate").asText());
-            document.addField("totalCost",json.get("totalCost").asText());
-            document.addField("area",json.get("area").asText());
-            document.addField("topicWater",json.get("topicWater").asText());
+            document.addField("name_s",json.get("title").asText());
+            document.addField("text_txt",json.get("objective").asText());
+            document.addField("instrument_s",json.get("instrument").asText());
+            document.addField("startDate_dt",json.get("startDate").asText());
+            document.addField("endDate_dt",json.get("endDate").asText());
+            document.addField("totalCost_f",json.get("totalCost").asText());
+            document.addField("area_s",json.get("area").asText());
+            document.addField("topicWater_i",json.get("topicWater").asText());
 
             collection.add(document);
-
-        }
+            }
+          }
+       // }
 
         collection.commit();
 

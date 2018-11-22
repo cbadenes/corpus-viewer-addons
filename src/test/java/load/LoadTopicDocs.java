@@ -67,7 +67,7 @@ public class LoadTopicDocs {
         Integer vocabularySize  = Integer.valueOf(response.getObject().getJSONObject("stats").getString("vocabulary"));
 
         // Creating Solr Collection
-        TopicDocsCollection collection = new TopicDocsCollection("topicdocs", vocabularySize);
+        TopicDocsCollection collection = new TopicDocsCollection("cordis-topicdocs", vocabularySize);
 
         // Loading topics
         response = RestClient.get(api + "/topics",200);
@@ -81,7 +81,7 @@ public class LoadTopicDocs {
             String description  = dimension.getString("description");
 
             JsonNode topicResponse = RestClient.get(api + "/topics/" + id, 200);
-            Double entropy      = topicResponse.getObject().getDouble("entropy");;
+            Double entropy      = topicResponse.getObject().getDouble("entropy");
 
             Integer offset = 0;
 
@@ -116,4 +116,7 @@ public class LoadTopicDocs {
 
         TimeUtils.print(modelStart, Instant.now(), "Topics from corpus: '" + name+ "' saved in Solr");
     }
+    
+    
+    
 }

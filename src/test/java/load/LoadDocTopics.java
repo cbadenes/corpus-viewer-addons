@@ -13,6 +13,10 @@ import org.junit.Assert;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,19 +39,19 @@ public class LoadDocTopics {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoadDocTopics.class);
 
-    private static final Integer MAX    = 1000;
-    private static final Integer OFFSET = 0;
+    private static final Integer MAX    = -1;
+    private static final Integer OFFSET = -1;
 
     @Test
     public void execute() throws UnirestException, IOException, SolrServerException {
 
         TestSettings settings = new TestSettings();
-        //cambio para prueba
+
         Assert.assertTrue("Solr server seems down: " + settings.getSolrUrl(), settings.isSolrUp());
 
         Instant testStart = Instant.now();
 
-        CorporaCollection corporaCollection = new CorporaCollection();
+      //  CorporaCollection corporaCollection = new CorporaCollection();
 
         Instant colStart = Instant.now();
 
@@ -58,7 +62,7 @@ public class LoadDocTopics {
         LOG.info("Loading doctopics from corpus: '" + path +" ..");
 
         // Creating Solr Collection
-        DocTopicsCollection collection = new DocTopicsCollection("doctopics", numTopics);
+        DocTopicsCollection collection = new DocTopicsCollection("cordis-doctopicss", numTopics,"cordis-documents");
 
         ParallelExecutor executor = new ParallelExecutor();
         BufferedReader reader = ReaderUtils.from(path);
@@ -75,7 +79,7 @@ public class LoadDocTopics {
                     List<Double> vector = new ArrayList<>();
                     for(int i=1;i<values.length;i++){
                         vector.add(Double.valueOf(values[i]));
-                    }
+                      }
 
                     collection.add(id,vector);
 
@@ -89,15 +93,19 @@ public class LoadDocTopics {
 
         collection.commit();
 
-        Corpus corpus = new Corpus(name+"-"+numTopics);
-        double corpusEntropy = collection.getEntropy() / collection.getSize();
-        corpus.setEntropy(corpusEntropy);
-        corporaCollection.add(corpus);
+      //  Corpus corpus = new Corpus(name+"-"+numTopics);
+      //  double corpusEntropy = collection.getEntropy() / collection.getSize();
+      //corpus.setEntropy(corpusEntropy);
+     // corporaCollection.add(corpus);
 
-        TimeUtils.print(colStart, Instant.now(), "Corpus '" + corpus +"' created in: ");
+    //    TimeUtils.print(colStart, Instant.now(), "Corpus '" + corpus +"' created in: ");
 
-        corporaCollection.commit();
+       //corporaCollection.commit();
         TimeUtils.print(testStart, Instant.now(), "All collections created in: ");
 
     }
+    
+    
+    
+
 }

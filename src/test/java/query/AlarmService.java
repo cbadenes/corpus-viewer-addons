@@ -37,7 +37,7 @@ public class AlarmService {
     private SolrClient client;
 
 
-    private static final String CORPUS = "doctopics";
+    private static final String CORPUS = "cordis-doctopicss";
 
     @Before
     public void setup(){
@@ -58,7 +58,7 @@ public class AlarmService {
     @Test
     public void listAlarms() throws IOException, SolrServerException {
 
-        List<Integer> alarmTypes = Arrays.asList(0,1,2,3,4,5);
+        List<Integer> alarmTypes = Arrays.asList(1,3,5);
 
         for(Integer alarmType : alarmTypes){
 
@@ -73,31 +73,26 @@ public class AlarmService {
     /**
      * Given a group (hashcode) belonging to an alarm type (integer), display the list of similar documents in a corpus
      */
-    @Test
+  //  @Test
     public void listDocuments() throws IOException, SolrServerException {
 
-        Integer alarmType   = 0;
+        Integer alarmType   = 1;
         String hashcode     = "1478773850";
 
 
         List<SolrDocument> documents = getDocumentsBy(alarmType, CORPUS, hashcode, client);
 
-        documents.forEach(doc -> LOG.info("-" + doc));
+        documents.forEach(doc -> LOG.info("-" + doc.getFieldValue("name_s")));
     }
 
 
     /**
      * Analyze performance with respect to brute-force approach
-     * Requirements:
-     * 1. Start Solr (docker container)
-     * 2. Create Collections (create-collections.sh)
-     * 3. Load DocTopics (unit-test LoadDocTopics)
-     *
      */
-    @Test
+   // @Test
     public void evaluation() throws IOException, SolrServerException {
 
-        MinMaxPriorityQueue<Similarity> pairs = MinMaxPriorityQueue.orderedBy(new Similarity.ScoreComparator()).maximumSize(100).create();
+        MinMaxPriorityQueue<Similarity> pairs = MinMaxPriorityQueue.orderedBy(new Similarity.ScoreComparator()).maximumSize(10).create();
 
         Integer numTopics = Integer.valueOf(settings.get("corpus.dim"));
         DocTopicsIndex indexer = new DocTopicsCollection(CORPUS, numTopics).getDocTopicIndexer();
@@ -128,11 +123,9 @@ public class AlarmService {
         SolrUtils.iterate(CORPUS, "*:*", client, bruteForceComparison);
         Instant e1 = Instant.now();
 
-        double similarityThreshold = 0.98;
-        List<Similarity> topSimilarDocs = pairs.stream().sorted((a, b) -> -a.getScore().compareTo(b.getScore())).filter(s -> s.getScore()>similarityThreshold).collect(Collectors.toList());
+        List<Similarity> topSimilarDocs = pairs.stream().sorted((a, b) -> -a.getScore().compareTo(b.getScore())).collect(Collectors.toList());
         List<String> groundTruth = topSimilarDocs.stream().map(sim -> sim.getPair()).collect(Collectors.toList());
         topSimilarDocs.forEach(sim -> LOG.info("Top Similarity: " + sim));
-        LOG.info("Ground Truth size: " + groundTruth.size());
 
 
         // Evaluations
@@ -145,50 +138,10 @@ public class AlarmService {
                 AtomicInteger densityCounter = new AtomicInteger();
                 List<Similarity> topSimilarDocsByDensity = getSimilarDocumentsBy(alarmType, CORPUS, indexer, densityCounter, client);
                 Instant end = Instant.now();
-                LOG.info("Density-based["+alarmType+"] Approach@"+accuracy+": " + new Evaluation(start, end, groundTruth, topSimilarDocsByDensity.stream().limit(accuracy).map(sim -> sim.getPair()).collect(Collectors.toList()), densityCounter.get()));
+                LOG.info("Density-based["+alarmType+"] Approach@"+accuracy+": " + new Evaluation(start, end, groundTruth.subList(0,accuracy), topSimilarDocsByDensity.stream().limit(accuracy).map(sim -> sim.getPair()).collect(Collectors.toList()), densityCounter.get()));
             }
-        }
 
-        // TODO Threshold-based Approach Evaluation
-        MinMaxPriorityQueue<Similarity> p3 = MinMaxPriorityQueue.orderedBy(new Similarity.ScoreComparator()).maximumSize(10).create();
-        Instant s3 = Instant.now();
-        AtomicInteger normCalculus = new AtomicInteger();
-        AtomicInteger simCalculus = new AtomicInteger();
-        double thr      = 0.005; //0.005
-        double thr_v    = Math.sqrt(8*thr);
-
-        SolrUtils.Executor cotaBasedComparison = d1 -> {
-            try {
-                final DocTopic dt1      = DocTopic.from(d1);
-                final List<Double> v1   = indexer.toVector(dt1.getTopics());
-                SolrUtils.Executor similarityComparison = new SolrUtils.Executor() {
-                    @Override
-                    public void handle(SolrDocument d2) {
-                        normCalculus.incrementAndGet();
-                        final DocTopic dt2      = DocTopic.from(d2);
-                        final List<Double> v2   = indexer.toVector(dt2.getTopics());
-
-                        double l1 = 0.0;
-                        for(int i=0;i<v1.size();i++){
-                            l1 += Math.abs(v1.get(i)-v2.get(i));
-                        }
-
-                        if (l1 < thr_v){
-                            simCalculus.incrementAndGet();
-                            p3.add(new Similarity(JensenShannon.similarity(v1,v2), new Document(dt1.getId(),dt1.getHash()), new Document(dt2.getId(), dt2.getHash())));
-                        }
-                    }
-                };
-                SolrUtils.iterate(CORPUS, "id:{* TO " + dt1.getId() + "}", client, similarityComparison);
-            } catch (Exception e) {
-                LOG.error("Unexpected error", e);
-
-            }
-        };
-        SolrUtils.iterate(CORPUS, "*:*", client, cotaBasedComparison);
-        Instant e3 = Instant.now();
-        for(Integer accuracy: Arrays.asList(1,5,10)){
-            LOG.info("Threshold-based Approach@"+accuracy+": " + new Evaluation(s3, e3, groundTruth, p3.stream().limit(accuracy).map(sim -> sim.getPair()).collect(Collectors.toList()), simCalculus.get()));
+            // TODO Threshold-based Approach Evaluation
         }
     }
 
@@ -204,7 +157,7 @@ public class AlarmService {
      * @throws SolrServerException
      */
     public static Alarm getAlarmsBy(Integer alarmType, String corpus, SolrClient client) throws IOException, SolrServerException {
-        String fieldName = "hashcode"+alarmType;
+        String fieldName = "hashcode"+alarmType+"_i";
         SolrQuery query = new SolrQuery();
         query.setRequestHandler("/terms");
         query.setTerms(true);
@@ -212,6 +165,7 @@ public class AlarmService {
         query.addTermsField(fieldName);
         query.setTermsMinCount(2);
 
+        System.out.println(query.toQueryString());
         List<TermsResponse.Term> terms = client.query(corpus,query).getTermsResponse().getTerms(fieldName);
 
         Alarm alarm = new Alarm(alarmType);
@@ -222,7 +176,7 @@ public class AlarmService {
 
 
     public static List<SolrDocument> getDocumentsBy(Integer alarmType, String corpus, String group, SolrClient client) throws IOException, SolrServerException {
-        String fieldName = "hashcode"+alarmType;
+        String fieldName = "hashcode"+alarmType+"_i";
         SolrQuery query = new SolrQuery();
         query.set("q",fieldName+":"+group.replace("-","\\-"));
         query.setRows(1000);
