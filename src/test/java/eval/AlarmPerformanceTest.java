@@ -104,7 +104,7 @@ public class AlarmPerformanceTest {
             for(Integer alarmType: Arrays.asList(1,3,5)){
                 Instant start = Instant.now();
                 AtomicInteger densityCounter = new AtomicInteger();
-                List<Similarity> topSimilarDocsByDensity = AlarmServiceTest.getSimilarDocumentsBy(alarmType, CORPUS, indexer, densityCounter, client);
+                List<Similarity> topSimilarDocsByDensity = AlarmPerformanceTest.getSimilarDocumentsBy(alarmType, CORPUS, indexer, densityCounter, client);
                 Instant end = Instant.now();
                 LOG.info("Density-based["+alarmType+"] Approach@"+accuracy+": " + new Evaluation(start, end, groundTruth, topSimilarDocsByDensity.stream().limit(accuracy).map(sim -> sim.getPair()).collect(Collectors.toList()), densityCounter.get()));
             }
@@ -153,6 +153,28 @@ public class AlarmPerformanceTest {
         }
     }
 
+    public static List<Similarity> getSimilarDocumentsBy(int alarmType, String corpus, DocTopicsIndex indexer, AtomicInteger counter, SolrClient client) throws IOException, SolrServerException {
+        // Density-based Approach Evaluation
+        MinMaxPriorityQueue<Similarity> densityPairs = MinMaxPriorityQueue.orderedBy(new Similarity.ScoreComparator()).maximumSize(10).create();
+        Alarm alarms = AlarmServiceTest.getAlarmsBy(alarmType, corpus, client);
+        for(String hashcode: alarms.getGroups().keySet()){
+
+            List<SolrDocument> docs = AlarmServiceTest.getDocumentsBy(alarmType, corpus, hashcode, 1000, client);
+
+            for(int i=0; i< docs.size(); i++){
+                final DocTopic dt1      = DocTopic.from(docs.get(i));
+                final List<Double> v1   = indexer.toVector(dt1.getTopics());
+                for(int j=0; j<i; j++){
+                    final DocTopic dt2      = DocTopic.from(docs.get(j));
+                    final List<Double> v2   = indexer.toVector(dt2.getTopics());
+                    densityPairs.add(new Similarity(JensenShannon.similarity(v1,v2),new Document(dt1.getId(), dt1.getHash()), new Document(dt2.getId(), dt2.getHash())));
+                    counter.incrementAndGet();
+                }
+            }
+        }
+        List<Similarity> topSimilarDocsByDensity = densityPairs.stream().sorted((a, b) -> -a.getScore().compareTo(b.getScore())).collect(Collectors.toList());
+        return topSimilarDocsByDensity;
+    }
 
 
 }
