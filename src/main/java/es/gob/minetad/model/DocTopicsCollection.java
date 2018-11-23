@@ -74,12 +74,8 @@ public class DocTopicsCollection extends SolrCollection {
             Integer hashCode = tsq1.getHashCode(i);
             if (hashCode == 0) continue;
             document.addField("hashcode"+i,hashCode);
-            document.addField("hashexpr"+i,""+tsq1.getHashTopics(i));
+            document.addField("hashexpr"+i,""+tsq1.getHashTopics(i).replace("|"," "));
         }
-
-
-        //TODO debug
-//        document.addField("topics",topicDistribution);
 
         add(document);
 
