@@ -18,15 +18,21 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
  *
- * Set of queries to obtain documents as candidates to be duplicated.
+ * Obtain documents as candidates to be duplicated.
  *
- * Before run the tests you must start the Solr service!
+ * Given a corpus, display the number of similar documents grouped by alarm type: (1) critical, (3) high and (5) low
+ *
+ * Then, given a group (hashcode) belonging to an alarm type (integer), display the list of documents for that group
+ *
+ * Before run the query you must start the Solr service with a valid doctopic collection!
  *
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
  */
@@ -36,52 +42,40 @@ public class AlarmServiceTest {
     private static final Logger LOG = LoggerFactory.getLogger(AlarmServiceTest.class);
     private TestSettings settings;
     private SolrClient client;
+    private Map<Integer,String> alarmTypes;
 
 
-    private static final String CORPUS = "doctopics";
+
+    private static final String COLLECTION = "doctopics";
 
     @Before
     public void setup(){
         settings    = new TestSettings();
         client      = SolrClientFactory.create(settings.get("solr.url"), settings.get("solr.mode"));
+        alarmTypes  = new HashMap<>();
+        alarmTypes.put(1,"critical");
+        alarmTypes.put(3,"high");
+        alarmTypes.put(5,"low");
     }
 
 
-    /**
-     * Given a corpus, display the number of similar documents grouped by alarm type:
-     * 1: critical
-     * 3: high
-     * 5: low
-     */
     @Test
-    public void listAlarms() throws IOException, SolrServerException {
+    public void execute() throws IOException, SolrServerException {
 
-        List<Integer> alarmTypes = Arrays.asList(1,3,5);
+        int sampleSize = 10;
 
-        for(Integer alarmType : alarmTypes){
-
-            Alarm alarm = getAlarmsBy(alarmType, CORPUS, client);
-            LOG.info(""+alarm);
-            alarm.getGroups().entrySet().stream().sorted((a,b) -> -a.getValue().compareTo(b.getValue())).limit(10).forEach(entry -> LOG.info("\t " + entry.getValue() + " docs grouped by hashcode: " + entry.getKey() + ""));
+        for(Integer alarmType : alarmTypes.keySet().stream().sorted().collect(Collectors.toList())){
+            // Read groups of documents
+            Alarm alarm = getAlarmsBy(alarmType, COLLECTION, client);
+            LOG.info("'"+alarmTypes.get(alarmType) + "' similarity in documents: ");
+            for(String group : alarm.getGroups().entrySet().stream().sorted((a,b) -> -a.getValue().compareTo(b.getValue())).limit(sampleSize).map(e -> e.getKey()).collect(Collectors.toList())){
+                LOG.info("\t > by hashcode [" + group + "]:");
+                // Read documents by hash
+                getDocumentsBy(alarmType, COLLECTION, group, sampleSize, client).forEach(doc -> LOG.info("\t\t-" + doc.getFieldValue("id")));
+            }
 
         }
 
-    }
-
-    /**
-     * Given a group (hashcode) belonging to an alarm type (integer), display the list of documents for that group
-     *
-     */
-    @Test
-    public void listDocuments() throws IOException, SolrServerException {
-
-        Integer alarmType   = 0;
-        String hashcode     = "1478773850";
-
-
-        List<SolrDocument> documents = getDocumentsBy(alarmType, CORPUS, hashcode, client);
-
-        documents.forEach(doc -> LOG.info("-" + doc));
     }
 
 
@@ -112,37 +106,14 @@ public class AlarmServiceTest {
     }
 
 
-    public static List<SolrDocument> getDocumentsBy(Integer alarmType, String corpus, String group, SolrClient client) throws IOException, SolrServerException {
+    public static List<SolrDocument> getDocumentsBy(Integer alarmType, String corpus, String group, Integer max, SolrClient client) throws IOException, SolrServerException {
         String fieldName = "hashcode"+alarmType;
         SolrQuery query = new SolrQuery();
         query.set("q",fieldName+":"+group.replace("-","\\-"));
-        query.setRows(1000);
+        query.setRows(max);
 
         QueryResponse response = client.query(corpus, query);
         return response.getResults();
-    }
-
-    public static List<Similarity> getSimilarDocumentsBy(int alarmType, String corpus, DocTopicsIndex indexer, AtomicInteger counter, SolrClient client) throws IOException, SolrServerException {
-        // Density-based Approach Evaluation
-        MinMaxPriorityQueue<Similarity> densityPairs = MinMaxPriorityQueue.orderedBy(new Similarity.ScoreComparator()).maximumSize(10).create();
-        Alarm alarms = getAlarmsBy(alarmType, corpus, client);
-        for(String hashcode: alarms.getGroups().keySet()){
-
-            List<SolrDocument> docs = getDocumentsBy(alarmType, corpus, hashcode, client);
-
-            for(int i=0; i< docs.size(); i++){
-                final DocTopic dt1      = DocTopic.from(docs.get(i));
-                final List<Double> v1   = indexer.toVector(dt1.getTopics());
-                for(int j=0; j<i; j++){
-                    final DocTopic dt2      = DocTopic.from(docs.get(j));
-                    final List<Double> v2   = indexer.toVector(dt2.getTopics());
-                    densityPairs.add(new Similarity(JensenShannon.similarity(v1,v2),new Document(dt1.getId(), dt1.getHash()), new Document(dt2.getId(), dt2.getHash())));
-                    counter.incrementAndGet();
-                }
-            }
-        }
-        List<Similarity> topSimilarDocsByDensity = densityPairs.stream().sorted((a, b) -> -a.getScore().compareTo(b.getScore())).collect(Collectors.toList());
-        return topSimilarDocsByDensity;
     }
 
 }
