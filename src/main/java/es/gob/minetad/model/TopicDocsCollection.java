@@ -29,15 +29,21 @@ public class TopicDocsCollection extends SolrCollection {
 
     }
 
-    public void add(String id, String name, String description, Double entropy,  Map<String,Double> words) throws IOException, SolrServerException {
+    public void add(String id, String name, String description, String label, String model, Double entropy, Double weight, Map<String,Double> words, Map<String,Double> wordsTfIdf) throws IOException, SolrServerException {
         SolrInputDocument document = new SolrInputDocument();
         document.addField("id",id);
         document.addField("name",name);
         document.addField("description",description);
+        document.addField("label",label);
+        document.addField("model",model);
+        document.addField("weight",weight);
         document.addField("entropy",entropy);
 
         String dtf = indexer.toString(words);
         document.addField("words",dtf);
+
+        String dtfidf = indexer.toString(wordsTfIdf);
+        document.addField("wordsTFIDF",dtfidf);
 
         add(document);
     }
