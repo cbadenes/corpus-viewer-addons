@@ -1,15 +1,19 @@
 package load;
 
 import com.mashape.unirest.http.exceptions.UnirestException;
-import es.gob.minetad.model.*;
+import es.gob.minetad.model.CorporaCollection;
+import es.gob.minetad.model.Corpus;
+import es.gob.minetad.model.DocTopicsCollection;
+import es.gob.minetad.model.TestSettings;
 import es.gob.minetad.utils.ParallelExecutor;
 import es.gob.minetad.utils.ReaderUtils;
 import es.gob.minetad.utils.TimeUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.junit.Assert;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,22 +25,32 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  *
- *  Create a 'doc-topic' collection for each Model in a Corpus.
+ *  Create a 'doctopics' collection for a given Corpus
  *
  *  It Requires a Solr server running:
  *    1. move into: src/test/docker/solr
- *    2. create (or start) a container: ./run.sh (./start.sh)
+ *    2. create (or start) a container: ./start.sh
  *    3. create collections: ./create-collections.sh
  *
+ *  http://localhost:8983/solr/#/doctopics
  *
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
+ *
+ *
  */
-public class LoadDocTopics {
+public abstract class LoadDocTopicsFromFile {
 
-    private static final Logger LOG = LoggerFactory.getLogger(LoadDocTopics.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LoadDocTopicsFromFile.class);
 
-    private static final Integer MAX    = 1000;
-    private static final Integer OFFSET = 0;
+    private final String corpus;
+    private final Integer max;
+    private final Integer offset;
+
+    public LoadDocTopicsFromFile(String corpus, Integer max, Integer offset) {
+        this.corpus = corpus;
+        this.max    = max;
+        this.offset = offset;
+    }
 
     @Test
     public void execute() throws UnirestException, IOException, SolrServerException {
@@ -51,9 +65,10 @@ public class LoadDocTopics {
 
         Instant colStart = Instant.now();
 
-        String path = settings.get("corpus.doctopics");
-        String name = settings.get("corpus.name");
-        Integer numTopics = Integer.valueOf(settings.get("corpus.dim"));
+        String path = corpus;
+        String name = StringUtils.substringBetween(corpus,"/","/");
+
+        Integer numTopics = Integer.valueOf(StringUtils.substringBetween(corpus,"-",".csv"));
 
         LOG.info("Loading doctopics from corpus: '" + path +" ..");
 
@@ -67,7 +82,7 @@ public class LoadDocTopics {
         String row;
         while((row = reader.readLine()) != null){
             final String line = row;
-            if ((OFFSET>0) && (offCounter.incrementAndGet()<OFFSET)) continue;
+            if ((offset>0) && (offCounter.incrementAndGet()<offset)) continue;
             executor.submit(() -> {
                 try{
                     String[] values = line.split(",");
@@ -83,7 +98,7 @@ public class LoadDocTopics {
                     LOG.error("Unexpected error",e);
                 }
             });
-            if ((MAX > 0) && (counter.incrementAndGet() >= MAX))break;
+            if ((max > 0) && (counter.incrementAndGet() >= max))break;
         }
         executor.awaitTermination(1, TimeUnit.HOURS);
 
