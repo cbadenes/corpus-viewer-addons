@@ -68,4 +68,8 @@ public class SolrCollection {
     public String getCollectionName() {
         return collectionName;
     }
+
+    public SolrClient getSolrClient() {
+        return solrClient;
+    }
 }
