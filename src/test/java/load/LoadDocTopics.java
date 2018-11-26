@@ -1,6 +1,7 @@
 package load;
 
-import es.gob.minetad.doctopic.CleanZeroEpsylonIndex;
+import es.gob.minetad.doctopic.DocTopicIndexFactory;
+import es.gob.minetad.doctopic.DocTopicsIndex;
 import es.gob.minetad.doctopic.TopicSummary;
 import es.gob.minetad.model.CorporaCollection;
 import es.gob.minetad.model.Corpus;
@@ -30,9 +31,7 @@ import java.util.List;
 public abstract class LoadDocTopics extends LoadDocuments{
 
     private static final Logger LOG = LoggerFactory.getLogger(LoadDocTopics.class);
-    protected float epsylon;
-    protected float multiplicationFactor;
-    protected CleanZeroEpsylonIndex docTopicIndexer;
+    protected DocTopicsIndex docTopicIndexer;
     protected SolrCollection documentCollection;
     protected double entropy;
     protected int size;
@@ -40,9 +39,7 @@ public abstract class LoadDocTopics extends LoadDocuments{
     public LoadDocTopics(String corpus, Integer max, Integer offset) {
         super(corpus, max, offset);
         try {
-            this.epsylon                = 1f / numTopics;
-            this.multiplicationFactor   = Double.valueOf(1*Math.pow(10,String.valueOf(numTopics).length()+1)).floatValue();
-            this.docTopicIndexer        = new CleanZeroEpsylonIndex(numTopics, multiplicationFactor, epsylon);
+            this.docTopicIndexer        = DocTopicIndexFactory.newFrom(numTopics);
             this.entropy                = 0.0;
             this.size                   = 0;
             this.documentCollection =new SolrCollection(name+"-documents");

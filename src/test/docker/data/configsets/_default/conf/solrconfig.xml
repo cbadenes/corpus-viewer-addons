@@ -35,7 +35,7 @@
        that you fully re-index after changing this setting as it can
        affect both how text is indexed and queried.
   -->
-  <luceneMatchVersion>7.3.1</luceneMatchVersion>
+  <luceneMatchVersion>7.5.0</luceneMatchVersion>
 
   <!-- <lib/> directives can be used to instruct Solr to load any Jars
        identified and use them to resolve any "plugins" specified in
@@ -98,7 +98,8 @@
        replication is in use, this should match the replication
        configuration.
     -->
-  <dataDir>${solr.data.dir:}</dataDir>
+  <!--<dataDir>${solr.data.dir:}</dataDir>-->
+  <dataDir>/opt/solr/data/${solr.core.name}</dataDir>
 
 
   <!-- The DirectoryFactory to use for indexes.
@@ -694,10 +695,10 @@
       <str name="echoParams">explicit</str>
       <int name="rows">10</int>
       <!-- Default search field
-         <str name="df">text</str> 
+         <str name="df">text</str>
         -->
       <!-- Change from JSON to XML format (the default prior to Solr 7.0)
-         <str name="wt">xml</str> 
+         <str name="wt">xml</str>
         -->
     </lst>
     <!-- In addition to defaults, "appends" params can be specified

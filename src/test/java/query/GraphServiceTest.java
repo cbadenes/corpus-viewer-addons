@@ -1,6 +1,8 @@
 package query;
 
 import es.gob.minetad.doctopic.CleanZeroEpsylonIndex;
+import es.gob.minetad.doctopic.DocTopicIndexFactory;
+import es.gob.minetad.doctopic.DocTopicsIndex;
 import es.gob.minetad.metric.JensenShannonExt;
 import es.gob.minetad.model.DocTopic;
 import es.gob.minetad.model.TestSettings;
@@ -47,16 +49,14 @@ public class GraphServiceTest {
 
     private float epsylon;
     private float multiplicationFactor;
-    private CleanZeroEpsylonIndex doctopicParser;
+    private DocTopicsIndex doctopicParser;
 
 
     @Before
     public void setup(){
         settings                    = new TestSettings();
         client                      = SolrClientFactory.create(settings.get("solr.url"), settings.get("solr.mode"));
-        this.epsylon                = 1f / NUM_TOPICS;
-        this.multiplicationFactor   = Double.valueOf(1*Math.pow(10,String.valueOf(NUM_TOPICS).length()+1)).floatValue();
-        this.doctopicParser         = new CleanZeroEpsylonIndex(NUM_TOPICS, multiplicationFactor, epsylon);
+        this.doctopicParser         = DocTopicIndexFactory.newFrom(NUM_TOPICS);
     }
 
 

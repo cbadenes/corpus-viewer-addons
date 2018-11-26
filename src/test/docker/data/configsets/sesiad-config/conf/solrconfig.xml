@@ -1365,6 +1365,7 @@ class="es.gob.minetad.custom.function.FunctionRangeQParserPluginExt"/>
 
     <transformer name="js" class="es.gob.minetad.custom.transformer.JSTransformerFactory" />
      <transformer name="percentage" class="es.gob.minetad.custom.transformer.PercentTranformerFactory" />
+     <transformer name="alarmas" class="es.gob.minetad.custom.transformer.AlarmTransformerFactory" />
   <!--
     <transformer name="js" class="es.gob.minetad.transformer.CustomTransformer" />
      Could be something like:
