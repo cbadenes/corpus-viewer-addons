@@ -3,6 +3,8 @@ package load;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.solr.common.SolrInputDocument;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -19,7 +21,9 @@ import java.io.IOException;
  *
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
  */
-public class LoadWikipediaDocuments extends LoadDocumentsFromFile {
+public class LoadWikipediaDocuments extends LoadDocuments {
+
+    private static final Logger LOG = LoggerFactory.getLogger(LoadPatentsDocuments.class);
 
     private static final Integer MAX    = 1000;//-1
     private static final Integer OFFSET = 0;
@@ -46,6 +50,11 @@ public class LoadWikipediaDocuments extends LoadDocumentsFromFile {
         }catch (IOException e){
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    protected void handleComplete() {
+        LOG.info("done!");
     }
 
 }

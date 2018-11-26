@@ -1,6 +1,7 @@
 package eval;
 
 import com.google.common.collect.MinMaxPriorityQueue;
+import es.gob.minetad.doctopic.CleanZeroEpsylonIndex;
 import es.gob.minetad.doctopic.DocTopicsIndex;
 import es.gob.minetad.metric.JensenShannon;
 import es.gob.minetad.model.*;
@@ -61,7 +62,10 @@ public class AlarmPerformanceTest {
         MinMaxPriorityQueue<Similarity> pairs = MinMaxPriorityQueue.orderedBy(new Similarity.ScoreComparator()).maximumSize(100).create();
 
         Integer numTopics = Integer.valueOf(settings.get("corpus.dim"));
-        DocTopicsIndex indexer = new DocTopicsCollection(CORPUS, numTopics).getDocTopicIndexer();
+
+        float epsylon = 1f / numTopics;
+        float multiplicationFactor = Double.valueOf(1 * Math.pow(10, String.valueOf(numTopics).length() + 1)).floatValue();
+        CleanZeroEpsylonIndex indexer = new CleanZeroEpsylonIndex(numTopics, multiplicationFactor, epsylon);
 
         AtomicInteger bruteForceCounter = new AtomicInteger();
         SolrUtils.Executor bruteForceComparison = d1 -> {

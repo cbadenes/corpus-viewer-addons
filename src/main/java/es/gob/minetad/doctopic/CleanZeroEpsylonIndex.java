@@ -28,7 +28,9 @@ public class CleanZeroEpsylonIndex implements DocTopicsIndex{
 
     @Override
     public String toString(List<Double> topicDistributions) {
-        return DocTopicsUtil.getVectorString(topicDistributions, precision, epsylon);
+    	//implementamos clean Zeros pruebas DPerez
+       // return DocTopicsUtil.getVectorString( DocTopicsUtil.cleanZerosDocTopicVector(topicDistributions), precision, epsylon);
+        return DocTopicsUtil.getVectorString( topicDistributions, precision, epsylon);
     }
 
     @Override

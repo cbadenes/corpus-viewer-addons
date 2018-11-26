@@ -18,7 +18,7 @@ package load;
  *
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
  */
-public class LoadCordisTopicDocs extends LoadTopicDocsFromLibrAIry {
+public class LoadCordisTopicDocs extends LoadTopicDocsFromLDA {
 
     private static final String CORPUS_NAME     = "cordis";
     private static final String CORPUS_DIM      = "70";

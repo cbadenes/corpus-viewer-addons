@@ -1,5 +1,10 @@
 package load;
 
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrInputDocument;
+
+import java.util.Optional;
+
 /**
  *
  *  Create a 'doctopics' collection for a given Corpus
@@ -15,7 +20,7 @@ package load;
  *
  *
  */
-public class LoadWikipediaDocTopics extends LoadDocTopicsFromFile {
+public class LoadWikipediaDocTopics extends LoadDocTopics {
 
     private static final Integer MAX    = 1000;//-1
     private static final Integer OFFSET = 0;
@@ -25,4 +30,24 @@ public class LoadWikipediaDocTopics extends LoadDocTopicsFromFile {
         super(CORPUS, MAX, OFFSET);
     }
 
+    @Override
+    protected SolrInputDocument newDocTopic(String id) {
+        SolrInputDocument document = new SolrInputDocument();
+        document.addField("id",id);
+
+        Optional<SolrDocument> doc=documentCollection.getById(id);
+
+        if (doc.isPresent()) {
+            SolrDocument solrDoc = doc.get();
+            document.addField("name_s", solrDoc.get("name_s"));
+            document.addField("text_txt", solrDoc.get("text_txt"));
+            document.addField("url_s", solrDoc.get("url_s"));
+        }
+
+        return document;
+
+
+
+
+    }
 }

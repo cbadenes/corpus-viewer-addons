@@ -18,7 +18,7 @@ package load;
  *
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
  */
-public class LoadWikipediaTopicDocs extends LoadTopicDocsFromLibrAIry {
+public class LoadWikipediaTopicDocs extends LoadTopicDocsFromLDA {
 
     private static final String CORPUS_NAME     = "wikipedia";
     private static final String CORPUS_DIM      = "120";

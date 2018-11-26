@@ -1,0 +1,59 @@
+2018-11-26 14:30:11.324 INFO  (main) [   ] o.e.j.s.Server jetty-9.4.8.v20171121, build timestamp: 2017-11-21T21:27:37Z, git hash: 82b8fb23f757335bb3329d540ce37a2a2615f0a8
+2018-11-26 14:30:11.683 INFO  (main) [   ] o.a.s.s.SolrDispatchFilter  ___      _       Welcome to Apache Solr™ version 7.3.1
+2018-11-26 14:30:11.684 INFO  (main) [   ] o.a.s.s.SolrDispatchFilter / __| ___| |_ _   Starting in cloud mode on port 8983
+2018-11-26 14:30:11.684 INFO  (main) [   ] o.a.s.s.SolrDispatchFilter \__ \/ _ \ | '_|  Install dir: /opt/solr
+2018-11-26 14:30:11.697 INFO  (main) [   ] o.a.s.s.SolrDispatchFilter |___/\___/_|_|    Start time: 2018-11-26T14:30:11.687808Z
+2018-11-26 14:30:11.764 INFO  (main) [   ] o.a.s.c.SolrResourceLoader Using system property solr.solr.home: /opt/solr/server/solr
+2018-11-26 14:30:11.772 INFO  (main) [   ] o.a.s.c.SolrXmlConfig Loading container configuration from /opt/solr/server/solr/solr.xml
+2018-11-26 14:30:11.787 ERROR (main) [   ] o.a.s.s.SolrDispatchFilter Could not start Solr. Check solr/home property and the logs
+2018-11-26 14:30:11.833 ERROR (main) [   ] o.a.s.c.SolrCore null:org.apache.solr.common.SolrException: solr.xml does not exist in /opt/solr/server/solr cannot start Solr
+	at org.apache.solr.core.SolrXmlConfig.fromFile(SolrXmlConfig.java:117)
+	at org.apache.solr.core.SolrXmlConfig.fromSolrHome(SolrXmlConfig.java:149)
+	at org.apache.solr.servlet.SolrDispatchFilter.loadNodeConfig(SolrDispatchFilter.java:295)
+	at org.apache.solr.servlet.SolrDispatchFilter.createCoreContainer(SolrDispatchFilter.java:261)
+	at org.apache.solr.servlet.SolrDispatchFilter.init(SolrDispatchFilter.java:183)
+	at org.eclipse.jetty.servlet.FilterHolder.initialize(FilterHolder.java:139)
+	at org.eclipse.jetty.servlet.ServletHandler.initialize(ServletHandler.java:741)
+	at org.eclipse.jetty.servlet.ServletContextHandler.startContext(ServletContextHandler.java:348)
+	at org.eclipse.jetty.webapp.WebAppContext.startWebapp(WebAppContext.java:1515)
+	at org.eclipse.jetty.webapp.WebAppContext.startContext(WebAppContext.java:1477)
+	at org.eclipse.jetty.server.handler.ContextHandler.doStart(ContextHandler.java:785)
+	at org.eclipse.jetty.servlet.ServletContextHandler.doStart(ServletContextHandler.java:261)
+	at org.eclipse.jetty.webapp.WebAppContext.doStart(WebAppContext.java:545)
+	at org.eclipse.jetty.util.component.AbstractLifeCycle.start(AbstractLifeCycle.java:68)
+	at org.eclipse.jetty.deploy.bindings.StandardStarter.processBinding(StandardStarter.java:41)
+	at org.eclipse.jetty.deploy.AppLifeCycle.runBindings(AppLifeCycle.java:188)
+	at org.eclipse.jetty.deploy.DeploymentManager.requestAppGoal(DeploymentManager.java:502)
+	at org.eclipse.jetty.deploy.DeploymentManager.addApp(DeploymentManager.java:150)
+	at org.eclipse.jetty.deploy.providers.ScanningAppProvider.fileAdded(ScanningAppProvider.java:180)
+	at org.eclipse.jetty.deploy.providers.WebAppProvider.fileAdded(WebAppProvider.java:453)
+	at org.eclipse.jetty.deploy.providers.ScanningAppProvider$1.fileAdded(ScanningAppProvider.java:64)
+	at org.eclipse.jetty.util.Scanner.reportAddition(Scanner.java:610)
+	at org.eclipse.jetty.util.Scanner.reportDifferences(Scanner.java:529)
+	at org.eclipse.jetty.util.Scanner.scan(Scanner.java:392)
+	at org.eclipse.jetty.util.Scanner.doStart(Scanner.java:313)
+	at org.eclipse.jetty.util.component.AbstractLifeCycle.start(AbstractLifeCycle.java:68)
+	at org.eclipse.jetty.deploy.providers.ScanningAppProvider.doStart(ScanningAppProvider.java:150)
+	at org.eclipse.jetty.util.component.AbstractLifeCycle.start(AbstractLifeCycle.java:68)
+	at org.eclipse.jetty.deploy.DeploymentManager.startAppProvider(DeploymentManager.java:564)
+	at org.eclipse.jetty.deploy.DeploymentManager.doStart(DeploymentManager.java:239)
+	at org.eclipse.jetty.util.component.AbstractLifeCycle.start(AbstractLifeCycle.java:68)
+	at org.eclipse.jetty.util.component.ContainerLifeCycle.start(ContainerLifeCycle.java:133)
+	at org.eclipse.jetty.server.Server.start(Server.java:418)
+	at org.eclipse.jetty.util.component.ContainerLifeCycle.doStart(ContainerLifeCycle.java:115)
+	at org.eclipse.jetty.server.handler.AbstractHandler.doStart(AbstractHandler.java:113)
+	at org.eclipse.jetty.server.Server.doStart(Server.java:385)
+	at org.eclipse.jetty.util.component.AbstractLifeCycle.start(AbstractLifeCycle.java:68)
+	at org.eclipse.jetty.xml.XmlConfiguration$1.run(XmlConfiguration.java:1584)
+	at org.eclipse.jetty.xml.XmlConfiguration$1.run(XmlConfiguration.java:1508)
+	at java.base/java.security.AccessController.doPrivileged(Native Method)
+	at org.eclipse.jetty.xml.XmlConfiguration.main(XmlConfiguration.java:1507)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:564)
+	at org.eclipse.jetty.start.Main.invokeMain(Main.java:221)
+	at org.eclipse.jetty.start.Main.start(Main.java:504)
+	at org.eclipse.jetty.start.Main.main(Main.java:78)
+
+2018-11-26 14:30:11.899 INFO  (main) [   ] o.e.j.s.Server Started @1359ms

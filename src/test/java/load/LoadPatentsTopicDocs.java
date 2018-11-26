@@ -18,7 +18,7 @@ package load;
  *
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
  */
-public class LoadPatentsTopicDocs extends LoadTopicDocsFromLibrAIry {
+public class LoadPatentsTopicDocs extends LoadTopicDocsFromLDA {
 
     private static final String CORPUS_NAME     = "patents";
     private static final String CORPUS_DIM      = "250";

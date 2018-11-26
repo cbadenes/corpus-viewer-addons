@@ -1,6 +1,8 @@
 package load;
 
 import org.apache.solr.common.SolrInputDocument;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -18,7 +20,9 @@ import java.util.stream.Collectors;
  *
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
  */
-public class LoadPatentsDocuments extends LoadDocumentsFromFile {
+public class LoadPatentsDocuments extends LoadDocuments {
+
+    private static final Logger LOG = LoggerFactory.getLogger(LoadPatentsDocuments.class);
 
     private static final Integer MAX    = 1000;//-1
     private static final Integer OFFSET = 0;
@@ -33,10 +37,15 @@ public class LoadPatentsDocuments extends LoadDocumentsFromFile {
         String[] values = row.split(",");
         SolrInputDocument document = new SolrInputDocument();
         document.addField("id",values[0]);
-        document.addField("name",values[0]);
-        document.addField("lang",values[1]);
-        document.addField("text",Arrays.stream(values).skip(2).collect(Collectors.joining(",")));
+        document.addField("name_s",values[0]);
+        document.addField("lang_s",values[1]);
+        document.addField("text_txt",Arrays.stream(values).skip(2).collect(Collectors.joining(",")));
         return document;
+    }
+
+    @Override
+    protected void handleComplete() {
+        LOG.info("done!");
     }
 
 }
