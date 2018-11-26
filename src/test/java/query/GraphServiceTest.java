@@ -1,21 +1,15 @@
 package query;
 
-import com.google.common.collect.MinMaxPriorityQueue;
 import es.gob.minetad.doctopic.CleanZeroEpsylonIndex;
-import es.gob.minetad.doctopic.DocTopicsIndex;
-import es.gob.minetad.metric.JensenShannon;
 import es.gob.minetad.metric.JensenShannonExt;
-import es.gob.minetad.model.*;
+import es.gob.minetad.model.DocTopic;
+import es.gob.minetad.model.TestSettings;
 import es.gob.minetad.solr.SolrClientFactory;
 import es.gob.minetad.solr.SolrUtils;
 import es.gob.minetad.utils.TimeUtils;
 import es.gob.minetad.utils.WriterUtils;
 import org.apache.solr.client.solrj.SolrClient;
-import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.response.QueryResponse;
-import org.apache.solr.client.solrj.response.TermsResponse;
-import org.apache.solr.common.SolrDocument;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -26,14 +20,12 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 /**
  *
- * Exports a collection of documents as a list of nodes and a list of edges based on their similarities
+ * Exports a collection of documents as both a list of nodes and a list of edges based on their similarities
  *
  * in CSV format to be imported by a graph-oriented database
  *
@@ -116,7 +108,7 @@ public class GraphServiceTest {
                         LOG.error("Unexpected error",e);
                     }
                 };
-                SolrUtils.iterate(COLLECTION, "id:{* TO " + dt1.getId() + "}", client, similarityComparison);
+                SolrUtils.iterate(COLLECTION, QUERY + " AND id:{* TO " + dt1.getId() + "}", client, similarityComparison);
             } catch (Exception e) {
                 LOG.error("Unexpected error", e);
 
