@@ -1,6 +1,6 @@
 package load.patents;
 
-import load.LoadTopicDocsFromLDA;
+import load.LoadLDATopicDocs;
 
 /**
  *
@@ -20,7 +20,7 @@ import load.LoadTopicDocsFromLDA;
  *
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
  */
-public class LoadPatentsLDATopicDocs extends LoadTopicDocsFromLDA {
+public class LoadPatentsLDATopicDocs extends LoadLDATopicDocs {
 
     private static final String CORPUS_NAME     = "patents";
     private static final String CORPUS_DIM      = "250";

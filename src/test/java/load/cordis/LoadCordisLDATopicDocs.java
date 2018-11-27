@@ -1,6 +1,6 @@
 package load.cordis;
 
-import load.LoadTopicDocsFromLDA;
+import load.LoadLDATopicDocs;
 
 /**
  *
@@ -20,7 +20,7 @@ import load.LoadTopicDocsFromLDA;
  *
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
  */
-public class LoadCordisLDATopicDocs extends LoadTopicDocsFromLDA {
+public class LoadCordisLDATopicDocs extends LoadLDATopicDocs {
 
     private static final String CORPUS_NAME     = "cordis";
     private static final String CORPUS_DIM      = "70";

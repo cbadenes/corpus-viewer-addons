@@ -19,6 +19,10 @@ public class Topic {
 
     private String description;
 
+    private Double weight;
+
+    private Double entropy;
+
     private List<TopicWord> words;
 
     public Topic() {
@@ -63,12 +67,30 @@ public class Topic {
         this.words = words;
     }
 
+    public Double getWeight() {
+        return weight;
+    }
+
+    public void setWeight(Double weight) {
+        this.weight = weight;
+    }
+
+    public Double getEntropy() {
+        return entropy;
+    }
+
+    public void setEntropy(Double entropy) {
+        this.entropy = entropy;
+    }
+
     @Override
     public String toString() {
         return "Topic{" +
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
+                ", weight=" + weight +
+                ", entropy=" + entropy +
                 '}';
     }
 }

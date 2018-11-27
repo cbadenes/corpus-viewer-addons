@@ -28,7 +28,7 @@ import java.util.List;
  *
  *
  */
-public abstract class LoadDocTopics extends LoadDocuments{
+public abstract class LoadDocTopics extends LoadData{
 
     private static final Logger LOG = LoggerFactory.getLogger(LoadDocTopics.class);
     protected DocTopicsIndex docTopicIndexer;
@@ -37,7 +37,7 @@ public abstract class LoadDocTopics extends LoadDocuments{
     protected int size;
 
     public LoadDocTopics(String corpus, Integer max, Integer offset) {
-        super(corpus, max, offset);
+        super(corpus, "doctopics", max, offset);
         try {
             this.docTopicIndexer        = DocTopicIndexFactory.newFrom(numTopics);
             this.entropy                = 0.0;
@@ -72,7 +72,7 @@ public abstract class LoadDocTopics extends LoadDocuments{
 
 
         TopicSummary tsq1 = new TopicSummary(topicDistribution);
-        for(int i=0; i<6; i++){
+        for(int i=1; i<6; i++){
             Integer hashCode = tsq1.getHashCode(i);
             if (hashCode == 0) continue;
             document.addField("hashcode"+i+"_i",hashCode);
@@ -84,7 +84,7 @@ public abstract class LoadDocTopics extends LoadDocuments{
     }
 
     protected void handleComplete(){
-        CorporaCollection corporaCollection = null;
+        CorporaCollection corporaCollection;
         try {
             corporaCollection = new CorporaCollection();
             Corpus corpus = new Corpus(name+"-"+numTopics);

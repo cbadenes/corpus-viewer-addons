@@ -45,7 +45,7 @@ public class DocTopic {
     public static DocTopic from(SolrDocument d1){
         DocTopic docTopic = new DocTopic();
         docTopic.setId((String) d1.getFieldValue("id"));
-        docTopic.setHash((String) d1.getFieldValues("hashcode1_i").iterator().next());
+        docTopic.setHash(String.valueOf(d1.getFieldValues("hashcode1_i").iterator().next()));
         docTopic.setTopics((String) d1.getFieldValues("listaBO").iterator().next());
         return docTopic;
     }

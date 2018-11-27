@@ -34,6 +34,8 @@ import java.util.stream.Collectors;
  *
  * Before run the query you must start the Solr service with a valid doctopic collection!
  *
+ * http://localhost:8983/solr/cordis-doctopics/terms?terms.fl=hashcode0&wt=xml&terms.mincount=2&terms.limit=100
+ *
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
  */
 
@@ -46,7 +48,7 @@ public class AlarmServiceTest {
 
 
 
-    private static final String COLLECTION = "doctopics";
+    private static final String COLLECTION = "cordis-doctopics";
 
     @Before
     public void setup(){
@@ -67,11 +69,11 @@ public class AlarmServiceTest {
         for(Integer alarmType : alarmTypes.keySet().stream().sorted().collect(Collectors.toList())){
             // Read groups of documents
             Alarm alarm = getAlarmsBy(alarmType, COLLECTION, client);
-            LOG.info("'"+alarmTypes.get(alarmType) + "' similarity in documents: ");
+            LOG.info("'"+alarmTypes.get(alarmType) + "' similar documents: ");
             for(String group : alarm.getGroups().entrySet().stream().sorted((a,b) -> -a.getValue().compareTo(b.getValue())).limit(sampleSize).map(e -> e.getKey()).collect(Collectors.toList())){
                 LOG.info("\t > by hashcode [" + group + "]:");
                 // Read documents by hash
-                getDocumentsBy(alarmType, COLLECTION, group, sampleSize, client).forEach(doc -> LOG.info("\t\t-" + doc.getFieldValue("id")));
+                getDocumentsBy(alarmType, COLLECTION, group, sampleSize, client).forEach(doc -> LOG.info("\t\t-" + doc.getFieldValue("id") + " - '"+ doc.getFieldValue("name_s") + "'"));
             }
 
         }
@@ -79,17 +81,8 @@ public class AlarmServiceTest {
     }
 
 
-    /**
-     * http://localhost:8983/solr/cordis-doctopics-70/terms?terms.fl=hashcode0&wt=xml&terms.mincount=2&terms.limit=100
-     * @param alarmType
-     * @param corpus
-     * @param client
-     * @return
-     * @throws IOException
-     * @throws SolrServerException
-     */
     public static Alarm getAlarmsBy(Integer alarmType, String corpus, SolrClient client) throws IOException, SolrServerException {
-        String fieldName = "hashcode"+alarmType;
+        String fieldName = "hashcode"+alarmType+"_i";
         SolrQuery query = new SolrQuery();
         query.setRequestHandler("/terms");
         query.setTerms(true);
@@ -107,9 +100,10 @@ public class AlarmServiceTest {
 
 
     public static List<SolrDocument> getDocumentsBy(Integer alarmType, String corpus, String group, Integer max, SolrClient client) throws IOException, SolrServerException {
-        String fieldName = "hashcode"+alarmType;
+        String fieldName = "hashcode"+alarmType+"_i";
         SolrQuery query = new SolrQuery();
         query.set("q",fieldName+":"+group.replace("-","\\-"));
+        query.setFields("id","name_s");
         query.setRows(max);
 
         QueryResponse response = client.query(corpus, query);

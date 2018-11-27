@@ -3,7 +3,7 @@ package load.wikipedia;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import load.LoadDocuments;
-import load.LoadPatentsDocuments;
+import load.patents.LoadPatentsDocuments;
 import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

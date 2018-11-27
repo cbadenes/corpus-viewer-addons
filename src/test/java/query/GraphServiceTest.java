@@ -42,13 +42,11 @@ public class GraphServiceTest {
     private TestSettings settings;
     private SolrClient client;
 
-    private static final String COLLECTION  = "doctopics";
+    private static final String COLLECTION  = "cordis-doctopics";
     private static final String QUERY       = "*:*";
     private static final Integer NUM_TOPICS = 70;
-    private static final Double THRESHOLD   = 0.8;
+    private static final Double THRESHOLD   = 0.9;
 
-    private float epsylon;
-    private float multiplicationFactor;
     private DocTopicsIndex doctopicParser;
 
 

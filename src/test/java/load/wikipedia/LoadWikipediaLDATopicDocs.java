@@ -1,6 +1,6 @@
 package load.wikipedia;
 
-import load.LoadTopicDocsFromLDA;
+import load.LoadLDATopicDocs;
 
 /**
  *
@@ -20,7 +20,7 @@ import load.LoadTopicDocsFromLDA;
  *
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
  */
-public class LoadWikipediaLDATopicDocs extends LoadTopicDocsFromLDA {
+public class LoadWikipediaLDATopicDocs extends LoadLDATopicDocs {
 
     private static final String CORPUS_NAME     = "wikipedia";
     private static final String CORPUS_DIM      = "120";

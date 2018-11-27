@@ -24,8 +24,10 @@ public class ReaderUtils {
         InputStreamReader inputStreamReader;
         if (path.startsWith("http")){
             inputStreamReader = new InputStreamReader(new GZIPInputStream(new URL(path).openStream()));
-        }else{
+        }else if (path.endsWith(".gz")){
             inputStreamReader = new InputStreamReader(new GZIPInputStream(new FileInputStream(path)));
+        } else{
+            inputStreamReader = new InputStreamReader(new FileInputStream(path));
         }
 
         return new BufferedReader(inputStreamReader);
