@@ -1,4 +1,5 @@
 src/test/docker/logs/*.log*
+src/test/docker/solr-cloud/data/zoo_data
 src/test/docker/data/zoo_data
 output/
 corpora/
