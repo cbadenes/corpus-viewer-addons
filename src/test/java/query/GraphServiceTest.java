@@ -61,10 +61,10 @@ public class GraphServiceTest {
     @Test
     public void execute() throws IOException, SolrServerException {
 
-        Path nodesPath = Paths.get("output", "nodes.csv.gz");
+        Path nodesPath = Paths.get("output", "graphs", COLLECTION, "nodes.csv.gz");
         if (!nodesPath.getParent().toFile().exists()) nodesPath.getParent().toFile().mkdirs();
 
-        Path edgesPath = Paths.get("output", "edges.csv.gz");
+        Path edgesPath = Paths.get("output", "graphs", COLLECTION, "edges.csv.gz");
         if (!edgesPath.getParent().toFile().exists()) edgesPath.getParent().toFile().mkdirs();
 
         BufferedWriter nodesWriter = WriterUtils.to(nodesPath.toFile().getAbsolutePath());

@@ -41,7 +41,7 @@ public class LoadDTMTopicDocs {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoadDTMTopicDocs.class);
 
-    private static final Integer MULTIPLIER = 10000;
+    public static final Integer MULTIPLIER = 10000;
 
     private String corpus;
     private Integer dimension;
