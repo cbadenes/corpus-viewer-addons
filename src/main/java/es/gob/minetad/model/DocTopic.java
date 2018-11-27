@@ -4,6 +4,8 @@ import org.apache.solr.common.SolrDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
+
 /**
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
  */
