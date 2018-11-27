@@ -35,12 +35,12 @@ public class TopicSummary {
     public TopicSummary(List<Double> topicDistribution) {
         Stats stats = new Stats(topicDistribution);
         DistanceMeasure distanceMeasure = new MonoDimensionalDistanceMeasure();
-        //double eps      = stats.getVariance();
-        double eps      = stats.getDev();
         int minPts      = 0;
+        double eps      = stats.getVariance();
+        int multiplier  = 10;
 
-        DBSCANClusterer<TopicPoint> fineGrainedClusterer    = new DBSCANClusterer<>(stats.getVariance(),minPts,distanceMeasure);
-        DBSCANClusterer<TopicPoint> coarseGrainedClusterer  = new DBSCANClusterer<>(stats.getDev(),minPts,distanceMeasure);
+        DBSCANClusterer<TopicPoint> fineGrainedClusterer    = new DBSCANClusterer<>(eps,minPts,distanceMeasure);
+        DBSCANClusterer<TopicPoint> coarseGrainedClusterer  = new DBSCANClusterer<>(eps*multiplier,minPts,distanceMeasure);
 
 
         List<TopicPoint> points = IntStream.range(0, topicDistribution.size()).mapToObj(i -> new TopicPoint("" + i, topicDistribution.get(i))).collect(Collectors.toList());

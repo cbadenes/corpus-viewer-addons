@@ -70,7 +70,8 @@ public class AlarmServiceTest {
             for(String group : alarm.getGroups().entrySet().stream().sorted((a,b) -> -a.getValue().compareTo(b.getValue())).limit(sampleSize).map(e -> e.getKey()).collect(Collectors.toList())){
                 LOG.info("\t > similar docs by hashcode [" + group + "]:");
                 // Read documents by hash
-                getDocumentsBy(alarmType, COLLECTION, group, sampleSize, client).forEach(doc -> LOG.info("\t\t-" + doc.getFieldValue("id") + " - '"+ doc.getFieldValue("name_s") + "'"));
+                List<SolrDocument> docs = getDocumentsBy(alarmType, COLLECTION, group, sampleSize, client);
+                docs.forEach(doc -> LOG.info("\t\t-" + doc.getFieldValue("id") + " - '"+ doc.getFieldValue("name_s") + "'"));
             }
 
         }
