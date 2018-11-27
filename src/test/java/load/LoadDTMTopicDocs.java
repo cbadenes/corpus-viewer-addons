@@ -89,12 +89,12 @@ public class LoadDTMTopicDocs {
                         Double entropy  = Double.valueOf(values[2].replace(",","."));
                         String word     = values[3];
                         Double score    = Double.valueOf(values[4].replace(",","."));
-                        String key      = id + "_" + year;
+                        String key      = id + "_" + year+"_dtm";
 
                         if (!topics.containsKey(key)){
                             Topic topic = new Topic();
-                            topic.setId(id+"_"+year);
-                            topic.setName("t"+id+"_"+year);
+                            topic.setId(key);
+                            topic.setName("t"+key);
                             topic.setWeight(weight);
                             topic.setEntropy(entropy);
                             topic.setWords(new ArrayList<>());
@@ -128,7 +128,7 @@ public class LoadDTMTopicDocs {
                         document.addField("id",topic.getId());
                         document.addField("name_s",topic.getName());
                         document.addField("description_txt",topic.getDescription());
-                        document.addField("label_s",StringUtils.substringAfterLast(topic.getName(),"_"));
+                        document.addField("label_s",StringUtils.substringBetween(topic.getName(),"_"));
                         document.addField("model_s","dtm");
                         document.addField("weight_f",topic.getWeight());
                         document.addField("entropy_f",topic.getEntropy());
