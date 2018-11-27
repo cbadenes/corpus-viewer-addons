@@ -31,9 +31,9 @@ import java.util.stream.Collectors;
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
  */
 
-public class DynamicTopicModelTest {
+public class DTMServiceTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DynamicTopicModelTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DTMServiceTest.class);
     private TestSettings settings;
     private SolrClient client;
 
