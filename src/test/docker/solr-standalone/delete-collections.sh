@@ -1,0 +1,11 @@
+curl "http://localhost:8983/solr/admin/cores?action=UNLOAD&deleteInstanceDir=true&core=corpora"
+curl "http://localhost:8983/solr/admin/cores?action=UNLOAD&deleteInstanceDir=true&core=cordis-documents"
+curl "http://localhost:8983/solr/admin/cores?action=UNLOAD&deleteInstanceDir=true&core=cordis-doctopics"
+curl "http://localhost:8983/solr/admin/cores?action=UNLOAD&deleteInstanceDir=true&core=cordis-topicdocs"
+#curl "http://localhost:8983/solr/admin/cores?action=UNLOAD&deleteInstanceDir=true&core=wikipedia-documents"
+#curl "http://localhost:8983/solr/admin/cores?action=UNLOAD&deleteInstanceDir=true&core=wikipedia-doctopics"
+#curl "http://localhost:8983/solr/admin/cores?action=UNLOAD&deleteInstanceDir=true&core=wikipedia-topicdocs"
+#curl "http://localhost:8983/solr/admin/cores?action=UNLOAD&deleteInstanceDir=true&core=patents-documents"
+#curl "http://localhost:8983/solr/admin/cores?action=UNLOAD&deleteInstanceDir=true&core=patents-doctopics"
+curl "http://localhost:8983/solr/admin/cores?action=UNLOAD&deleteInstanceDir=true&core=patents-topicdocs"
+rm -rf collections/data/**

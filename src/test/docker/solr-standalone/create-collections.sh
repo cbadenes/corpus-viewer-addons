@@ -1,0 +1,10 @@
+docker exec -it solr solr create_core -c corpora
+docker exec -it solr solr create_core -c cordis-documents
+docker exec -it solr solr create_core -c cordis-doctopics
+docker exec -it solr solr create_core -c cordis-topicdocs
+#docker exec -it solr solr create_core -c wikipedia-documents
+#docker exec -it solr solr create_core -c wikipedia-doctopics
+#docker exec -it solr solr create_core -c wikipedia-topicdocs
+#docker exec -it solr solr create_core -c patents-documents
+#docker exec -it solr solr create_core -c patents-doctopics
+docker exec -it solr solr create_core -c patents-topicdocs
