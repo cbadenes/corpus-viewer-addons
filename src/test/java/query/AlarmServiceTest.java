@@ -51,22 +51,22 @@ public class AlarmServiceTest {
         settings    = new TestSettings();
         client      = SolrClientFactory.create(settings.get("solr.url"), settings.get("solr.mode"));
         alarmTypes  = new HashMap<>();
-        alarmTypes.put(1,"critical");
-        alarmTypes.put(2,"high");
-        alarmTypes.put(3,"medium");
-        alarmTypes.put(4,"low");
+        alarmTypes.put(0,"critical");
+        alarmTypes.put(1,"high");
+        alarmTypes.put(2,"medium");
+        alarmTypes.put(3,"low");
     }
 
 
     @Test
     public void execute() throws IOException, SolrServerException {
 
-        int sampleSize = 10;
+        int sampleSize = 0;
 
         for(Integer alarmType : alarmTypes.keySet().stream().sorted().collect(Collectors.toList())){
             // Read groups of documents
             Alarm alarm = getAlarmsBy(alarmType, COLLECTION, client);
-            LOG.info("Severity Level: '"+alarmTypes.get(alarmType) + "': ");
+            LOG.info(alarm.getTotal() + " '"+alarmTypes.get(alarmType) + "' similarities found: ");
             for(String group : alarm.getGroups().entrySet().stream().sorted((a,b) -> -a.getValue().compareTo(b.getValue())).limit(sampleSize).map(e -> e.getKey()).collect(Collectors.toList())){
                 LOG.info("\t > similar docs by hashcode [" + group + "]:");
                 // Read documents by hash
@@ -100,7 +100,7 @@ public class AlarmServiceTest {
         String fieldName = "hashcode"+alarmType+"_i";
         SolrQuery query = new SolrQuery();
         query.set("q",fieldName+":"+group.replace("-","\\-"));
-        query.setFields("id","name_s");
+        query.setFields("id","name_s","hashcode1_i","listaBO");
         query.setRows(max);
 
         QueryResponse response = client.query(corpus, query);

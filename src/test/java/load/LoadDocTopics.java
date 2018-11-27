@@ -72,7 +72,7 @@ public abstract class LoadDocTopics extends LoadData{
 
 
         TopicSummary tsq1 = new TopicSummary(topicDistribution);
-        for(int i=1; i<6; i++){
+        for(int i=0; i<6; i++){
             Integer hashCode = tsq1.getHashCode(i);
             if (hashCode == 0) continue;
             document.addField("hashcode"+i+"_i",hashCode);

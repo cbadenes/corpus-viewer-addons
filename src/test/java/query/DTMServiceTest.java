@@ -34,13 +34,14 @@ import java.util.stream.Collectors;
 public class DTMServiceTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(DTMServiceTest.class);
-    private TestSettings settings;
-    private SolrClient client;
-
 
 
     private static final String COLLECTION = "patents-topicdocs";
+
+
     private DTFIndex indexer;
+    private TestSettings settings;
+    private SolrClient client;
 
     @Before
     public void setup(){

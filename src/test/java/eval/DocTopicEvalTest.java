@@ -1,4 +1,4 @@
-package es.gob.minetad.doctopic;
+package eval;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -10,7 +10,6 @@ import es.gob.minetad.metric.JensenShannon;
 import es.gob.minetad.utils.ReaderUtils;
 import es.gob.minetad.utils.WriterUtils;
 import org.apache.commons.text.similarity.JaccardSimilarity;
-import org.apache.hadoop.util.hash.Hash;
 import org.json.JSONArray;
 import org.junit.Test;
 import org.librairy.service.modeler.facade.rest.model.InferenceRequest;
@@ -27,24 +26,27 @@ import java.util.stream.IntStream;
 
 /**
  *
- * This class groups the tests that allow to compare the topic distributions generated during the training stage of the model
+ * Analyze the topic distributions generated during the training stage of the model
  * with those obtained by inference for the same corpus.
+ *
+ * Before run the test you must start the Rest API service with a valid topic model!
  *
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
  */
 
-public class DocTopicValidationTest {
+public class DocTopicEvalTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DocTopicValidationTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DocTopicEvalTest.class);
 
     static ObjectMapper jsonMapper = new ObjectMapper();
+
+    String documents    = "corpora/cordis/documents.jsonl.gz";
+
+    String doctopics    = "corpora/cordis/doctopics-70.csv.gz";
 
     @Test
     public void comparison() throws IOException {
 
-        String documents    = "https://delicias.dia.fi.upm.es/nextcloud/index.php/s/woBzdYWfJtJ6sfY/download";
-
-        String doctopics    = "https://delicias.dia.fi.upm.es/nextcloud/index.php/s/nfmoNWMB3NN7FwE/download";
 
         JaccardSimilarity similarity = new JaccardSimilarity();
         int size            = 10;
@@ -105,9 +107,7 @@ public class DocTopicValidationTest {
     @Test
     public void generate() throws IOException {
 
-        String documents    = "https://delicias.dia.fi.upm.es/nextcloud/index.php/s/woBzdYWfJtJ6sfY/download";
-
-        BufferedWriter writer = WriterUtils.to(Paths.get("cordis.csv.gz").toFile().getAbsolutePath());
+        BufferedWriter writer = WriterUtils.to(Paths.get("output", "eval", "doctopics","cordis.csv.gz").toFile().getAbsolutePath());
         BufferedReader docReader = ReaderUtils.from(documents);
         String row;
         while((row = docReader.readLine()) != null){
@@ -126,7 +126,7 @@ public class DocTopicValidationTest {
             InferenceRequest request = new InferenceRequest();
             request.setTopics(false);
             request.setText(text);
-            HttpResponse<com.mashape.unirest.http.JsonNode> response = Unirest.post("http://localhost:8080/inferences")
+            HttpResponse<com.mashape.unirest.http.JsonNode> response = Unirest.post("http://localhost:8000/model/inferences")
                     .header("accept", "application/json")
                     .header("content-type", "application/json")
                     .body(jsonMapper.writeValueAsString(request))

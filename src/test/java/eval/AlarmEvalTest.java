@@ -2,6 +2,7 @@ package eval;
 
 import com.google.common.collect.MinMaxPriorityQueue;
 import es.gob.minetad.doctopic.CleanZeroEpsylonIndex;
+import es.gob.minetad.doctopic.DocTopicIndexFactory;
 import es.gob.minetad.doctopic.DocTopicsIndex;
 import es.gob.minetad.metric.JensenShannon;
 import es.gob.minetad.model.*;
@@ -25,21 +26,25 @@ import java.util.stream.Collectors;
 
 /**
  *
- * Set of queries to obtain documents as candidates to be duplicated.
+ * Analyze performance with respect to brute-force approach
+ * Requirements:
+ * 1. Start Solr (docker container)
+ * 2. Create Collections (create-collections.sh)
+ * 3. Load DocTopics (unit-test LoadDocTopics)
  *
- * Before run the tests you must start the Solr service!
  *
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
  */
 
-public class AlarmPerformanceTest {
+public class AlarmEvalTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AlarmPerformanceTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AlarmEvalTest.class);
     private TestSettings settings;
     private SolrClient client;
 
 
-    private static final String CORPUS = "doctopics";
+    private static final String CORPUS      = "cordis-doctopics";
+    private static final Integer NUM_TOPICS = 70;
 
     @Before
     public void setup(){
@@ -48,38 +53,23 @@ public class AlarmPerformanceTest {
     }
 
 
-    /**
-     * Analyze performance with respect to brute-force approach
-     * Requirements:
-     * 1. Start Solr (docker container)
-     * 2. Create Collections (create-collections.sh)
-     * 3. Load DocTopics (unit-test LoadDocTopics)
-     *
-     */
     @Test
     public void execute() throws IOException, SolrServerException {
 
         MinMaxPriorityQueue<Similarity> pairs = MinMaxPriorityQueue.orderedBy(new Similarity.ScoreComparator()).maximumSize(100).create();
 
-        Integer numTopics = Integer.valueOf(settings.get("corpus.dim"));
-
-        float epsylon = 1f / numTopics;
-        float multiplicationFactor = Double.valueOf(1 * Math.pow(10, String.valueOf(numTopics).length() + 1)).floatValue();
-        CleanZeroEpsylonIndex indexer = new CleanZeroEpsylonIndex(numTopics, multiplicationFactor, epsylon);
+        DocTopicsIndex indexer = DocTopicIndexFactory.newFrom(NUM_TOPICS);
 
         AtomicInteger bruteForceCounter = new AtomicInteger();
         SolrUtils.Executor bruteForceComparison = d1 -> {
             try {
                 final DocTopic dt1      = DocTopic.from(d1);
                 final List<Double> v1 = indexer.toVector(dt1.getTopics());
-                SolrUtils.Executor similarityComparison = new SolrUtils.Executor() {
-                    @Override
-                    public void handle(SolrDocument d2) {
-                        bruteForceCounter.incrementAndGet();
-                        final DocTopic dt2      = DocTopic.from(d2);
-                        final List<Double> v2   = indexer.toVector(dt2.getTopics());
-                        pairs.add(new Similarity(JensenShannon.similarity(v1,v2), new Document(dt1.getId(),dt1.getHash()), new Document(dt2.getId(), dt2.getHash())));
-                    }
+                SolrUtils.Executor similarityComparison = d2 -> {
+                    bruteForceCounter.incrementAndGet();
+                    final DocTopic dt2      = DocTopic.from(d2);
+                    final List<Double> v2   = indexer.toVector(dt2.getTopics());
+                    pairs.add(new Similarity(JensenShannon.similarity(v1,v2), new Document(dt1.getId(),dt1.getHash()), new Document(dt2.getId(), dt2.getHash())));
                 };
                 SolrUtils.iterate(CORPUS, "id:{* TO " + dt1.getId() + "}", client, similarityComparison);
             } catch (Exception e) {
@@ -88,7 +78,7 @@ public class AlarmPerformanceTest {
             }
         };
 
-        LOG.info("Calculating all pair-wise similarities ..");
+        LOG.info("Calculating similarity among all pairs of documents ..");
         Instant s1 = Instant.now();
         SolrUtils.iterate(CORPUS, "*:*", client, bruteForceComparison);
         Instant e1 = Instant.now();
@@ -105,10 +95,10 @@ public class AlarmPerformanceTest {
         for(Integer accuracy: Arrays.asList(1,5,10)){
 
             // Density-based Approach Evaluation
-            for(Integer alarmType: Arrays.asList(1,3,5)){
+            for(Integer alarmType: Arrays.asList(0,1,2,3,4,5)){
                 Instant start = Instant.now();
                 AtomicInteger densityCounter = new AtomicInteger();
-                List<Similarity> topSimilarDocsByDensity = AlarmPerformanceTest.getSimilarDocumentsBy(alarmType, CORPUS, indexer, densityCounter, client);
+                List<Similarity> topSimilarDocsByDensity = AlarmEvalTest.getSimilarDocumentsBy(alarmType, CORPUS, indexer, densityCounter, client);
                 Instant end = Instant.now();
                 LOG.info("Density-based["+alarmType+"] Approach@"+accuracy+": " + new Evaluation(start, end, groundTruth, topSimilarDocsByDensity.stream().limit(accuracy).map(sim -> sim.getPair()).collect(Collectors.toList()), densityCounter.get()));
             }
@@ -126,22 +116,19 @@ public class AlarmPerformanceTest {
             try {
                 final DocTopic dt1      = DocTopic.from(d1);
                 final List<Double> v1   = indexer.toVector(dt1.getTopics());
-                SolrUtils.Executor similarityComparison = new SolrUtils.Executor() {
-                    @Override
-                    public void handle(SolrDocument d2) {
-                        normCalculus.incrementAndGet();
-                        final DocTopic dt2      = DocTopic.from(d2);
-                        final List<Double> v2   = indexer.toVector(dt2.getTopics());
+                SolrUtils.Executor similarityComparison = d2 -> {
+                    normCalculus.incrementAndGet();
+                    final DocTopic dt2      = DocTopic.from(d2);
+                    final List<Double> v2   = indexer.toVector(dt2.getTopics());
 
-                        double l1 = 0.0;
-                        for(int i=0;i<v1.size();i++){
-                            l1 += Math.abs(v1.get(i)-v2.get(i));
-                        }
+                    double l1 = 0.0;
+                    for(int i=0;i<v1.size();i++){
+                        l1 += Math.abs(v1.get(i)-v2.get(i));
+                    }
 
-                        if (l1 < thr_v){
-                            simCalculus.incrementAndGet();
-                            p3.add(new Similarity(JensenShannon.similarity(v1,v2), new Document(dt1.getId(),dt1.getHash()), new Document(dt2.getId(), dt2.getHash())));
-                        }
+                    if (l1 < thr_v){
+                        simCalculus.incrementAndGet();
+                        p3.add(new Similarity(JensenShannon.similarity(v1,v2), new Document(dt1.getId(),dt1.getHash()), new Document(dt2.getId(), dt2.getHash())));
                     }
                 };
                 SolrUtils.iterate(CORPUS, "id:{* TO " + dt1.getId() + "}", client, similarityComparison);

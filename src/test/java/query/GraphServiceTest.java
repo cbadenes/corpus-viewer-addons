@@ -1,6 +1,5 @@
 package query;
 
-import es.gob.minetad.doctopic.CleanZeroEpsylonIndex;
 import es.gob.minetad.doctopic.DocTopicIndexFactory;
 import es.gob.minetad.doctopic.DocTopicsIndex;
 import es.gob.minetad.metric.JensenShannonExt;
