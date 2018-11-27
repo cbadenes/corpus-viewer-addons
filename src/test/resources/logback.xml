@@ -29,7 +29,7 @@
 
     <logger name="query" level="DEBUG"/>
 
-    <logger name="evals" level="DEBUG"/>
+    <logger name="eval" level="DEBUG"/>
 
     <logger name="admin" level="DEBUG"/>
 
