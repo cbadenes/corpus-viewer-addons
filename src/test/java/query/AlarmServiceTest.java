@@ -1,9 +1,7 @@
 package query;
 
-import com.google.common.collect.MinMaxPriorityQueue;
-import es.gob.minetad.doctopic.DocTopicsIndex;
-import es.gob.minetad.metric.JensenShannon;
-import es.gob.minetad.model.*;
+import es.gob.minetad.model.Alarm;
+import es.gob.minetad.model.TestSettings;
 import es.gob.minetad.solr.SolrClientFactory;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -17,11 +15,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -56,8 +52,9 @@ public class AlarmServiceTest {
         client      = SolrClientFactory.create(settings.get("solr.url"), settings.get("solr.mode"));
         alarmTypes  = new HashMap<>();
         alarmTypes.put(1,"critical");
-        alarmTypes.put(3,"high");
-        alarmTypes.put(5,"low");
+        alarmTypes.put(2,"high");
+        alarmTypes.put(3,"medium");
+        alarmTypes.put(4,"low");
     }
 
 
@@ -69,9 +66,9 @@ public class AlarmServiceTest {
         for(Integer alarmType : alarmTypes.keySet().stream().sorted().collect(Collectors.toList())){
             // Read groups of documents
             Alarm alarm = getAlarmsBy(alarmType, COLLECTION, client);
-            LOG.info("'"+alarmTypes.get(alarmType) + "' similar documents: ");
+            LOG.info("Severity Level: '"+alarmTypes.get(alarmType) + "': ");
             for(String group : alarm.getGroups().entrySet().stream().sorted((a,b) -> -a.getValue().compareTo(b.getValue())).limit(sampleSize).map(e -> e.getKey()).collect(Collectors.toList())){
-                LOG.info("\t > by hashcode [" + group + "]:");
+                LOG.info("\t > similar docs by hashcode [" + group + "]:");
                 // Read documents by hash
                 getDocumentsBy(alarmType, COLLECTION, group, sampleSize, client).forEach(doc -> LOG.info("\t\t-" + doc.getFieldValue("id") + " - '"+ doc.getFieldValue("name_s") + "'"));
             }
