@@ -69,10 +69,19 @@ services:
 #   environment:
 #    - REST_PATH=/model
   solr:
-    image: solr:7.5
+    image: solr:7.3.1
     container_name: solr
     ports:
+    - "9983:9983"
     - "8983:8983"
     volumes:
-    - ./collections/config:/opt/solr/server/solr
-    - ./collections/data:/opt/solr/data
+    - ./bin/solr.in.sh:/opt/solr/bin/solr.in.sh
+    - ./contrib/jscustomsimilarity:/opt/solr/contrib/jscustomsimilarity
+    - ./data:/opt/solr/server/solr
+    - ./graph/solr-graph-ui:/opt/solr/server/solr-webapp/webapp/solr-graph-ui
+    - ./logs:/opt/solr/server/logs
+    entrypoint:
+    - solr
+    - start
+    - -c
+    - -f
