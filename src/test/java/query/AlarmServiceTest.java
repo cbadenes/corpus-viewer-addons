@@ -32,7 +32,6 @@ import java.util.stream.Collectors;
  *
  * http://localhost:8983/solr/cordis-doctopics/terms?terms.fl=hashcode0&wt=xml&terms.mincount=2&terms.limit=100
  *
- * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
  */
 
 public class AlarmServiceTest {
