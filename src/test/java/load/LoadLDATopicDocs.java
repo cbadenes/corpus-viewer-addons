@@ -24,6 +24,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -104,7 +105,7 @@ public abstract class LoadLDATopicDocs {
 
             String id           = String.valueOf(dimension.getInt("id"));
             String topicName    = dimension.getString("name");
-            String description  = dimension.getString("description");
+//            String description  = dimension.getString("description");
 
             JsonNode topicResponse = RestClient.get(endpoint + "/topics/" + id, 200);
             Double entropy      = topicResponse.getObject().getDouble("entropy");;
@@ -112,7 +113,7 @@ public abstract class LoadLDATopicDocs {
             // Calculate the topic weight based on documents containing that topic in hashexpr5
             solrQuery = new SolrQuery();
             solrQuery.setRows(0);
-            solrQuery.setQuery("hashexpr5_txt:t"+id);
+            solrQuery.setQuery("hashexpr5_t:t"+id);
             rsp = collection.getSolrClient().query(name+"-doctopics",solrQuery);
             long numFound = rsp.getResults().getNumFound();
             Double weight       = Double.valueOf(numFound) / Double.valueOf(numDocs);
@@ -124,7 +125,13 @@ public abstract class LoadLDATopicDocs {
             SolrInputDocument document = new SolrInputDocument();
             document.addField("id",id);
             document.addField("name_s",topicName);
-            document.addField("description_txt",description);
+
+            String description = words.entrySet().stream().sorted((a,b) -> -a.getValue().compareTo(b.getValue())).limit(10).map(e -> e.getKey()).collect(Collectors.joining(","));
+            document.addField("description_t",description);
+
+            String descriptionTFIDF = wordsTfIdf.entrySet().stream().sorted((a,b) -> -a.getValue().compareTo(b.getValue())).limit(10).map(e -> e.getKey()).collect(Collectors.joining(","));
+            document.addField("descriptionTFIDF_t",descriptionTFIDF);
+
 //            document.addField("label_s","");
             document.addField("model_s","lda");
             document.addField("weight_f",weight);

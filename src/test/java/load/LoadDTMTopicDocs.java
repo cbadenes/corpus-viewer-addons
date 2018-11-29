@@ -89,13 +89,20 @@ public class LoadDTMTopicDocs {
                     String dtf = indexer.toString(words);
 
                     Map<String,Double> wordsTFIDF = new HashMap<>();
-                    topicsByTFIDF.get(topicKey).getWords().forEach(tw -> wordsTFIDF.put(tw.getWord().getValue(), tw.getScore()));
+                    Topic topicTFIDF = topicsByTFIDF.get(topicKey);
+                    topicTFIDF.getWords().forEach(tw -> wordsTFIDF.put(tw.getWord().getValue(), tw.getScore()));
                     String dtfTFIDF = indexer.toString(wordsTFIDF);
 
 
                     document.addField("id",topic.getId());
                     document.addField("name_s",topic.getName());
-                    document.addField("description_txt",topic.getDescription());
+
+                    String description = topic.getWords().stream().sorted((a,b) -> -a.getScore().compareTo(b.getScore())).limit(10).map(e -> e.getWord().getValue()).collect(Collectors.joining(","));
+                    document.addField("description_t",description);
+
+                    String descriptionTFIDF = topicTFIDF.getWords().stream().sorted((a,b) -> -a.getScore().compareTo(b.getScore())).limit(10).map(e -> e.getWord().getValue()).collect(Collectors.joining(","));
+                    document.addField("descriptionTFIDF_t",descriptionTFIDF);
+
                     document.addField("label_s",StringUtils.substringBetween(topic.getName(),"_"));
                     document.addField("model_s","dtm");
                     document.addField("weight_f",topic.getWeight());
