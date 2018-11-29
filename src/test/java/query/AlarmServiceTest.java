@@ -95,7 +95,26 @@ public class AlarmServiceTest {
         return alarm;
 
     }
-
+    /*
+     * calculo agrupacion alarmas  
+     */
+    public static void getDocumentsList(Integer alarmType, String corpus, SolrClient client) throws IOException, SolrServerException{
+    	String fieldName = "hashcode"+alarmType+"_i";
+    	SolrQuery query = new SolrQuery();
+    	query.setRequestHandler("/select");
+    	query.set("q","*:*");
+    	query.set("qt", "terms");
+    	query.set("terms.fl", fieldName);
+    	query.set("terms","true");
+    	query.set("fieldName","name_s");
+    	query.addField("alar:[alarmas]");
+    	query.set("terms.mincount", "2");
+    	query.setRows(1);
+    	List<SolrDocument> p=client.query(corpus,query).getResults();
+    	System.out.println();
+    	p.forEach(doc -> LOG.info("-" + doc.getFieldValue("alar")));
+    
+    }
 
     public static List<SolrDocument> getDocumentsBy(Integer alarmType, String corpus, String group, Integer max, SolrClient client) throws IOException, SolrServerException {
         String fieldName = "hashcode"+alarmType+"_i";
