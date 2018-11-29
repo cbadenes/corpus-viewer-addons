@@ -47,11 +47,11 @@ public class HierarchicalQueriesTest {
     /**
      * groups of topics that are dealt with together being the main topics of a document
      *
-     * http://localhost:8983/solr/cordis-doctopics/terms?terms.fl=hashexpr5_txt&wt=xml&terms.mincount=2&terms.limit=100
+     * http://localhost:8983/solr/cordis-doctopics/terms?terms.fl=hashexpr5_t&wt=xml&terms.mincount=2&terms.limit=100
      *
      */
     public void getMainTopicGroups() throws IOException, SolrServerException {
-        List<TermsResponse.Term> terms = getTopicStats("hashexpr5_txt");
+        List<TermsResponse.Term> terms = getTopicStats("hashexpr5_t");
 
         terms.stream().filter(t -> t.getTerm().contains("_")).forEach(t -> LOG.info("Topics: " + t.getTerm() + " as main topics in " + t.getFrequency() + " docs"));
     }
@@ -62,8 +62,8 @@ public class HierarchicalQueriesTest {
      *
      */
     public void getBackgroundTopicGroups() throws IOException, SolrServerException {
-        List<TermsResponse.Term> level1 = getTopicStats("hashexpr1_txt");
-        List<TermsResponse.Term> level2 = getTopicStats("hashexpr2_txt");
+        List<TermsResponse.Term> level1 = getTopicStats("hashexpr1_t");
+        List<TermsResponse.Term> level2 = getTopicStats("hashexpr2_t");
 
         Map<String,Integer> map = new HashMap<>();
         level2.stream().filter(t -> t.getTerm().contains("_")).forEach(t -> map.put(t.getTerm(),1));
@@ -82,9 +82,9 @@ public class HierarchicalQueriesTest {
 
         StringBuilder query = new StringBuilder();
         // main topics
-        query.append("hashexpr5_txt:").append(mainTopics).append(" AND ");
+        query.append("hashexpr5_t:").append(mainTopics).append(" AND ");
         // background topics
-        query.append("(hashexpr4_txt:").append(backgroundTopics).append(" OR ").append(" hashexpr3_txt:").append(backgroundTopics).append(")");
+        query.append("(hashexpr4_t:").append(backgroundTopics).append(" OR ").append(" hashexpr3_t:").append(backgroundTopics).append(")");
 
         SolrQuery solrQuery = new SolrQuery();
         solrQuery.setRows(500);

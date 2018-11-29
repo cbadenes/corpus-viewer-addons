@@ -41,7 +41,7 @@ public class LoadWikipediaDocTopics extends LoadDocTopics {
         if (doc.isPresent()) {
             SolrDocument solrDoc = doc.get();
             document.addField("name_s", solrDoc.get("name_s"));
-            document.addField("text_txt", solrDoc.get("text_txt"));
+            document.addField("text_t", solrDoc.get("text_t"));
             document.addField("url_s", solrDoc.get("url_s"));
         }
 

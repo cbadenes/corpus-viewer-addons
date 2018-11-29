@@ -42,7 +42,7 @@ public class LoadPatentsDocTopics extends LoadDocTopics {
             SolrDocument solrDoc = doc.get();
             document.addField("name_s", solrDoc.get("name_s"));
             document.addField("lang_s", solrDoc.get("lang_s"));
-            document.addField("text_txt", solrDoc.get("text_txt"));
+            document.addField("text_t", solrDoc.get("text_t"));
         }
 
         return document;

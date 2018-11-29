@@ -26,7 +26,7 @@ public class LoadCordisDocuments extends LoadDocuments {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoadCordisDocuments.class);
 
-    private static final Integer MAX    = 1000; //-1
+    private static final Integer MAX    = -1; //-1
     private static final Integer OFFSET = 0;
     private static final String CORPUS  = "corpora/cordis/documents.jsonl.gz";
     private final ObjectMapper jsonMapper;
@@ -45,7 +45,7 @@ public class LoadCordisDocuments extends LoadDocuments {
             SolrInputDocument document = new SolrInputDocument();
             document.addField("id",json.get("id").asText());
             document.addField("name_s",json.get("title").asText());
-            document.addField("text_txt",json.get("objective").asText());
+            document.addField("text_t",json.get("objective").asText());
             document.addField("instrument_s",json.get("instrument").asText());
             document.addField("startDate_dt",json.get("startDate").asText());
             document.addField("endDate_dt",json.get("endDate").asText());

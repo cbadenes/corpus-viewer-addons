@@ -40,7 +40,7 @@ public class LoadPatentsDocuments extends LoadDocuments {
         document.addField("id",values[0]);
         document.addField("name_s",values[0]);
         document.addField("lang_s",values[1]);
-        document.addField("text_txt",Arrays.stream(values).skip(2).collect(Collectors.joining(",")));
+        document.addField("text_t",Arrays.stream(values).skip(2).collect(Collectors.joining(",")));
         return document;
     }
 

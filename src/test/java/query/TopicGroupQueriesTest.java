@@ -46,12 +46,12 @@ public class TopicGroupQueriesTest {
     /**
      * groups of topics that are dealt with together in a document
      *
-     * http://localhost:8983/solr/cordis-doctopics/terms?terms.fl=hashexpr5_txt&wt=xml&terms.mincount=2&terms.limit=100
+     * http://localhost:8983/solr/cordis-doctopics/terms?terms.fl=hashexpr5_t&wt=xml&terms.mincount=2&terms.limit=100
      *
      */
     @Test
     public void getTopicGroups() throws IOException, SolrServerException {
-        List<TermsResponse.Term> terms = getTopicStats("hashexpr0_txt","");
+        List<TermsResponse.Term> terms = getTopicStats("hashexpr0_t","");
 
         terms.stream().filter(t -> t.getTerm().contains("_")).forEach(t -> LOG.info("Topics: " + t.getTerm() + " in " + t.getFrequency() + " docs"));
     }
@@ -59,11 +59,11 @@ public class TopicGroupQueriesTest {
     /**
      * topics in a document having similar proportion as one given
      *
-     * http://localhost:8983/solr/cordis-doctopics/terms?terms.fl=hashexpr0_txt&wt=xml&terms.mincount=2&terms.limit=100&terms.regex=.*t20.*
+     * http://localhost:8983/solr/cordis-doctopics/terms?terms.fl=hashexpr0_t&wt=xml&terms.mincount=2&terms.limit=100&terms.regex=.*t20.*
      */
     @Test
     public void getRelatedTopics() throws IOException, SolrServerException {
-        List<TermsResponse.Term> terms = getTopicStats("hashexpr0_txt",".*t20.*");
+        List<TermsResponse.Term> terms = getTopicStats("hashexpr0_t",".*t20.*");
 
         terms.stream().filter(t -> t.getTerm().contains("_")).forEach(t -> LOG.info("Topics: " + t.getTerm() + " in " + t.getFrequency() + " docs"));
 

@@ -88,7 +88,7 @@ public class DTMServiceTest {
                 List<String> header = new ArrayList<>();
                 header.add("date");
 
-                String descriptionWords = ((List<String>) topicdoc.getFieldValue("description_txt")).get(0);
+                String descriptionWords = ((List<String>) topicdoc.getFieldValue("description_t")).get(0);
 
                 String[] words = descriptionWords.split(",");
                 Arrays.stream(words).forEach(w -> header.add(w));
@@ -177,7 +177,7 @@ public class DTMServiceTest {
         String fieldName = "id";
         SolrQuery query = new SolrQuery();
         query.set("q",fieldName+":"+id);
-        query.setFields("id","description_txt","words_tfdl");
+        query.setFields("id","description_t","words_tfdl");
         query.setRows(1);
 
         QueryResponse response = client.query(COLLECTION, query);

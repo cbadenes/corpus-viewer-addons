@@ -76,7 +76,7 @@ public abstract class LoadDocTopics extends LoadData{
             Integer hashCode = tsq1.getHashCode(i);
             if (hashCode == 0) continue;
             document.addField("hashcode"+i+"_i",hashCode);
-            document.addField("hashexpr"+i+"_txt",""+tsq1.getHashTopics(i).replace("|"," "));
+            document.addField("hashexpr"+i+"_t",""+tsq1.getHashTopics(i).replace("|"," "));
         }
 
         return document;

@@ -25,9 +25,9 @@ public class CorpusViewerTest_24 {
 	 
 	 private final int NROWS =10;
 	 private static final String FIELD1    = "score";
-	 private static final String FIELD2    = "text_txt";
+	 private static final String FIELD2    = "text_t";
 	 private static final String FIELDFACET   = "area_s";
-	 private static final String textualQuery ="text_txt: investigate smarth";
+	 private static final String textualQuery ="text_t: investigate smarth";
 	 private static final String DATESTART  = "date_dt";
 	 private static final String DATEND   = "endDate_dt";
 	 private static final String start="2016-07-17T00:00:00Z";
