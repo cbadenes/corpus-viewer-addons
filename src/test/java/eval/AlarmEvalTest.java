@@ -102,6 +102,11 @@ public class AlarmEvalTest {
                 Instant end = Instant.now();
                 LOG.info("Density-based["+alarmType+"] Approach@"+accuracy+": " + new Evaluation(start, end, groundTruth, topSimilarDocsByDensity.stream().limit(accuracy).map(sim -> sim.getPair()).collect(Collectors.toList()), densityCounter.get()));
             }
+            //agrupacion de alarmas calculo  
+            for(Integer alarmType: Arrays.asList(0,1,2,3,4,5)){
+            	AlarmServiceTest.getDocumentsList(alarmType, CORPUS, client);
+            }
+            
         }
 
         // Threshold-based Approach Evaluation
