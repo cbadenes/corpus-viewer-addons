@@ -24,7 +24,7 @@ public class DTFIndex {
 
 
     public String toString(Map<String,Double> values) {
-        return values.entrySet().stream().map(entry -> entry.getKey()+"|"+Double.valueOf(entry.getValue()*multiplier).intValue()).collect(Collectors.joining(" "));
+        return  values.entrySet().stream().filter(entry -> entry.getValue() > 0.0).map(entry -> entry.getKey()+"|"+Double.valueOf(entry.getValue()*multiplier).intValue()).collect(Collectors.joining(" "));
     }
 
     public Map<String,Double> toMap(String topicRepresentation, Boolean normalize) {

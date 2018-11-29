@@ -125,7 +125,7 @@ public abstract class LoadLDATopicDocs {
             document.addField("id",id);
             document.addField("name_s",topicName);
             document.addField("description_txt",description);
-            document.addField("label_s","");
+//            document.addField("label_s","");
             document.addField("model_s","lda");
             document.addField("weight_f",weight);
             document.addField("entropy_f",entropy);

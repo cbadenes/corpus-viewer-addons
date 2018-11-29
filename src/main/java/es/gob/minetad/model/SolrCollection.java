@@ -31,7 +31,7 @@ public class SolrCollection {
     protected  SolrClient solrClient;
     protected final String collectionName;
     protected AtomicInteger counter = new AtomicInteger();
-    protected int interval = 10;
+    protected int interval = 5000;
 
     public SolrCollection(String name) throws IOException, SolrServerException {
 

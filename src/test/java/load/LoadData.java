@@ -103,6 +103,8 @@ public abstract class LoadData {
 
         collection.commit();
 
+        handleComplete();
+
         TimeUtils.print(corpusStart, Instant.now(), "Corpus '" + name +"' saved in solr in: ");
 
     }
