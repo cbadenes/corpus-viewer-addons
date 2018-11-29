@@ -62,7 +62,7 @@ public class LoadDTMTopicDocs {
             }
 
             List<Path> files = Files.walk(path)
-                    .filter(s -> s.toString().endsWith(".tsv"))
+                    .filter(s -> s.toString().endsWith(".tsv") && !s.toFile().getName().contains("_tfidf_"))
                     .sorted()
                     .collect(Collectors.toList());
 
@@ -71,48 +71,12 @@ public class LoadDTMTopicDocs {
             DTFIndex indexer = new DTFIndex(MULTIPLIER);
 
             for(Path file : files){
-                String name = file.toFile().getName();
-                boolean tfidf = name.contains("tfidf");
-                String year = StringUtils.substringBefore(StringUtils.substringAfterLast(name,"_"),".tsv");
+
                 ConcurrentHashMap<String,Topic> topics = new ConcurrentHashMap<>();
+                ConcurrentHashMap<String,Topic> topicsByTFIDF = new ConcurrentHashMap<>();
 
-                BufferedReader reader = ReaderUtils.from(file.toFile().getAbsolutePath());
-                String line;
-                while((line = reader.readLine()) != null){
-                    if (Strings.isNullOrEmpty(line)) continue;
-                    String[] values = line.split("\t");
-                    if (values.length != 5) continue;
-
-                    try{
-                        String id       = values[0];
-                        Double weight   = Double.valueOf(values[1].replace(",","."));
-                        Double entropy  = Double.valueOf(values[2].replace(",","."));
-                        String word     = values[3];
-                        Double score    = Double.valueOf(values[4].replace(",","."));
-                        String key      = id + "_" + year+"_dtm";
-
-                        if (!topics.containsKey(key)){
-                            Topic topic = new Topic();
-                            topic.setId(key);
-                            topic.setName("t"+key);
-                            topic.setWeight(weight);
-                            topic.setEntropy(entropy);
-                            topic.setWords(new ArrayList<>());
-                            topics.put(key,topic);
-                        }
-
-                        topics.get(key).getWords().add(new TopicWord(new Word(word),score));
-
-                        if (topics.get(key).getWords().size() == 10){
-                            String description = topics.get(key).getWords().stream().map(tw -> tw.getWord().getValue()).collect(Collectors.joining(","));
-                            topics.get(key).setDescription(description);
-                        }
-                    }catch (NumberFormatException e){
-                        //"invalid line: '" + line+"'"
-                        continue;
-                    }
-
-                }
+                readFile(file,topics);
+                readFile(Paths.get(file.toFile().getAbsolutePath().replace("modelo_","modelo_tfidf_")),topicsByTFIDF);
 
                 for(String topicKey: topics.keySet()){
 
@@ -124,24 +88,20 @@ public class LoadDTMTopicDocs {
                     topic.getWords().forEach(tw -> words.put(tw.getWord().getValue(), tw.getScore()));
                     String dtf = indexer.toString(words);
 
-                    if (!tfidf){
-                        document.addField("id",topic.getId());
-                        document.addField("name_s",topic.getName());
-                        document.addField("description_txt",topic.getDescription());
-                        document.addField("label_s",StringUtils.substringBetween(topic.getName(),"_"));
-                        document.addField("model_s","dtm");
-                        document.addField("weight_f",topic.getWeight());
-                        document.addField("entropy_f",topic.getEntropy());
-                        document.addField("words_tfdl",dtf);
-                    }else{
-                        Optional<SolrDocument> optDoc = collection.getById(topic.getId());
-                        if (!optDoc.isPresent()) continue;
-                        SolrDocument indexedDoc = optDoc.get();
-                        for(String field : indexedDoc.getFieldNames()){
-                            document.addField(field, indexedDoc.getFieldValue(field));
-                        }
-                        document.addField("wordsTFIDF_tfdl",dtf);
-                    }
+                    Map<String,Double> wordsTFIDF = new HashMap<>();
+                    topicsByTFIDF.get(topicKey).getWords().forEach(tw -> wordsTFIDF.put(tw.getWord().getValue(), tw.getScore()));
+                    String dtfTFIDF = indexer.toString(wordsTFIDF);
+
+
+                    document.addField("id",topic.getId());
+                    document.addField("name_s",topic.getName());
+                    document.addField("description_txt",topic.getDescription());
+                    document.addField("label_s",StringUtils.substringBetween(topic.getName(),"_"));
+                    document.addField("model_s","dtm");
+                    document.addField("weight_f",topic.getWeight());
+                    document.addField("entropy_f",topic.getEntropy());
+                    document.addField("words_tfdl",dtf);
+                    document.addField("wordsTFIDF_tfdl",dtfTFIDF);
 
                     collection.add(document);
 
@@ -156,6 +116,47 @@ public class LoadDTMTopicDocs {
             LOG.info("Unexpected error",e);
         }
 
+    }
+
+    private void readFile(Path path, ConcurrentHashMap<String,Topic> topics) throws IOException {
+        String name = path.toFile().getName();
+        String year = StringUtils.substringBefore(StringUtils.substringAfterLast(name,"_"),".tsv");
+        BufferedReader reader = ReaderUtils.from(path.toFile().getAbsolutePath());
+        String line;
+        while((line = reader.readLine()) != null){
+            if (Strings.isNullOrEmpty(line)) continue;
+            String[] values = line.split("\t");
+            if (values.length != 5) continue;
+
+            try{
+                String id       = values[0];
+                Double weight   = Double.valueOf(values[1].replace(",","."));
+                Double entropy  = Double.valueOf(values[2].replace(",","."));
+                String word     = values[3];
+                Double score    = Double.valueOf(values[4].replace(",","."));
+                String key      = id + "_" + year+"_dtm";
+
+                if (!topics.containsKey(key)){
+                    Topic topic = new Topic();
+                    topic.setId(key);
+                    topic.setName("t"+key);
+                    topic.setWeight(weight);
+                    topic.setEntropy(entropy);
+                    topic.setWords(new ArrayList<>());
+                    topics.put(key,topic);
+                }
+
+                topics.get(key).getWords().add(new TopicWord(new Word(word),score));
+
+                if (topics.get(key).getWords().size() == 10){
+                    String description = topics.get(key).getWords().stream().map(tw -> tw.getWord().getValue()).collect(Collectors.joining(","));
+                    topics.get(key).setDescription(description);
+                }
+            }catch (NumberFormatException e){
+                //"invalid line: '" + line+"'"
+                continue;
+            }
+        }
     }
 
 }
