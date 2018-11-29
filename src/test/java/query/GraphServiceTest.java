@@ -41,12 +41,13 @@ public class GraphServiceTest {
     private TestSettings settings;
     private SolrClient client;
 
-    private static final String COLLECTION  = "cordis-doctopics";
+    private static final String CORPUS  = "cordis";
     private static final String QUERY       = "*:*";
     private static final Integer NUM_TOPICS = 70;
     private static final Double THRESHOLD   = 0.9;
 
     private DocTopicsIndex doctopicParser;
+    private String collection;
 
 
     @Before
@@ -54,23 +55,39 @@ public class GraphServiceTest {
         settings                    = new TestSettings();
         client                      = SolrClientFactory.create(settings.get("solr.url"), settings.get("solr.mode"));
         this.doctopicParser         = DocTopicIndexFactory.newFrom(NUM_TOPICS);
+        collection                  = CORPUS + "-doctopics";
     }
 
 
     @Test
     public void execute() throws IOException, SolrServerException {
 
-        Path nodesPath = Paths.get("output", "graphs", COLLECTION, "nodes.csv.gz");
+        Path nodesPath = Paths.get("output", "graphs", CORPUS, ""+NUM_TOPICS, "nodes.csv.gz");
         if (!nodesPath.getParent().toFile().exists()) nodesPath.getParent().toFile().mkdirs();
 
-        Path edgesPath = Paths.get("output", "graphs", COLLECTION, "edges.csv.gz");
+        Path nodesHeaderPath = Paths.get("output", "graphs", CORPUS, ""+NUM_TOPICS, "nodes-header.csv");
+        if (!nodesHeaderPath.getParent().toFile().exists()) nodesHeaderPath.getParent().toFile().mkdirs();
+
+        Path edgesPath = Paths.get("output", "graphs", CORPUS, ""+NUM_TOPICS, "edges.csv.gz");
         if (!edgesPath.getParent().toFile().exists()) edgesPath.getParent().toFile().mkdirs();
+
+        Path edgesHeaderPath = Paths.get("output", "graphs", CORPUS, ""+NUM_TOPICS, "edges-header.csv");
+        if (!edgesHeaderPath.getParent().toFile().exists()) edgesHeaderPath.getParent().toFile().mkdirs();
+
+        // Header Files
+        BufferedWriter nodesHeaderWriter = WriterUtils.to(nodesHeaderPath.toFile().getAbsolutePath());
+        BufferedWriter edgesHeaderWriter = WriterUtils.to(edgesHeaderPath.toFile().getAbsolutePath());
+
+        nodesHeaderWriter.write("documentId:ID(Document-ID)\n");
+        edgesHeaderWriter.write(":START_ID(Document-ID),:END_ID(Document-ID),similarity,:TYPE\n");
+
+        nodesHeaderWriter.close();
+        edgesHeaderWriter.close();
+
+        // Content files
 
         BufferedWriter nodesWriter = WriterUtils.to(nodesPath.toFile().getAbsolutePath());
         BufferedWriter edgesWriter = WriterUtils.to(edgesPath.toFile().getAbsolutePath());
-
-        nodesWriter.write("id\n");
-        edgesWriter.write("id1,id2,similarity\n");
 
 
         AtomicInteger counter = new AtomicInteger();
@@ -97,7 +114,8 @@ public class GraphServiceTest {
                             StringBuffer edge = new StringBuffer();
                             edge.append(dt1.getId()).append(",");
                             edge.append(dt2.getId()).append(",");
-                            edge.append(similarity);
+                            edge.append(similarity).append(",");
+                            edge.append("SIMILAR_TO");
                             // add as many metadata as required
                             edgesWriter.write(edge.toString() + "\n");
                         }
@@ -105,7 +123,7 @@ public class GraphServiceTest {
                         LOG.error("Unexpected error",e);
                     }
                 };
-                SolrUtils.iterate(COLLECTION, QUERY + " AND id:{* TO " + dt1.getId() + "}", client, similarityComparison);
+                SolrUtils.iterate(collection, QUERY + " AND id:{* TO " + dt1.getId() + "}", client, similarityComparison);
             } catch (Exception e) {
                 LOG.error("Unexpected error", e);
 
@@ -114,7 +132,7 @@ public class GraphServiceTest {
 
         LOG.info("Calculating all pair-wise similarities ..");
         Instant s1 = Instant.now();
-        SolrUtils.iterate(COLLECTION, QUERY, client, bruteForceComparison);
+        SolrUtils.iterate(collection, QUERY, client, bruteForceComparison);
         Instant e1 = Instant.now();
         nodesWriter.close();
         edgesWriter.close();
