@@ -1,3 +1,7 @@
+src/test/docker/data/cordis*
+src/test/docker/data/wikipedia*
+src/test/docker/data/patents*
+src/test/docker/data/corpora*
 src/test/docker/logs
 src/test/docker/neo4j/data
 src/test/docker/logs/*.log*
