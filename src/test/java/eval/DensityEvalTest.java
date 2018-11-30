@@ -7,10 +7,12 @@ import es.gob.minetad.metric.JensenShannon;
 import es.gob.minetad.model.*;
 import es.gob.minetad.solr.SolrClientFactory;
 import es.gob.minetad.solr.SolrUtils;
+import es.gob.minetad.utils.ParallelExecutor;
 import es.gob.minetad.utils.TimeUtils;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.io.stream.ParallelStream;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.junit.Before;
@@ -21,6 +23,10 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -47,9 +53,9 @@ public class DensityEvalTest {
     private static final Integer NUM_TOPICS     = 70;
 
 
-    private static final Integer MAX_HASH_LEVEL = 5;
+    private static final Integer MAX_HASH_LEVEL = 6;
     private static final Integer SAMPLE_SIZE    = 1000;
-    private static final Integer TOP_SIZE       = 100;
+    private static final Integer TOP_SIZE       = 10;
     private DocTopicsIndex docTopicIndexer;
 
     @Before
@@ -62,11 +68,6 @@ public class DensityEvalTest {
 
     @Test
     public void execute() throws IOException, SolrServerException {
-
-        MinMaxPriorityQueue<Similarity> pairs = MinMaxPriorityQueue.orderedBy(new Similarity.ScoreComparator()).maximumSize(100).create();
-
-
-
         // get a sample list of documents
 
         SolrQuery query = new SolrQuery();
@@ -74,49 +75,73 @@ public class DensityEvalTest {
         query.set("q","*:*");
         query.setRows(SAMPLE_SIZE);
         QueryResponse rsp = client.query(CORPUS, query);
-        Map<Integer,List<Evaluation>> evaluations = new HashMap<>();
-        IntStream.range(0,MAX_HASH_LEVEL+1).forEach(i -> evaluations.put(i,new ArrayList<>()));
+        ConcurrentHashMap<Integer,List<Evaluation>> evaluations = new ConcurrentHashMap<>();
+        IntStream.range(0,MAX_HASH_LEVEL).forEach(i -> evaluations.put(i,new ArrayList<>()));
 
+        ConcurrentLinkedQueue<Double> refSimilarities = new ConcurrentLinkedQueue<>();
+
+        ConcurrentHashMap<Integer,List<Double>> hashSimilaritiesMap = new ConcurrentHashMap<>();
+        IntStream.range(0,MAX_HASH_LEVEL).forEach(i -> hashSimilaritiesMap.put(i,new ArrayList<>()));
+
+        ConcurrentHashMap<Integer,List<Integer>> hashSizeMap = new ConcurrentHashMap<>();
+        IntStream.range(0,MAX_HASH_LEVEL).forEach(i -> hashSizeMap.put(i,new ArrayList<>()));
+
+        AtomicInteger counter = new AtomicInteger();
+        ParallelExecutor executor = new ParallelExecutor();
         for(SolrDocument doc: rsp.getResults()) {
 
-            Document document = new Document();
-            document.setId((String) doc.getFieldValue("id"));
-            document.setShape(docTopicIndexer.toVector((String) doc.getFieldValue("listaBM")));
-            document.setName((String) doc.getFieldValue("name_s"));
+            final SolrDocument d1 = doc;
+            executor.submit(() -> {
+                LOG.info("Creating statistics for document "+ counter.incrementAndGet() + "/" + SAMPLE_SIZE);
+                Document document = new Document();
+                document.setId((String) d1.getFieldValue("id"));
+                document.setShape(docTopicIndexer.toVector((String) d1.getFieldValue("listaBM")));
+                document.setName((String) d1.getFieldValue("name_s"));
 
-            List<Similarity> groundTruth = getTop(document, TOP_SIZE);
+                List<Similarity> groundTruth = getTop(document, TOP_SIZE);
+                refSimilarities.addAll(groundTruth.stream().map(d -> d.getScore()).collect(Collectors.toList()));
 
-            // by HashCode
-            Map<Integer,List<String>> hashCodeMap = new HashMap<>();
-            IntStream.range(0,MAX_HASH_LEVEL+1).forEach(i -> hashCodeMap.put(i, getDocumentsByHashCode((Integer) doc.getFieldValue("hashcode"+i+"_i"), i) ));
-
-
-            for (Integer precision : Arrays.asList(10)) {
-
-                List<Similarity> reference = groundTruth.stream().limit(precision).map(s -> s).collect(Collectors.toList());
-                List<String> goldStandard = reference.stream().map(s -> s.getD2().getId()).collect(Collectors.toList());
-                LOG.info("Precision@"+precision + ": ["+ reference.get(0).getScore() + " - " + reference.get(reference.size()-1).getScore() + "]");
-
-                for(Integer hashLevel : hashCodeMap.keySet().stream().sorted().collect(Collectors.toList())){
-                    Evaluation evaluation = new Evaluation(Instant.now(), Instant.now(), goldStandard, hashCodeMap.get(hashLevel), precision);
-                    //LOG.debug("Evaluation by HashCode "+ hashLevel+ ": " + evaluation);
-                    evaluations.get(hashLevel).add(evaluation);
+                // by HashCode
+                Map<Integer,List<String>> hashCodeMap = new HashMap<>();
+                for(int i=0; i< MAX_HASH_LEVEL; i++){
+                    List<Document> docs = getDocumentsByHashCode((Integer) d1.getFieldValue("hashcode" + i + "_i"), i);
+                    hashCodeMap.put(i, docs.stream().map(d -> d.getId()).collect(Collectors.toList()));
+                    // calculate similarities
+                    hashSimilaritiesMap.put(i,docs.stream().map(d -> JensenShannon.similarity(d.getShape(), document.getShape())).collect(Collectors.toList()));
+                    hashSizeMap.get(i).add(docs.size());
                 }
 
-            }
+
+                List<String> goldStandard = groundTruth.stream().map(s -> s.getD2().getId()).collect(Collectors.toList());
+//                    LOG.debug("Precision@"+precision + ": ["+ reference.get(0).getScore() + " - " + reference.get(reference.size()-1).getScore() + "]");
+
+                for(Integer hashLevel : hashCodeMap.keySet().stream().sorted().collect(Collectors.toList())){
+                    Evaluation evaluation = new Evaluation(Instant.now(), Instant.now(), goldStandard, hashCodeMap.get(hashLevel), TOP_SIZE);
+//                    LOG.debug("Evaluation by HashCode "+ hashLevel+ ": " + evaluation);
+                    evaluations.get(hashLevel).add(evaluation);
+                }
+            });
 
         }
+        executor.awaitTermination(1, TimeUnit.HOURS);
 
         LOG.info("Summary:");
         for(Integer hashLevel: evaluations.keySet()){
             LOG.info("\thashcode" + hashLevel+ ": ");
             List<Evaluation> hashEvaluations = evaluations.get(hashLevel);
 
-            Double totalPrecision   = hashEvaluations.stream().map(eval -> eval.getPrecision()).reduce((a, b) -> a + b).get();
-            Double totalRecall      = hashEvaluations.stream().map(eval -> eval.getRecall()).reduce((a, b) -> a + b).get();
-            Double totalfMeasure    = hashEvaluations.stream().map(eval -> eval.getFMeasure()).reduce((a, b) -> a + b).get();
-            Double totalEvals       = Double.valueOf(hashEvaluations.size());
+            Double totalPrecision       = hashEvaluations.stream().map(eval -> eval.getPrecision()).reduce((a, b) -> a + b).get();
+            Double totalRecall          = hashEvaluations.stream().map(eval -> eval.getRecall()).reduce((a, b) -> a + b).get();
+            Double totalfMeasure        = hashEvaluations.stream().map(eval -> eval.getFMeasure()).reduce((a, b) -> a + b).get();
+            Double totalEvals           = Double.valueOf(hashEvaluations.size());
+            Double totalRefSimilarity   = refSimilarities.stream().reduce((a,b) -> a+b).get();
+            Double totalGroupSimilarity = hashSimilaritiesMap.get(hashLevel).stream().reduce((a,b) -> a+b).get();
+            Double totalGroupElements   = Double.valueOf(hashSizeMap.get(hashLevel).stream().reduce((a,b) -> a+b).get());
 
+
+            LOG.info("\t\tref-similarity ratio: " + totalRefSimilarity / Double.valueOf(refSimilarities.size()));
+            LOG.info("\t\thash-similarity ratio: " + totalGroupSimilarity/ Double.valueOf(hashSimilaritiesMap.get(hashLevel).size()));
+            LOG.info("\t\thash-size ratio: " + totalGroupElements/ Double.valueOf(hashSizeMap.get(hashLevel).size()));
             LOG.info("\t\tprecision ratio: " + totalPrecision / totalEvals);
             LOG.info("\t\trecall ratio: " + totalRecall / totalEvals);
             LOG.info("\t\tfMeasure ratio: " + totalfMeasure / totalEvals);
@@ -129,7 +154,7 @@ public class DensityEvalTest {
             MinMaxPriorityQueue<Similarity> pairs = MinMaxPriorityQueue.orderedBy(new Similarity.ScoreComparator()).maximumSize(num).create();
             List<Double> v1 = doc.getShape();
 
-            LOG.info("Calculating similarity between "+ doc.getId() + " and all documents ..");
+//            LOG.debug("Calculating similarity between "+ doc.getId() + " and all documents ..");
             Instant s1 = Instant.now();
             SolrUtils.Executor compareToDoc = d -> {
                 List<Double> v2 = docTopicIndexer.toVector((String) d.getFieldValue("listaBM"));
@@ -139,7 +164,7 @@ public class DensityEvalTest {
             };
             SolrUtils.iterate(CORPUS, "*:*", client, compareToDoc);
             Instant e1 = Instant.now();
-            TimeUtils.print(s1,e1,"All similarities from document '" + doc.getId() + "' calculated in: ");
+//            TimeUtils.print(s1,e1,"All similarities from document '" + doc.getId() + "' calculated in: ");
             return  pairs.stream().sorted((a,b) -> -a.getScore().compareTo(b.getScore())).collect(Collectors.toList());
         } catch (Exception e) {
             LOG.error("Unexpected error",e);
@@ -147,16 +172,16 @@ public class DensityEvalTest {
         }
     }
 
-    private List<String> getDocumentsByHashCode(Integer hashcode, Integer level)  {
+    private List<Document> getDocumentsByHashCode(Integer hashcode, Integer level)  {
         try {
             SolrQuery query = new SolrQuery();
             query.setRequestHandler("/select");
             String hashcodeString = hashcode <0 ? String.valueOf(hashcode).replace("-","\\-") : String.valueOf(hashcode);
             query.set("q","hashcode"+level+"_i:"+hashcodeString);
-            query.setFields("id");
+            query.setFields("id","listaBM");
             query.setRows(Integer.MAX_VALUE);
             QueryResponse rsp = client.query(CORPUS, query);
-            return rsp.getResults().parallelStream().map(d -> (String) d.getFieldValue("id")).collect(Collectors.toList());
+            return rsp.getResults().parallelStream().map(d -> new Document((String) d.getFieldValue("id"), docTopicIndexer.toVector((String) d.getFieldValue("listaBM")))).collect(Collectors.toList());
         } catch (Exception e) {
             LOG.error("Unexpected error",e);
             return Collections.emptyList();
