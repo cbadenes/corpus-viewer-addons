@@ -47,7 +47,7 @@ public class SolrCloudIntTest {
         client.connect();
 
         ClusterState clusterState = client.getZkStateReader().getClusterState();
-        LOG.info("Collection: " + clusterState);
+        LOG.info("Collection: cambioooooo" + clusterState);
     }
     
     @AfterClass
