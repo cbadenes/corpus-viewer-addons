@@ -48,7 +48,7 @@ public abstract class LoadSimilarities {
     private TestSettings settings;
     private SolrClient client;
 
-    private static final String QUERY       = "*:*";
+    private static final Double THRESHOLD   = 0.8;
 
     private DocTopicsIndex doctopicParser;
 
@@ -91,35 +91,30 @@ public abstract class LoadSimilarities {
                         final DocTopic dt2      = DocTopic.from(d2);
                         final List<Double> v2   = doctopicParser.toVector(dt2.getTopics());
 
-                        // use of JSD with l1-based threshold
-                        double similarity = JensenShannonExt.similarity(v1, v2);
+                        // TODO Save doc similarity into collection
+//                        SolrInputDocument document = new SolrInputDocument();
+//                        document.addField("d1_s",dt1.getId());
+//                        document.addField("name1_s",d1.getFieldValue("name_s"));
+//                        document.addField("d2_s",dt2.getId());
+//                        document.addField("name2s",d2.getFieldValue("name_s"));
+//                        document.addField("score_f",Double.valueOf(similarity).floatValue());
+//                        this.collection.add(document);
 
-                        if (similarity > threshold){
-
-                            //Save in 'similarities' collection
-                            SolrInputDocument document = new SolrInputDocument();
-                            document.addField("d1_s",dt1.getId());
-                            document.addField("name1_s",d1.getFieldValue("name_s"));
-                            document.addField("d2_s",dt2.getId());
-                            document.addField("name2s",d2.getFieldValue("name_s"));
-                            document.addField("score_f",Double.valueOf(similarity).floatValue());
-                            this.collection.add(document);
-
-                        }
                     } catch (Exception e) {
                         LOG.error("Unexpected error",e);
                     }
                 };
-                SolrUtils.iterate(docTopicCollection, QUERY + " AND id:{* TO " + dt1.getId() + "}", client, similarityComparison);
+                // Calculate all pair-wise similarities
+                SolrUtils.iterateBySimilar(docTopicCollection, "*:*", dt1.getTopics(), THRESHOLD, client, similarityComparison);
             } catch (Exception e) {
                 LOG.error("Unexpected error", e);
 
             }
         };
 
-        LOG.info("Calculating all pair-wise similarities ..");
+        LOG.info("Iterate on all documents ..");
         Instant s1 = Instant.now();
-        SolrUtils.iterate(docTopicCollection, QUERY, client, bruteForceComparison);
+        SolrUtils.iterate(docTopicCollection, "*:*", client, bruteForceComparison);
         Instant e1 = Instant.now();
 
         this.collection.commit();
