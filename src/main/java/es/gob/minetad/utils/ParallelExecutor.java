@@ -28,7 +28,7 @@ public class ParallelExecutor {
 
     public ParallelExecutor(){
         int cpus = Runtime.getRuntime().availableProcessors();
-        int maxThreads = 1;//(cpus > 1)? cpus-1 : cpus;
+        int maxThreads = (cpus > 1)? cpus-1 : cpus;
         pool = new ThreadPoolExecutor(
                 maxThreads, // core thread pool size
                 maxThreads, // maximum thread pool size
