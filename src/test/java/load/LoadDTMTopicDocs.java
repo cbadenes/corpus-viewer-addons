@@ -146,7 +146,7 @@ public class LoadDTMTopicDocs {
                 if (!topics.containsKey(key)){
                     Topic topic = new Topic();
                     topic.setId(key);
-                    topic.setName("t"+key);
+                    topic.setName("topic"+key);
                     topic.setWeight(weight);
                     topic.setEntropy(entropy);
                     topic.setWords(new ArrayList<>());
