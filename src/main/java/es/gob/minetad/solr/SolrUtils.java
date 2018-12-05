@@ -43,7 +43,7 @@ public class SolrUtils {
         }
     }
 
-    public static void iterateBySimilar(String collection, String filterQuery, String docTopics, Double threshold, Double epsylon, Double multiplier, SolrClient client, Executor executor) throws IOException, SolrServerException {
+    public static void iterateBySimilar(String collection, String filterQuery, String docTopics, Double threshold, Double epsylon, Integer multiplier, SolrClient client, Executor executor) throws IOException, SolrServerException {
 
 
         /**
@@ -59,7 +59,8 @@ public class SolrUtils {
         solrQuery.addField("jsWeight:[js],id,listaBM,name_s");
         solrQuery.set("epsylon", epsylon+"");
         solrQuery.setRows(Integer.MAX_VALUE);
-        solrQuery.setSort("score", SolrQuery.ORDER.desc);
+//        solrQuery.setSort("score", SolrQuery.ORDER.desc);
+        solrQuery.addSort("id", SolrQuery.ORDER.asc);
         /**
          *
          */

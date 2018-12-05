@@ -114,8 +114,8 @@ public class CRDCIndex implements DocTopicsIndex {
     }
 
     @Override
-    public Double getPrecision() {
-        return Double.valueOf(multiplier);
+    public Integer getPrecision() {
+        return multiplier;
     }
 
     @Override

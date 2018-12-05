@@ -16,6 +16,8 @@ public class DocTopic {
 
     private String id;
 
+    private String name;
+
     private String hash;
 
     private String topics;
@@ -44,11 +46,21 @@ public class DocTopic {
         this.topics = topics;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public static DocTopic from(SolrDocument d1){
         DocTopic docTopic = new DocTopic();
         docTopic.setId((String) d1.getFieldValue("id"));
-        docTopic.setHash(String.valueOf(d1.getFieldValues("hashcode1_i").iterator().next()));
-        docTopic.setTopics((String) d1.getFieldValues("listaBO").iterator().next());
+        if (d1.containsKey("hashcode1_i")) docTopic.setHash(String.valueOf(d1.getFieldValues("hashcode1_i").iterator().next()));
+        if (d1.containsKey("listaBO")) docTopic.setTopics((String) d1.getFieldValues("listaBO").iterator().next());
+        if (d1.containsKey("listaBM")) docTopic.setTopics((String) d1.getFieldValues("listaBM").iterator().next());
+        if (d1.containsKey("name_s")) docTopic.setName((String) d1.getFieldValues("name_s").iterator().next());
         return docTopic;
     }
 

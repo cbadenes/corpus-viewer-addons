@@ -49,8 +49,8 @@ public class CleanZeroIndex implements DocTopicsIndex{
     }
 
     @Override
-    public Double getPrecision() {
-        return Double.valueOf(precision);
+    public Integer getPrecision() {
+        return Float.valueOf(precision).intValue();
     }
 
     @Override

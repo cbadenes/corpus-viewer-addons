@@ -6,7 +6,6 @@ import com.jujutsu.tsne.barneshut.BHTSne;
 import com.jujutsu.tsne.barneshut.BarnesHutTSne;
 import com.jujutsu.tsne.barneshut.ParallelBHTsne;
 import com.jujutsu.utils.TSneUtils;
-import es.gob.minetad.metric.JensenShannon;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.math3.ml.distance.EuclideanDistance;
 import org.apache.commons.math3.stat.StatUtils;
@@ -160,8 +159,8 @@ public class TSNEIndex implements DocTopicsIndex {
     }
 
     @Override
-    public Double getPrecision() {
-        return Double.valueOf(multiplier);
+    public Integer getPrecision() {
+        return multiplier;
     }
 
     @Override

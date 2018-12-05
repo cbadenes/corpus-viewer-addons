@@ -19,7 +19,7 @@ public interface DocTopicsIndex {
 
     Double getEpsylon();
 
-    Double getPrecision();
+    Integer getPrecision();
 
     Double similarity(List<Double> v1, List<Double> v2);
 
