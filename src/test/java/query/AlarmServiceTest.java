@@ -42,8 +42,9 @@ public class AlarmServiceTest {
     private Map<Integer,String> alarmTypes;
 
 
-
-    private static final String COLLECTION = "cordis-doctopics";
+    private static final Integer SAMPLE_DOCS    = 2;
+    private static final Integer SAMPLE_GROUPS  = 1;
+    private static final String COLLECTION      = "cordis-doctopics";
 
     @Before
     public void setup(){
@@ -60,16 +61,14 @@ public class AlarmServiceTest {
     @Test
     public void execute() throws IOException, SolrServerException {
 
-        int sampleSize = 0;
-
         for(Integer alarmType : alarmTypes.keySet().stream().sorted().collect(Collectors.toList())){
             // Read groups of documents
             Alarm alarm = getAlarmsBy(alarmType, COLLECTION, client);
             LOG.info(alarm.getTotal() + " '"+alarmTypes.get(alarmType) + "' similarities found: ");
-            for(String group : alarm.getGroups().entrySet().stream().sorted((a,b) -> -a.getValue().compareTo(b.getValue())).limit(sampleSize).map(e -> e.getKey()).collect(Collectors.toList())){
+            for(String group : alarm.getGroups().entrySet().stream().sorted((a,b) -> -a.getValue().compareTo(b.getValue())).limit(SAMPLE_GROUPS).map(e -> e.getKey()).collect(Collectors.toList())){
                 LOG.info("\t > similar docs by hashcode [" + group + "]:");
                 // Read documents by hash
-                List<SolrDocument> docs = getDocumentsBy(alarmType, COLLECTION, group, sampleSize, client);
+                List<SolrDocument> docs = getDocumentsBy(alarmType, COLLECTION, group, SAMPLE_DOCS, client);
                 docs.forEach(doc -> LOG.info("\t\t-" + doc.getFieldValue("id") + " - '"+ doc.getFieldValue("name_s") + "'"));
             }
 
