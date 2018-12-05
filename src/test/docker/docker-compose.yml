@@ -1,19 +1,19 @@
 version: '3'
 services:
-  dbpedia-spotlight:
-    container_name: dbpedia-spotlight
-    image: dbpedia/spotlight-english:latest
-    command: java -Dfile.encoding=UTF-8 -Xmx10G -Dthreads.max=4 -Dthreads.core=4 -jar /opt/spotlight/dbpedia-spotlight-nightly-build.jar /opt/spotlight/en  http://0.0.0.0:80/rest
-    restart: always
-  nlp-en-service:
-    container_name: nlp-en-service
-    image: registry.bdlab.minetur.es/nlp-en-service:latest
-    restart: always
-    ports:
-     - "7777:7777"
-     - "65111:65111"
-    environment:
-     - REST_PATH=/en
+#  dbpedia-spotlight:
+#    container_name: dbpedia-spotlight
+#    image: dbpedia/spotlight-english:latest
+#    command: java -Dfile.encoding=UTF-8 -Xmx10G -Dthreads.max=4 -Dthreads.core=4 -jar /opt/spotlight/dbpedia-spotlight-nightly-build.jar /opt/spotlight/en  http://0.0.0.0:80/rest
+#    restart: always
+#  nlp-en-service:
+#    container_name: nlp-en-service
+#    image: registry.bdlab.minetur.es/nlp-en-service:latest
+#    restart: always
+#    ports:
+#     - "7777:7777"
+#     - "65111:65111"
+#    environment:
+#     - REST_PATH=/en
   cordis-70:
    container_name: cordis-70
    image: registry.bdlab.minetur.es/cordis-70-model:latest
