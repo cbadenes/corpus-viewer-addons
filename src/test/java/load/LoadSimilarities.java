@@ -8,6 +8,7 @@ import es.gob.minetad.model.SolrCollection;
 import es.gob.minetad.model.TestSettings;
 import es.gob.minetad.solr.SolrClientFactory;
 import es.gob.minetad.solr.SolrUtils;
+import es.gob.minetad.utils.ParallelExecutor;
 import es.gob.minetad.utils.TimeUtils;
 import es.gob.minetad.utils.WriterUtils;
 import org.apache.solr.client.solrj.SolrClient;
@@ -25,6 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.apache.solr.core.SolrInfoBean.Group.collection;
@@ -76,46 +78,65 @@ public abstract class LoadSimilarities {
 
         String docTopicCollection = corpus+"-doctopics";
 
+        ParallelExecutor parallelExecutor = new ParallelExecutor();
+
         AtomicInteger counter = new AtomicInteger();
         AtomicInteger compCounter = new AtomicInteger();
         SolrUtils.Executor bruteForceComparison = d1 -> {
-            try {
-                final DocTopic dt1      = DocTopic.from(d1);
-                LOG.info("Getting similar docs to: " + dt1.getId() + "[" + counter.incrementAndGet()+"]");
-                StringBuffer node = new StringBuffer();
-                node.append(dt1.getId());
-                final List<Double> v1   = doctopicParser.toVector(dt1.getTopics());
-                SolrUtils.Executor similarityComparison = d2 -> {
-                    try {
-                        compCounter.incrementAndGet();
-                        final DocTopic dt2      = DocTopic.from(d2);
-                        final List<Double> v2   = doctopicParser.toVector(dt2.getTopics());
+            parallelExecutor.submit(() -> {
+                try {
+                    final DocTopic dt1      = DocTopic.from(d1);
+                    LOG.info("Getting similar docs to: " + dt1.getId() + "[" + counter.incrementAndGet()+"]");
+                    StringBuffer node = new StringBuffer();
+                    node.append(dt1.getId());
+                    final List<Double> v1   = doctopicParser.toVector(dt1.getTopics());
+                    SolrUtils.Executor similarityComparison = d2 -> {
+                        try {
+                            compCounter.incrementAndGet();
+                            final DocTopic dt2      = DocTopic.from(d2);
 
-                        // TODO Save doc similarity into collection
-//                        SolrInputDocument document = new SolrInputDocument();
-//                        document.addField("d1_s",dt1.getId());
-//                        document.addField("name1_s",d1.getFieldValue("name_s"));
-//                        document.addField("d2_s",dt2.getId());
-//                        document.addField("name2s",d2.getFieldValue("name_s"));
-//                        document.addField("score_f",Double.valueOf(similarity).floatValue());
-//                        this.collection.add(document);
+                            if (dt1.getId().equalsIgnoreCase(dt2.getId())) return;
 
-                    } catch (Exception e) {
-                        LOG.error("Unexpected error",e);
-                    }
-                };
-                // Calculate all pair-wise similarities
+                            SolrInputDocument document = new SolrInputDocument();
+                            document.addField("d1_s",dt1.getId());
+                            document.addField("name1_s",d1.getFieldValue("name_s"));
+                            document.addField("d2_s",dt2.getId());
+                            document.addField("name2s",d2.getFieldValue("name_s"));
+
+
+                            Float score = 0.0f;
+                            if (d2.containsKey("jsWeight")){
+                                score = Float.valueOf((String) d2.getFieldValue("jsWeight"));
+                            }else{
+                                final List<Double> v2   = doctopicParser.toVector(dt2.getTopics());
+                                score = Double.valueOf(JensenShannonExt.similarity(v1,v2)).floatValue();
+                            }
+
+                            if (score >= threshold){
+                                document.addField("score_f",score);
+                                collection.add(document);
+                            }
+
+                        } catch (Exception e) {
+                            LOG.error("Unexpected error",e);
+                        }
+                    };
+                    // Calculate all pair-wise similarities
                 SolrUtils.iterateBySimilar(docTopicCollection, "*:*", dt1.getTopics(), THRESHOLD, doctopicParser.getEpsylon(), doctopicParser.getPrecision(), client, similarityComparison);
-            } catch (Exception e) {
-                LOG.error("Unexpected error", e);
+//                    SolrUtils.iterate(docTopicCollection, "*:*", client, similarityComparison);
+                } catch (Exception e) {
+                    LOG.error("Unexpected error", e);
 
-            }
+                }
+            });
         };
 
         LOG.info("Iterate on all documents ..");
         Instant s1 = Instant.now();
         SolrUtils.iterate(docTopicCollection, "*:*", client, bruteForceComparison);
         Instant e1 = Instant.now();
+
+        parallelExecutor.awaitTermination(1, TimeUnit.HOURS);
 
         this.collection.commit();
         LOG.info("Total Comparisons: " + compCounter.get());
