@@ -21,11 +21,9 @@ import org.slf4j.LoggerFactory;
  */
 public class LoadWikipediaSimilarities extends LoadSimilarities {
 
-    private static final Logger LOG = LoggerFactory.getLogger(LoadWikipediaSimilarities.class);
-
     private static final String CORPUS      = "wikipedia";
     private static final Integer NUM_TOPICS = 250;
-    private static final Double THRESHOLD   = 0.8;
+    private static final Double THRESHOLD   = 0.9;
 
     public LoadWikipediaSimilarities() {
         super(CORPUS, NUM_TOPICS, THRESHOLD);

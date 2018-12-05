@@ -50,8 +50,6 @@ public abstract class LoadSimilarities {
     private TestSettings settings;
     private SolrClient client;
 
-    private static final Double THRESHOLD   = 0.8;
-
     private DocTopicsIndex doctopicParser;
 
 
@@ -118,14 +116,14 @@ public abstract class LoadSimilarities {
                             }
 
                         } catch (Exception e) {
-                            LOG.error("Unexpected error",e);
+//                            LOG.error("Unexpected error: ");
                         }
                     };
                     // Calculate all pair-wise similarities
-                SolrUtils.iterateBySimilar(docTopicCollection, "*:*", dt1.getTopics(), THRESHOLD, doctopicParser.getEpsylon(), doctopicParser.getPrecision(), client, similarityComparison);
-//                    SolrUtils.iterate(docTopicCollection, "*:*", client, similarityComparison);
+                SolrUtils.iterateBySimilar(docTopicCollection, "id:{* TO " + dt1.getId() + "}", dt1.getTopics(), threshold, doctopicParser.getEpsylon(), doctopicParser.getPrecision(), client, similarityComparison);
+//                    SolrUtils.iterate(docTopicCollection, "id:{* TO " + dt1.getId() + "}", client, similarityComparison);
                 } catch (Exception e) {
-                    LOG.error("Unexpected error", e);
+//                    LOG.error("Unexpected error: ");
 
                 }
             });
