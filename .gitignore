@@ -1,3 +1,4 @@
+src/test/docker/logs/
 src/test/docker/data/cordis*
 src/test/docker/data/wikipedia*
 src/test/docker/data/patents*
