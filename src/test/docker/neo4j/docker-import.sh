@@ -1,6 +1,6 @@
-if [ -f data ] ; then
-        rm -rf data/
-   else
+if [ -d data ] ; then
+    rm -rf data/
+fi
 mkdir -p data/import
 cp ../../../../output/graphs/$1/*.* data/import/
 docker run -it --rm --name "neo4j-import" \
