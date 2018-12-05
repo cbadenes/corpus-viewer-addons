@@ -44,6 +44,16 @@ public class CleanZeroIndex implements DocTopicsIndex{
     }
 
     @Override
+    public Double getEpsylon() {
+        return 0.0;
+    }
+
+    @Override
+    public Double getPrecision() {
+        return Double.valueOf(precision);
+    }
+
+    @Override
     public Double similarity(List<Double> v1, List<Double> v2) {
         return JensenShannon.similarity(v1,v2);
     }

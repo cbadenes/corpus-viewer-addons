@@ -17,6 +17,10 @@ public interface DocTopicsIndex {
 
     Similarity metric();
 
+    Double getEpsylon();
+
+    Double getPrecision();
+
     Double similarity(List<Double> v1, List<Double> v2);
 
 }

@@ -43,19 +43,19 @@ public class SolrUtils {
         }
     }
 
-    public static void iterateBySimilar(String collection, String filterQuery, String docTopics, Double threshold, SolrClient client, Executor executor) throws IOException, SolrServerException {
+    public static void iterateBySimilar(String collection, String filterQuery, String docTopics, Double threshold, Double epsylon, Double multiplier, SolrClient client, Executor executor) throws IOException, SolrServerException {
 
 
         /**
          *
          */
         SolrQuery solrQuery = new SolrQuery();
-        solrQuery.setRows(500);
-        solrQuery.set("qq", ""+docTopics); //la consulta será  el DelimitedTermFrequencyTokenFilter es decir t2|37 t7|23 t12|15 t13|46 t15|49 t20|91 t21|33 t23|24 t28|64 t32|32
-        solrQuery.set("q","{!frangeext l="+getCota(multiplicationFactor,(float)epsylon)+"}query($qq)");
-        solrQuery.set("pruebas", false); //parametro de pruebas que se quitará
-        solrQuery.set("multiplicationFactor", multiplicationFactor+"");
-        solrQuery.set("modelSize", 70);
+        solrQuery.set("qq", docTopics);
+        solrQuery.set("q","{!frangeext}query($qq)");
+        solrQuery.set("fq", filterQuery);
+        solrQuery.set("multiplicationFactor", multiplier+"");
+        solrQuery.set("threshold", threshold+""); //umbral
+        solrQuery.set("modelSize", 70); //tamaño del modelo
         solrQuery.addField("jsWeight:[js],id,listaBM,name_s");
         solrQuery.set("epsylon", epsylon+"");
         solrQuery.setRows(Integer.MAX_VALUE);

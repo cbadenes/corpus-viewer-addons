@@ -109,6 +109,16 @@ public class CRDCIndex implements DocTopicsIndex {
     }
 
     @Override
+    public Double getEpsylon() {
+        return threshold;
+    }
+
+    @Override
+    public Double getPrecision() {
+        return Double.valueOf(multiplier);
+    }
+
+    @Override
     public Double similarity(List<Double> v1, List<Double> v2) {
         return JensenShannon.similarity(v1, v2);
     }

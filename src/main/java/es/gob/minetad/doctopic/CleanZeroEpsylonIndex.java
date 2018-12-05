@@ -39,6 +39,16 @@ public class CleanZeroEpsylonIndex implements DocTopicsIndex{
     }
 
     @Override
+    public Double getEpsylon() {
+        return Double.valueOf(epsylon);
+    }
+
+    @Override
+    public Double getPrecision() {
+        return Double.valueOf(precision);
+    }
+
+    @Override
     public String id() {
         return "clean-zeros-with-epsylon";
     }
