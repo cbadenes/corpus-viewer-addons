@@ -75,6 +75,16 @@ public class SimGraphArrayIndex implements DocTopicsIndex{
     }
 
     @Override
+    public Double getEpsylon() {
+        return Double.valueOf(epsylon);
+    }
+
+    @Override
+    public Double getPrecision() {
+        return Double.valueOf(precision);
+    }
+
+    @Override
     public Double similarity(List<Double> v1, List<Double> v2) {
         List<Double> v1Norm = v1.stream().map(v -> v * precision).collect(Collectors.toList());
         List<Double> v2Norm = v2.stream().map(v -> v * precision).collect(Collectors.toList());
