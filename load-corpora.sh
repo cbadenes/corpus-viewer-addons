@@ -13,4 +13,8 @@ mvn -DargLine="-Xmx4096m" -Dtest=LoadPatentsDTMTopicDocs test
 echo "loading PATENTS CTMtopicdocs"
 mvn -DargLine="-Xmx4096m" -Dtest=LoadPatentsCTMTopicDocs test
 
+echo "loading CORDIS similarities"
+mvn -DargLine="-Xmx4096m" -Dtest=LoadCordisSimilarities test
+
+
 echo "all corpora are ready"
