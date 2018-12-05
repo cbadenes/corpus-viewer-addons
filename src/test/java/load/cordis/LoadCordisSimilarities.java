@@ -23,7 +23,7 @@ public class LoadCordisSimilarities extends LoadSimilarities {
 
     private static final String CORPUS      = "cordis";
     private static final Integer NUM_TOPICS = 70;
-    private static final Double THRESHOLD   = 0.9;
+    private static final Double THRESHOLD   = 0.5;
 
     public LoadCordisSimilarities() {
         super(CORPUS, NUM_TOPICS, THRESHOLD);
