@@ -7,7 +7,8 @@ services:
 #    restart: always
 #  nlp-en-service:
 #    container_name: nlp-en-service
-#    image: registry.bdlab.minetur.es/nlp-en-service:latest
+#    image: librairy/nlp-en-service:latest
+##    image: registry.bdlab.minetur.es/nlp-en-service:latest
 #    restart: always
 #    ports:
 #     - "7777:7777"
@@ -16,7 +17,8 @@ services:
 #     - REST_PATH=/en
   cordis-70:
    container_name: cordis-70
-   image: registry.bdlab.minetur.es/cordis-70-model:latest
+   image: sesiad/cordis-70-model:latest
+#   image: registry.bdlab.minetur.es/cordis-70-model:latest
    restart: always
    ports:
     - "8000:7777"
@@ -25,7 +27,8 @@ services:
     - REST_PATH=/model
 #  cordis-150:
 #   container_name: cordis-150
-#   image: registry.bdlab.minetur.es/cordis-150-model:latest
+#   image: sesiad/cordis-150-model:latest
+##   image: registry.bdlab.minetur.es/cordis-150-model:latest
 #   restart: always
 #   ports:
 #    - "8001:7777"
@@ -34,7 +37,8 @@ services:
 #    - REST_PATH=/model
 #  wiki-120:
 #   container_name: wiki-120
-#   image: registry.bdlab.minetur.es/wiki-120-model:latest
+#   image: sesiad/wiki-120-model:latest
+##   image: registry.bdlab.minetur.es/wiki-120-model:latest
 #   restart: always
 #   ports:
 #    - "8002:7777"
@@ -43,7 +47,8 @@ services:
 #    - REST_PATH=/model
 #  wiki-350:
 #   container_name: wiki-350
-#   image: registry.bdlab.minetur.es/wiki-350-model:latest
+#   image: sesiad/wiki-350-model:latest
+##   image: registry.bdlab.minetur.es/wiki-350-model:latest
 #   restart: always
 #   ports:
 #    - "8003:7777"
@@ -52,7 +57,8 @@ services:
 #    - REST_PATH=/model
 #  patstat-250:
 #   container_name: patstat-250
-#   image: registry.bdlab.minetur.es/patstat-250-model:latest
+#   image: sesiad/patstat-250-model:latest
+##   image: registry.bdlab.minetur.es/patstat-250-model:latest
 #   restart: always
 #   ports:
 #    - "8004:7777"
@@ -61,7 +67,8 @@ services:
 #    - REST_PATH=/model
 #  patstat-750:
 #   container_name: patstat-750
-#   image: registry.bdlab.minetur.es/patstat-750-model:latest
+#   image: sesiad/patstat-750-model:latest
+##   image: registry.bdlab.minetur.es/patstat-750-model:latest
 #   restart: always
 #   ports:
 #    - "8005:7777"
