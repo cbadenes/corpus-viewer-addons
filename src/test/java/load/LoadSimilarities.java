@@ -105,7 +105,7 @@ public abstract class LoadSimilarities {
                     }
                 };
                 // Calculate all pair-wise similarities
-                SolrUtils.iterateBySimilar(docTopicCollection, "*:*", dt1.getTopics(), THRESHOLD, client, similarityComparison);
+                SolrUtils.iterateBySimilar(docTopicCollection, "*:*", dt1.getTopics(), THRESHOLD, doctopicParser.getEpsylon(), doctopicParser.getPrecision(), client, similarityComparison);
             } catch (Exception e) {
                 LOG.error("Unexpected error", e);
 
