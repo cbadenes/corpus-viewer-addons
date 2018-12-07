@@ -22,8 +22,8 @@ import org.slf4j.LoggerFactory;
 public class LoadPatentsSimilarities extends LoadSimilarities {
 
     private static final String CORPUS      = "patents";
-    private static final Integer NUM_TOPICS = 250;
-    private static final Double THRESHOLD   = 0.9;
+    private static final Integer NUM_TOPICS = 750;
+    private static final Double THRESHOLD   = 0.8;
 
     public LoadPatentsSimilarities() {
         super(CORPUS, NUM_TOPICS, THRESHOLD);

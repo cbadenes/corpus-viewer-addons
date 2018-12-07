@@ -27,7 +27,7 @@ public class LoadWikipediaDocuments extends LoadDocuments {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoadPatentsDocuments.class);
 
-    private static final Integer MAX    = 1000;//-1
+    private static final Integer MAX    = -1;
     private static final Integer OFFSET = 0;
     private static final String CORPUS  = "corpora/wikipedia/documents.jsonl.gz";
     private final ObjectMapper jsonMapper;

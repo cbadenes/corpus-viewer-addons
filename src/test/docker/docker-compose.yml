@@ -1,20 +1,20 @@
 version: '3'
 services:
-#  dbpedia-spotlight:
-#    container_name: dbpedia-spotlight
-#    image: dbpedia/spotlight-english:latest
-#    command: java -Dfile.encoding=UTF-8 -Xmx10G -Dthreads.max=4 -Dthreads.core=4 -jar /opt/spotlight/dbpedia-spotlight-nightly-build.jar /opt/spotlight/en  http://0.0.0.0:80/rest
-#    restart: always
-#  nlp-en-service:
-#    container_name: nlp-en-service
-#    image: librairy/nlp-en-service:latest
-##    image: registry.bdlab.minetur.es/nlp-en-service:latest
-#    restart: always
-#    ports:
-#     - "7777:7777"
-#     - "65111:65111"
-#    environment:
-#     - REST_PATH=/en
+  dbpedia-spotlight:
+    container_name: dbpedia-spotlight
+    image: dbpedia/spotlight-english:latest
+    command: java -Dfile.encoding=UTF-8 -Xmx10G -Dthreads.max=4 -Dthreads.core=4 -jar /opt/spotlight/dbpedia-spotlight-nightly-build.jar /opt/spotlight/en  http://0.0.0.0:80/rest
+    restart: always
+  nlp-en-service:
+    container_name: nlp-en-service
+    image: librairy/nlp-en-service:latest
+#    image: registry.bdlab.minetur.es/nlp-en-service:latest
+    restart: always
+    ports:
+     - "7777:7777"
+     - "65111:65111"
+    environment:
+     - REST_PATH=/en
   cordis-70:
    container_name: cordis-70
    image: sesiad/cordis-70-model:latest
@@ -25,56 +25,56 @@ services:
     - "65000:65111"
    environment:
     - REST_PATH=/model
-#  cordis-150:
-#   container_name: cordis-150
-#   image: sesiad/cordis-150-model:latest
-##   image: registry.bdlab.minetur.es/cordis-150-model:latest
-#   restart: always
-#   ports:
-#    - "8001:7777"
-#    - "65001:65111"
-#   environment:
-#    - REST_PATH=/model
-#  wiki-120:
-#   container_name: wiki-120
-#   image: sesiad/wiki-120-model:latest
-##   image: registry.bdlab.minetur.es/wiki-120-model:latest
-#   restart: always
-#   ports:
-#    - "8002:7777"
-#    - "65002:65111"
-#   environment:
-#    - REST_PATH=/model
-#  wiki-350:
-#   container_name: wiki-350
-#   image: sesiad/wiki-350-model:latest
-##   image: registry.bdlab.minetur.es/wiki-350-model:latest
-#   restart: always
-#   ports:
-#    - "8003:7777"
-#    - "65003:65111"
-#   environment:
-#    - REST_PATH=/model
-#  patstat-250:
-#   container_name: patstat-250
-#   image: sesiad/patstat-250-model:latest
-##   image: registry.bdlab.minetur.es/patstat-250-model:latest
-#   restart: always
-#   ports:
-#    - "8004:7777"
-#    - "65004:65111"
-#   environment:
-#    - REST_PATH=/model
-#  patstat-750:
-#   container_name: patstat-750
-#   image: sesiad/patstat-750-model:latest
-##   image: registry.bdlab.minetur.es/patstat-750-model:latest
-#   restart: always
-#   ports:
-#    - "8005:7777"
-#    - "65005:65111"
-#   environment:
-#    - REST_PATH=/model
+  cordis-150:
+   container_name: cordis-150
+   image: sesiad/cordis-150-model:latest
+#   image: registry.bdlab.minetur.es/cordis-150-model:latest
+   restart: always
+   ports:
+    - "8001:7777"
+    - "65001:65111"
+   environment:
+    - REST_PATH=/model
+  wiki-120:
+   container_name: wiki-120
+   image: sesiad/wiki-120-model:latest
+#   image: registry.bdlab.minetur.es/wiki-120-model:latest
+   restart: always
+   ports:
+    - "8002:7777"
+    - "65002:65111"
+   environment:
+    - REST_PATH=/model
+  wiki-350:
+   container_name: wiki-350
+   image: sesiad/wiki-350-model:latest
+#   image: registry.bdlab.minetur.es/wiki-350-model:latest
+   restart: always
+   ports:
+    - "8003:7777"
+    - "65003:65111"
+   environment:
+    - REST_PATH=/model
+  patstat-250:
+   container_name: patstat-250
+   image: sesiad/patstat-250-model:latest
+#   image: registry.bdlab.minetur.es/patstat-250-model:latest
+   restart: always
+   ports:
+    - "8004:7777"
+    - "65004:65111"
+   environment:
+    - REST_PATH=/model
+  patstat-750:
+   container_name: patstat-750
+   image: sesiad/patstat-750-model:latest
+#   image: registry.bdlab.minetur.es/patstat-750-model:latest
+   restart: always
+   ports:
+    - "8005:7777"
+    - "65005:65111"
+   environment:
+    - REST_PATH=/model
   solr:
     image: solr:7.3.1
     container_name: solr

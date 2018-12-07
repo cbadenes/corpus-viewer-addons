@@ -23,9 +23,9 @@ import java.util.Optional;
  */
 public class LoadPatentsDocTopics extends LoadDocTopics {
 
-    private static final Integer MAX    = 1000;//-1
+    private static final Integer MAX    = -1;
     private static final Integer OFFSET = 0;
-    private static final String CORPUS  = "corpora/patents/doctopics-250.csv.gz"; //"corpora/patents/doctopics-750.csv.gz"
+    private static final String CORPUS  = "corpora/patents/doctopics-750.csv.gz"; //"corpora/patents/doctopics-250.csv.gz"
 
     public LoadPatentsDocTopics() {
         super(CORPUS, MAX, OFFSET);

@@ -13,7 +13,7 @@ public class LoadCordisDTMTopicDocs extends LoadDTMTopicDocs {
     private static final Logger LOG = LoggerFactory.getLogger(LoadCordisDTMTopicDocs.class);
 
     private static final String CORPUS  = "cordis";
-    private static final Integer DIM    = 70;
+    private static final Integer DIM    = 150;
 
 
     public LoadCordisDTMTopicDocs() {

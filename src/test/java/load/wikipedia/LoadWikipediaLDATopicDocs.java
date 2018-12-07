@@ -23,8 +23,8 @@ import load.LoadLDATopicDocs;
 public class LoadWikipediaLDATopicDocs extends LoadLDATopicDocs {
 
     private static final String CORPUS_NAME     = "wikipedia";
-    private static final String CORPUS_DIM      = "120";
-    private static final String CORPUS_MODEL    = "http://localhost:8002/model";
+    private static final String CORPUS_DIM      = "350";
+    private static final String CORPUS_MODEL    = "http://localhost:8003/model";
 
     public LoadWikipediaLDATopicDocs() {
         super(CORPUS_NAME, CORPUS_DIM, CORPUS_MODEL);

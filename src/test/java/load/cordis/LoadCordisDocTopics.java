@@ -29,7 +29,7 @@ public class LoadCordisDocTopics extends LoadDocTopics {
 
     private static final Integer MAX    = -1; //-1
     private static final Integer OFFSET = 0;
-    private static final String CORPUS  = "corpora/cordis/doctopics-70.csv.gz";
+    private static final String CORPUS  = "corpora/cordis/doctopics-150.csv.gz";
 
     public LoadCordisDocTopics() {
         super(CORPUS, MAX, OFFSET);

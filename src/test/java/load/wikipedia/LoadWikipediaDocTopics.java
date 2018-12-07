@@ -23,9 +23,9 @@ import java.util.Optional;
  */
 public class LoadWikipediaDocTopics extends LoadDocTopics {
 
-    private static final Integer MAX    = 1000;//-1
+    private static final Integer MAX    = -1;
     private static final Integer OFFSET = 0;
-    private static final String CORPUS  = "corpora/wikipedia/doctopics-120.csv.gz"; //"corpora/wikipedia/doctopics-350.csv.gz"
+    private static final String CORPUS  = "corpora/wikipedia/doctopics-350.csv.gz"; //"corpora/wikipedia/doctopics-120.csv.gz"
 
     public LoadWikipediaDocTopics() {
         super(CORPUS, MAX, OFFSET);

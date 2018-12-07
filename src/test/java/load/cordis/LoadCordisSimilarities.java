@@ -22,8 +22,8 @@ import org.slf4j.LoggerFactory;
 public class LoadCordisSimilarities extends LoadSimilarities {
 
     private static final String CORPUS      = "cordis";
-    private static final Integer NUM_TOPICS = 70;
-    private static final Double THRESHOLD   = 0.5;
+    private static final Integer NUM_TOPICS = 150;
+    private static final Double THRESHOLD   = 0.8;
 
     public LoadCordisSimilarities() {
         super(CORPUS, NUM_TOPICS, THRESHOLD);

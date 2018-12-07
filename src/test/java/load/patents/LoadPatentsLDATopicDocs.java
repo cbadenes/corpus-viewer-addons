@@ -23,8 +23,8 @@ import load.LoadLDATopicDocs;
 public class LoadPatentsLDATopicDocs extends LoadLDATopicDocs {
 
     private static final String CORPUS_NAME     = "patents";
-    private static final String CORPUS_DIM      = "250";
-    private static final String CORPUS_MODEL    = "http://localhost:8004/model";
+    private static final String CORPUS_DIM      = "750";
+    private static final String CORPUS_MODEL    = "http://localhost:8005/model";
 
     public LoadPatentsLDATopicDocs() {
         super(CORPUS_NAME, CORPUS_DIM, CORPUS_MODEL);
