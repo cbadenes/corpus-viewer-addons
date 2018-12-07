@@ -121,14 +121,10 @@ public abstract class LoadSimilarities {
                     }
                 };
 
-
-
                 // Calculate all pair-wise similarities
                 SolrUtils.iterateBySimilar(docTopicCollection, "id:{* TO " + dt1.getId() + "}", dt1.getTopics(), threshold, doctopicParser.getEpsylon(), doctopicParser.getPrecision(), client, similarityComparison);
-//                    SolrUtils.iterate(docTopicCollection, "id:{* TO " + dt1.getId() + "}", client, similarityComparison);
             } catch (Exception e) {
                 LOG.error("Unexpected iteration error: ",e);
-
             }
         });
 
