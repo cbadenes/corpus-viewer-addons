@@ -77,8 +77,8 @@ public class HierarchicalQueriesTest {
      */
     public void getDocumentsByGroupsOfTopics() throws IOException, SolrServerException {
 
-        String mainTopics       = concatenate(Arrays.asList("t12","t20"));
-        String backgroundTopics = concatenate(Arrays.asList("t47","t52","t58"));
+        String mainTopics       = concatenate(Arrays.asList("t9","t13"));
+        String backgroundTopics = concatenate(Arrays.asList("t7"));
 
         StringBuilder query = new StringBuilder();
         // main topics
