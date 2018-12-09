@@ -45,7 +45,7 @@ public class GraphServiceTest {
 
     private static final String CORPUS  = "cordis";
     private static final String QUERY       = "*:*";
-    private static final Integer NUM_TOPICS = 70;
+    private static final Integer NUM_TOPICS = 150;
     private static final Double THRESHOLD   = 0.9;
 
     private DocTopicsIndex doctopicParser;

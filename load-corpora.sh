@@ -44,12 +44,12 @@ echo "Graph Service"
 mvn -DargLine="-Xmx8096m" -Dtest=GraphServiceTest test
 
 echo "loading CORDIS similarities"
-mvn -DargLine="-Xmx4096m" -Dtest=LoadCordisSimilarities test
+mvn -DargLine="-Xmx32768m" -Dtest=LoadCordisSimilarities test
 
 echo "loading Wikipedia similarities"
-mvn -DargLine="-Xmx8096m" -Dtest=LoadWikipediaSimilarities test
+mvn -DargLine="-Xmx32768m" -Dtest=LoadWikipediaSimilarities test
 
 echo "loading Patents similarities"
-mvn -DargLine="-Xmx8096m" -Dtest=LoadPatentsSimilarities test
+mvn -DargLine="-Xmx32768m" -Dtest=LoadPatentsSimilarities test
 
 echo "all corpora are ready"
