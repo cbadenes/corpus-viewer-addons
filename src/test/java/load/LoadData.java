@@ -49,7 +49,7 @@ public abstract class LoadData {
         this.max        = max;
         this.offset     = offset;
         this.name       = corpus.contains("/")? StringUtils.substringBetween(corpus,"/","/") : corpus;
-        this.numTopics  = corpus.contains(".csv")? Integer.valueOf(StringUtils.substringBetween(corpus,"-",".csv")) : 0;
+        this.numTopics  = corpus.contains(".csv") && corpus.contains("-")? Integer.valueOf(StringUtils.substringBetween(corpus,"-",".csv")) : 0;
 
         this.settings   = new TestSettings();
 
