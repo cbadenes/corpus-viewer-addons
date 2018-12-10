@@ -134,7 +134,7 @@ public class GraphServiceTest {
                             LOG.error("Unexpected error",e);
                         }
                     };
-                    SolrUtils.iterateBySimilar(collection, QUERY + " AND id:{* TO " + dt1.getId() + "}", dt1.getTopics(), THRESHOLD, doctopicParser.getEpsylon(), doctopicParser.getPrecision(), client, similarityComparison);
+                    SolrUtils.iterateBySimilar(collection, QUERY + " AND id:{* TO " + dt1.getId() + "}", dt1.getTopics(), String.valueOf(NUM_TOPICS), THRESHOLD, doctopicParser.getEpsylon(), doctopicParser.getPrecision(), client, similarityComparison);
                 } catch (Exception e) {
                     LOG.error("Unexpected error", e);
 

@@ -43,7 +43,7 @@ public class SolrUtils {
         }
     }
 
-    public static void iterateBySimilar(String collection, String filterQuery, String docTopics, Double threshold, Double epsylon, Integer multiplier, SolrClient client, Executor executor) throws IOException, SolrServerException {
+    public static void iterateBySimilar(String collection, String filterQuery, String docTopics, String modelSize, Double threshold, Double epsylon, Integer multiplier, SolrClient client, Executor executor) throws IOException, SolrServerException {
 
 
         /**
@@ -55,7 +55,7 @@ public class SolrUtils {
         solrQuery.set("fq", filterQuery);
         solrQuery.set("multiplicationFactor", multiplier+"");
         solrQuery.set("threshold", threshold+""); //umbral
-        solrQuery.set("modelSize", 70); //tamaño del modelo
+        solrQuery.set("modelSize", modelSize); //tamaño del modelo
         solrQuery.addField("jsWeight:[js],id,listaBM,name_s");
         solrQuery.set("epsylon", epsylon+"");
         solrQuery.setRows(Integer.MAX_VALUE);

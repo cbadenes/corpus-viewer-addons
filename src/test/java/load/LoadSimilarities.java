@@ -46,6 +46,7 @@ public abstract class LoadSimilarities {
     private final String corpus;
     private final Double threshold;
     private final SolrCollection collection;
+    private final Integer numTopics;
 
     private TestSettings settings;
     private SolrClient client;
@@ -59,6 +60,7 @@ public abstract class LoadSimilarities {
         this.doctopicParser         = DocTopicIndexFactory.newFrom(numTopics);
         this.corpus                 = corpus;
         this.threshold              = threshold;
+        this.numTopics              = numTopics;
 
         Assert.assertTrue("Solr server seems down: " + settings.getSolrUrl(), settings.isSolrUp());
 
@@ -97,10 +99,11 @@ public abstract class LoadSimilarities {
                         if (dt1.getId().equalsIgnoreCase(dt2.getId())) return;
 
                         SolrInputDocument document = new SolrInputDocument();
+                        document.addField("id",dt1.getId()+"-"+dt2.getId());
                         document.addField("d1_s",dt1.getId());
                         document.addField("name1_s",d1.getFieldValue("name_s"));
                         document.addField("d2_s",dt2.getId());
-                        document.addField("name2s",d2.getFieldValue("name_s"));
+                        document.addField("name2_s",d2.getFieldValue("name_s"));
 
 
                         Float score = 0.0f;
@@ -122,7 +125,7 @@ public abstract class LoadSimilarities {
                 };
 
                 // Calculate all pair-wise similarities
-                SolrUtils.iterateBySimilar(docTopicCollection, "id:{* TO " + dt1.getId() + "}", dt1.getTopics(), threshold, doctopicParser.getEpsylon(), doctopicParser.getPrecision(), client, similarityComparison);
+                SolrUtils.iterateBySimilar(docTopicCollection, "id:{* TO " + dt1.getId() + "}", dt1.getTopics(), String.valueOf(numTopics), threshold, doctopicParser.getEpsylon(), doctopicParser.getPrecision(), client, similarityComparison);
             } catch (Exception e) {
                 LOG.error("Unexpected iteration error: ",e);
             }
