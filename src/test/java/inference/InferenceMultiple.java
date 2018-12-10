@@ -1,22 +1,18 @@
 package inference;
 
-import static org.junit.Assert.*;
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.text.StringEscapeUtils;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrDocumentList;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -42,8 +38,9 @@ public class InferenceMultiple {
 	    private static String url="cordis-70:7777";
 	    private static String prefix="t";
 	    private static int multiplicationFactor=1000;
-	    public static final String SEPARATOR=";";
+	    private static final String SEPARATOR=";";
 	    private static double epsylon=0.0142;
+	    private  static double threshold=0.5;
 
 	  
 	    @BeforeClass
@@ -65,10 +62,8 @@ public class InferenceMultiple {
 	    	query.set("prefix", prefix);	    	
 	    	query.set("topics", topics);
 	    	query.set("url", url);
-	    	//query.set("fq", "id:EU92349"); //filtro sobre los metadatos.
-	    	//query.set("q","id:EU92349"); //filtro sobre los metadatos.
+	    	//query.set("fq", "area_s:EU AND topicWater_i:0"); //filtro  sobre los metadatos.query.set("threshold", threshold+"");
 	    	query.set("q","{!frangeext}query($qq)");
-	    	query.set("pruebas", false); //parametro que se quitará
 	    	query.set("multiplicationFactor", multiplicationFactor+"");
 	    	query.addField("jsWeight:[js],score,id,listaBM,name_s");
 	    	query.set("epsylon", epsylon+"");
@@ -145,4 +140,6 @@ public class InferenceMultiple {
 	      
 	    }
 
+	    
+	   
 }
