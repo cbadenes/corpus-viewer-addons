@@ -69,7 +69,7 @@ public class AlarmServiceTest {
                 LOG.info("\t > similar docs by hashcode [" + group + "]:");
                 // Read documents by hash
                 List<SolrDocument> docs = getDocumentsBy(alarmType, COLLECTION, group, SAMPLE_DOCS, client);
-                docs.forEach(doc -> LOG.info("\t\t-" + doc.getFieldValue("id") + " - '"+ doc.getFieldValue("name_s") + "'"));
+                docs.forEach(doc -> LOG.info("\t\t-docId: '" + doc.getFieldValue("id") +"'"));
             }
 
         }
