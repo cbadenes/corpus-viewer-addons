@@ -27,7 +27,7 @@ public class LoadCordisDocTopics extends LoadDocTopics {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoadCordisDocTopics.class);
 
-    private static final Integer MAX    = 1000; //-1
+    private static final Integer MAX    = -1; //-1
     private static final Integer OFFSET = 0;
     private static final String CORPUS  = "corpora/cordis/doctopics-150.csv.gz";
 
