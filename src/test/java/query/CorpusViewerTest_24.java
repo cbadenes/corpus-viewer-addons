@@ -1,80 +1,80 @@
 package query;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Optional;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.impl.CloudSolrClient;
-
-import org.apache.solr.client.solrj.impl.NoOpResponseParser;
-import org.apache.solr.client.solrj.request.QueryRequest;
-import org.apache.solr.common.util.NamedList;
-import org.junit.Assert;
+import org.apache.solr.common.SolrDocumentList;
 import org.junit.After;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import es.gob.minetad.model.TestSettings;
+import es.gob.minetad.solr.SolrClientFactory;
 
 public class CorpusViewerTest_24 {
 
 	//Atributes
-	
-	 private static final String COLLECTIONAME    = "CORDIS_150";
-	 public  CloudSolrClient client = null;
-	 
+	private static final Logger LOG = LoggerFactory.getLogger(CorpusViewerTest_24.class);
+	 private static final String COLLECTIONAME    = "cordis-documents";
 	 private final int NROWS =10;
 	 private static final String FIELD1    = "score";
 	 private static final String FIELD2    = "text_t";
 	 private static final String FIELDFACET   = "area_s";
-	 private static final String textualQuery ="text_t: investigate smarth";
-	 private static final String DATESTART  = "date_dt";
+	 private static final String textualQuery ="text_txt:*investigate*smarth*";
+	 private static final String DATESTART  = "startDate_dt";
 	 private static final String DATEND   = "endDate_dt";
-	 private static final String start="2016-07-17T00:00:00Z";
+	 private static final String start="1890-07-17T00:00:00Z";
 	 private static final String end="2018-07-17T00:00:00Z";
-	 @Before
-	    
-	    public  void getConnection() {
-	    	
-	    	  client = new CloudSolrClient.Builder(Arrays.asList(new String[]{"localhost:9983"}), Optional.empty())
-	    	            .withConnectionTimeout(10000)
-	    	            .withSocketTimeout(60000)
-	    	            .build();
-
-	    	     client.setDefaultCollection(COLLECTIONAME);
-	    	     client.connect();
-	    	 
-	    	        	
+	 private static TestSettings settings;
+	 private static SolrClient client;
+	 
+	  
+	    @BeforeClass
+	    public static void setup(){
+	    	 settings    = new TestSettings();
+	         client      = SolrClientFactory.create(settings.get("solr.url"), settings.get("solr.mode"));
 	    }
-	    @Test
+	    
+	 
+	 
+	 @Test
 	    public void  iQuery() throws SolrServerException, IOException {
-	  	  //  List<Document> docList = new ArrayList<Document>();
-	  	   // String vectorResponse="";
-	  	    //Solr query
+	  
 
-	  	   
-	  	       
+		 	Instant startTime = Instant.now();
+		 	long totalHits=0; 
 	  	    SolrQuery idquery = new SolrQuery();
-	  	    idquery.setQuery(textualQuery);
+	  	    idquery.set("q","*:*");
+	  	    //idquery.set("fq",textualQuery);
 	  	    idquery.setRows(NROWS);
-	  	    idquery.setFields("id",FIELD1,FIELD2,FIELDFACET,DATESTART,DATEND);
+	  	    idquery.setFields("id,name_s",FIELD1,FIELD2,FIELDFACET,DATESTART,DATEND);
 	  	    idquery.setFacet(true);
-	  	//Adding the facet field 
-	        idquery.addFacetField(FIELDFACET); 
-	     // Adding filter query
+	  	    idquery.addFacetField(FIELDFACET); 
 	        idquery.addFilterQuery(DATESTART+":["+start+ " TO NOW"+ "]");
-	  	    idquery.addFilterQuery(DATEND+":["+end+ " TO NOW"+ "]");
+	  	 //   idquery.addFilterQuery(DATEND+":["+end+ " TO NOW"+ "]");
 	        
-	  	  	   
-	  	    QueryRequest req = new QueryRequest(idquery);
-	        NoOpResponseParser dontMessWithSolr = new NoOpResponseParser();
-	  	    dontMessWithSolr.setWriterType("json");
-	  	    client.setParser(dontMessWithSolr);
-	  	    NamedList<Object> resp = client.request(req);
-	  	    String jsonResponse = (String) resp.get("response");
-	  	    System.out.println(jsonResponse);
-	  	    Assert.assertTrue("Verify that we get back some JSON",
-	  	    jsonResponse.startsWith("{\"responseHeader"));
+	  	    SolrDocumentList results = client.query(COLLECTIONAME,idquery).getResults();
+		    Instant globalEndTime = Instant.now();
+	         String globalElapsedTime = ChronoUnit.HOURS.between(startTime, globalEndTime) + "hours "
+	                 + ChronoUnit.MINUTES.between(startTime, globalEndTime) % 60 + "min "
+	                 + (ChronoUnit.SECONDS.between(startTime, globalEndTime) % 60) + "secs "
+	                 + (ChronoUnit.MILLIS.between(startTime, globalEndTime) % 60) + "msecs";
+	         LOG.info("Total Query Time : " + globalElapsedTime);
+	         LOG.info("Total Hits: " + results.getNumFound() );
+	         totalHits= results.getNumFound();
+	         Instant startTimeJS = Instant.now();
+	         results.iterator().forEachRemaining(doc ->{
+		    		
+	        	 LOG.info("Metadatos & Textual Query   id : "+(String)doc.get("id")+ ", name : "+ (String)doc.get("name_s"));
+			    	
+	    		});
+	  	    
 	  	    
 
 	  	 
