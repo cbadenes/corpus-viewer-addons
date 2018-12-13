@@ -62,7 +62,7 @@ public class InferenceSimple {
 	    public void booleanQueryi() throws IOException {	    
 	    	SolrQuery query = new SolrQuery();
 	    	query.set("q", "*:*");
-	    	query.setRows(1000);//Integer.MAX_VALUE);
+	    	query.setRows(2000);//Integer.MAX_VALUE);
 	    	query.setSort("id", ORDER.asc);
 	    	searchIterate("Boolean",query);
 	    }
@@ -83,7 +83,7 @@ public class InferenceSimple {
 	    }
 	    
 	    @Test
-	    public void booleanQuerydd() throws IOException {	    
+	    public void booleanQuerysimple() throws IOException {	    
 	    	SolrQuery query = new SolrQuery();
 	    	query.set("model", model);
 	    	query.set("prefix", prefix);
@@ -120,10 +120,10 @@ public class InferenceSimple {
 	         totalHits= results.size();
 	         Instant startTimeJS = Instant.now();
 	        results.iterator().forEachRemaining(doc ->{		    		
-		    			topDocss.add(new Score(Double.parseDouble((String)doc.get("jsWeight")),new Document("ref"), new Document((String)doc.get("id"))));
+		    			topDocss.add(new Score(Double.parseDouble((String)doc.get("jsWeight")),new Document((String)doc.get("id"),(String)doc.get("name_s")), new Document((String)doc.get("id"))));
 			  });
 	         List<Score> topDocs=topDocss.stream().sorted((a, b) -> -a.getValue().compareTo(b.getValue())).limit(20).collect(Collectors.toList());
-	         topDocs.forEach(doc -> System.out.println("- " + doc.getSimilar().getId() + " \t ["+ doc.getValue()+"]"));
+	         topDocs.forEach(doc -> System.out.println("- " + doc.getSimilar().getId() + " \t ["+ doc.getValue()+"]\t"+doc.getReference().getName()));
 	    	
 	    	Instant globalEndTimedd = Instant.now();
 	        String globalElapsedTimed= ChronoUnit.HOURS.between(startTimeJS, globalEndTimedd) + "hours "
@@ -173,22 +173,24 @@ public class InferenceSimple {
 		    	squery.set("epsylon", epsylon+"");
 		    	squery.setRows(Integer.MAX_VALUE);
 		    	squery.setSort("score", ORDER.desc);
+		    	System.out.println((String)doc.get("id"));
 		    	search("Boolean",squery);
+		    	
 	        	}catch (Exception e) {
 					LOG.error(e.getMessage());
 				}
 	        	
 			  });
-	         List<Score> topDocs=topDocss.stream().sorted((a, b) -> -a.getValue().compareTo(b.getValue())).limit(20).collect(Collectors.toList());
-	         topDocs.forEach(doc -> System.out.println("- " + doc.getSimilar().getId() + " \t ["+ doc.getValue()+"]"));
+	       /*  List<Score> topDocs=topDocss.stream().sorted((a, b) -> -a.getValue().compareTo(b.getValue())).limit(20).collect(Collectors.toList());
+	         topDocs.forEach(doc -> System.out.println("33- " + doc.getSimilar().getId() + " \t ["+ doc.getValue()+"]"));*/
 	    	
 	    	Instant globalEndTimedd = Instant.now();
 	        String globalElapsedTimed= ChronoUnit.HOURS.between(startTimeJS, globalEndTimedd) + "hours "
 	                + ChronoUnit.MINUTES.between(startTimeJS, globalEndTimedd) % 60 + "min "
 	                + (ChronoUnit.SECONDS.between(startTimeJS, globalEndTimedd) % 60) + "secs "
 	                + (ChronoUnit.MILLIS.between(startTimeJS, globalEndTimedd) % 60) + "msecs";
-	        LOG.info("Total JS Time: " + globalElapsedTimed);
-	        LOG.info("Total Hits: " + totalHits );
+	        System.out.println("Total JS Time: " + globalElapsedTimed);
+	        System.out.println("Total Hits: " + totalHits );
 	        
 		    }catch (SolrServerException se) {
 		    	 LOG.error(se.getLocalizedMessage()); 
