@@ -783,6 +783,7 @@
   <initParams path="/update/**,/query,/select,/tvrh,/elevate,/spell,/browse">
     <lst name="defaults">
       <str name="df">_text_</str>
+      <str name="update.chain">langid</str>
     </lst>
   </initParams>
 
@@ -798,6 +799,7 @@
       <str name="lowernames">true</str>
       <str name="fmap.meta">ignored_</str>
       <str name="fmap.content">_text_</str>
+      <str name="update.chain">langid</str>
     </lst>
   </requestHandler>
 
@@ -1258,6 +1260,18 @@
    </updateRequestProcessorChain>
   -->
 
+
+<updateRequestProcessorChain name="langid">
+  <processor class="org.apache.solr.update.processor.LangDetectLanguageIdentifierUpdateProcessorFactory">
+  <lst name="defaults">
+    <str name="langid.fl">text_txt,name_s</str>
+    <str name="langid.langField">language_s</str>
+  </lst>
+</processor>
+<processor class="solr.LogUpdateProcessorFactory" />
+     <processor class="solr.RunUpdateProcessorFactory" />
+  </updateRequestProcessorChain>
+
   <!-- Script update processor
 
     This example hooks in an update processor implemented using JavaScript.
@@ -1364,8 +1378,9 @@ class="es.gob.minetad.custom.function.FunctionRangeQParserPluginExt"/>
 
 
     <transformer name="js" class="es.gob.minetad.custom.transformer.JSTransformerFactory" />
-     <transformer name="percentage" class="es.gob.minetad.custom.transformer.PercentTranformerFactory" />
-     <transformer name="alarmas" class="es.gob.minetad.custom.transformer.AlarmTransformerFactory" />
+    <transformer name="percentage" class="es.gob.minetad.custom.transformer.PercentTranformerFactory" />
+    <transformer name="alarmas" class="es.gob.minetad.custom.transformer.AlarmTransformerFactory" />
+    <transformer name="correlation" class="es.gob.minetad.custom.transformer.CorrelationTranformerFactory" />
   <!--
     <transformer name="js" class="es.gob.minetad.transformer.CustomTransformer" />
      Could be something like:
