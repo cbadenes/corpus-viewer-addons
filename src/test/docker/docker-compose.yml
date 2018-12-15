@@ -25,6 +25,8 @@ services:
     - "65000:65111"
    environment:
     - REST_PATH=/model
+    - SERVER_THREADS=1
+    - JAVA_OPTS=-Xmx4096m
   cordis-150:
    container_name: cordis-150
    image: sesiad/cordis-150-model:latest
@@ -35,6 +37,8 @@ services:
     - "65001:65111"
    environment:
     - REST_PATH=/model
+    - SERVER_THREADS=1
+    - JAVA_OPTS=-Xmx4096m
   wiki-120:
    container_name: wikipedia-120
    image: sesiad/wikipedia-120-model:latest
@@ -45,6 +49,8 @@ services:
     - "65002:65111"
    environment:
     - REST_PATH=/model
+    - SERVER_THREADS=1
+    - JAVA_OPTS=-Xmx8192m
   wiki-350:
    container_name: wikipedia-350
    image: sesiad/wikipedia-350-model:latest
@@ -55,6 +61,8 @@ services:
     - "65003:65111"
    environment:
     - REST_PATH=/model
+    - SERVER_THREADS=1
+    - JAVA_OPTS=-Xmx8192m
   patstat-250:
    container_name: patents-250
    image: sesiad/patents-250-model:latest
@@ -65,6 +73,8 @@ services:
     - "65004:65111"
    environment:
     - REST_PATH=/model
+    - SERVER_THREADS=1
+    - JAVA_OPTS=-Xmx8192m
   patstat-750:
    container_name: patents-750
    image: sesiad/patents-750-model:latest
@@ -75,6 +85,8 @@ services:
     - "65005:65111"
    environment:
     - REST_PATH=/model
+    - SERVER_THREADS=1
+    - JAVA_OPTS=-Xmx8192m
   solr:
     image: solr:7.3.1
     container_name: solr
